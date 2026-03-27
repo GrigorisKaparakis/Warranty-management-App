@@ -29,10 +29,10 @@ export const extractWarrantyFromPDF = async (base64Data: string, mimeType: strin
   const prompt = customPrompt 
     ? customPrompt
         .replaceAll('{{rules}}', rulesString)
-        .replaceAll('{{garage_name}}', process.env.VITE_APP_NAME || 'Warranty H&K')
+        .replaceAll('{{garage_name}}', import.meta.env.VITE_APP_NAME || 'Warranty H&K')
     : AI_CONFIG.BASE_PROMPTS.OCR_WARRANTY
         .replace('{{rules}}', rulesString)
-        .replace('{{garage_name}}', process.env.VITE_APP_NAME || 'Warranty H&K');
+        .replace('{{garage_name}}', import.meta.env.VITE_APP_NAME || 'Warranty H&K');
 
   const enhancedPrompt = `
     THINKING STEP:

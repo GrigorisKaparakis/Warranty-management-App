@@ -94,7 +94,13 @@ export const AiAssistantView: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || process.env.GEMINI_API_KEY! });
+      const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+      
+      if (!apiKey) {
+        throw new Error('Gemini API Key is missing. Please check your environment variables.');
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
       
       const customInstructions = (settings.aiPrompts?.botInstructions || AI_CONFIG.BASE_PROMPTS.ASSISTANT)
         .replaceAll('{{garage_name}}', settings.branding?.appName || 'Warranty H&K');
