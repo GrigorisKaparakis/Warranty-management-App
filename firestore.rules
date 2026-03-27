@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Fields: uid, email, displayName, photoURL, role, disabled, lastLogin
+    //
+    // Collection: entries
+    // Fields: id, warrantyId, vin, customerName, company, status, createdAt, ...
+    //
+    // Collection: settings
+    // Fields: statusConfigs, menuConfig, rolePermissions, ...
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN') ||
+        (request.auth.token.email == "kaparakisgrigoris@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function getRole() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role 
+        : 'USER';
+    }
+
+    function hasPermission(feature) {
+      return isAdmin() || (
+        exists(/databases/$(database)/documents/settings/garage-config) && 
+        getRole() in get(/databases/$(database)/documents/settings/garage-config).data.get('rolePermissions', {}).get(feature, ['ADMIN'])
+      );
+    }
+
+    function isNotDisabled() {
+      return !exists(/databases/$(database)/documents/users/$(request.auth.uid)) || 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('disabled', false) == false;
+    }
+
+    // Validation Helpers
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.role is string && data.role.size() > 0 && data.role.size() < 50 &&
+             (data.email == null || isValidEmail(data.email));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    // Κανόνες για Προφίλ Χρηστών
+    match /users/{userId} {
+      // ΠΡΟΣΟΧΗ: Περιορισμός πρόσβασης σε PII (email)
+      allow get: if isAuthenticated() && isNotDisabled() && (isOwner(userId) || isAdmin());
+      allow list: if isAuthenticated() && isNotDisabled() && isAdmin();
+      allow create: if isAuthenticated() && isNotDisabled() && isOwner(userId) && 
+                    isValidUser(request.resource.data) &&
+                    (request.resource.data.role == 'USER' || isAdmin());
+      allow update: if isAuthenticated() && isNotDisabled() && (
+        (isOwner(userId) && request.resource.data.role == resource.data.role) || 
+        isAdmin()
+      ) && isValidUser(request.resource.data);
+      allow delete: if isAuthenticated() && isNotDisabled() && isAdmin();
+    }
+
+    // Κανόνες για Εγγυήσεις
+    match /entries/{entryId} {
+      allow read: if isAuthenticated() && isNotDisabled();
+      allow create, update, delete: if isAuthenticated() && isNotDisabled() && hasPermission('entry');
+    }
+
+    // Κανόνες για Σημειώσεις
+    match /notes/{noteId} {
+      allow read: if isAuthenticated() && isNotDisabled();
+      allow create, update, delete: if isAuthenticated() && isNotDisabled() && hasPermission('notes');
+    }
+
+    // Κανόνες για Ανακοινώσεις (Ticker)
+    match /notices/{noticeId} {
+      allow read: if isAuthenticated() && isNotDisabled();
+      allow create, delete: if isAuthenticated() && isNotDisabled() && hasPermission('broadcast_notice');
+    }
+
+    // Κανόνες για Audit Logs
+    match /audit_logs/{logId} {
+      allow read: if isAuthenticated() && isNotDisabled() && hasPermission('auditLog');
+      allow create: if isAuthenticated() && isNotDisabled(); 
+    }
+
+    // Κανόνες για Ρυθμίσεις
+    match /settings/{settingId} {
+      allow read: if isAuthenticated() && isNotDisabled();
+      allow write: if isAuthenticated() && isNotDisabled() && hasPermission('maintenance');
+    }
+
+    // Κανόνες για Registries (Ανταλλακτικά, Οχήματα, Πελάτες)
+    match /parts/{partId} {
+      allow read: if isAuthenticated() && isNotDisabled();
+      allow write: if isAuthenticated() && isNotDisabled() && hasPermission('entry');
+    }
+
+    match /vehicles/{vin} {
+      allow read: if isAuthenticated() && isNotDisabled();
+      allow write: if isAuthenticated() && isNotDisabled() && hasPermission('entry');
+    }
+
+    match /customers/{customerId} {
+      allow read: if isAuthenticated() && isNotDisabled();
+      allow write: if isAuthenticated() && isNotDisabled() && hasPermission('entry');
+    }
+  }
+}
