@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase & Environment
+firebase-applet-config.json
+firebase-blueprint.json
+.env
+.env.local
+.env.*.local
