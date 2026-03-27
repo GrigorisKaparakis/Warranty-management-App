@@ -4,7 +4,12 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig(({ mode }) => {
+    // Load env from .env files
     const env = loadEnv(mode, '.', '');
+    
+    // Get API Key from .env files or system environment
+    const apiKey = env.GEMINI_API_KEY || process.env.GEMINI_API_KEY || env.API_KEY || process.env.API_KEY;
+    
     return {
       server: {
         port: 3000,
@@ -12,8 +17,8 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react(), tailwindcss()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.API_KEY': JSON.stringify(apiKey || ''),
+        'process.env.GEMINI_API_KEY': JSON.stringify(apiKey || '')
       },
       resolve: {
         alias: {

@@ -3,11 +3,19 @@
 Όλες οι σημαντικές αλλαγές σε αυτό το έργο θα καταγράφονται σε αυτό το αρχείο.
 
 ## [1.0.8] - 2026-03-27
-### UI Animations & Refactoring
-- **UI Micro-animations**: Προσθήκη staggered animations στη λίστα εγγυήσεων (Inventory), hover effects στις κάρτες και ομαλές μεταβάσεις (transitions) στα tabs του Maintenance Panel.
-- **Button Interactions**: Προσθήκη hover και tap animations σε όλα τα κουμπιά της εφαρμογής για καλύτερη αίσθηση αλληλεπίδρασης.
-- **Dashboard Animations**: Προσθήκη entrance animations στα στατιστικά και τα γραφήματα του Dashboard.
-- **Refactoring useAppState**: Αναδιοργάνωση και καθαρισμός του κεντρικού hook της εφαρμογής για καλύτερη συντηρησιμότητα.
+### Deployment, Security Hardening & UI Fixes
+- **Netlify Deployment**: Πλήρης μετάβαση της εφαρμογής σε περιβάλλον παραγωγής (Production) μέσω του Netlify.
+- **SPA Routing Support**: Προσθήκη αρχείου `_redirects` στον φάκελο `public/` για τη σωστή διαχείριση των διαδρομών (routing) από τον server του Netlify.
+- **Security Hardening**: 
+    - Πλήρης απομάκρυνση των hardcoded API keys από τον πηγαίο κώδικα.
+    - Μεταφορά όλων των ευαίσθητων ρυθμίσεων (Firebase, Gemini API) σε μεταβλητές περιβάλλοντος (**Environment Variables**).
+    - Ενημέρωση του `vite.config.ts` για δυναμική υποστήριξη κλειδιών από πολλαπλές πηγές (env files & system environment).
+- **Git Protection**: Ενίσχυση του `.gitignore` για την αυτόματη εξαίρεση ευαίσθητων αρχείων (`.env`, `firebase-applet-config.json`, `firebase-blueprint.json`) από το GitHub.
+- **Clean Environment**: Καθαρισμός του `.env.example` από πραγματικές τιμές για ασφαλή διαμοιρασμό του κώδικα.
+- **UI Animations & Refactoring**: 
+    - Προσθήκη staggered animations στη λίστα εγγυήσεων (Inventory), hover effects στις κάρτες και ομαλές μεταβάσεις (transitions) στα tabs.
+    - Προσθήκη entrance animations στα στατιστικά και τα γραφήματα του Dashboard.
+    - Αναδιοργάνωση και καθαρισμός του κεντρικού hook `useAppState` για καλύτερη συντηρησιμότητα.
 
 ## [1.0.7] - 2026-03-26
 ### Βελτιστοποίηση Ρυθμίσεων & UI
