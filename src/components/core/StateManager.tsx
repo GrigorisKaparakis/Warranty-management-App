@@ -83,6 +83,12 @@ export const StateManager: React.FC = () => {
   useEffect(() => {
     if (!store.user) return;
 
+    // Αυτά τα δεδομένα είναι απαραίτητα σχεδόν παντού ή είναι μικρά
+    const unsubNotes = FirestoreService.subscribeToNotes((data) => store.setNotes(data));
+    const unsubSettings = FirestoreService.subscribeToSettings((data) => store.setSettings(data));
+    const unsubNotices = FirestoreService.subscribeToNotices((data) => store.setNotices(data));
+    
+    // Τα entries τα θέλουμε live αλλά με limit αν δεν είμαστε σε σελίδα που τα δείχνει όλα
     const isDashboard = currentPath === '/dashboard';
     const isWarrantyView = currentPath.startsWith('/warranty/') || currentPath === '/paid' || currentPath === '/rejected';
     const limit = (isDashboard || isWarrantyView) ? undefined : (store.settings.limits?.fetchLimit || FETCH_LIMIT);
@@ -91,39 +97,40 @@ export const StateManager: React.FC = () => {
       store.setEntries(data); 
       store.setIsLive(true); 
     });
-    const unsubNotes = FirestoreService.subscribeToNotes((data) => store.setNotes(data));
-    const unsubSettings = FirestoreService.subscribeToSettings((data) => store.setSettings(data));
-    const unsubNotices = FirestoreService.subscribeToNotices((data) => store.setNotices(data));
-    
+
     return () => { 
       unsubEntries(); unsubNotes(); unsubSettings(); unsubNotices();
       store.setIsLive(false); 
     };
-  }, [store.user, store.settings.limits?.fetchLimit, currentPath]);
+  }, [store.user, store.settings.limits?.fetchLimit, currentPath]); // Το currentPath παραμένει εδώ για το limit των entries
 
-  // --- LAZY REGISTRIES & ADMIN DATA ---
+  // --- PERSISTENT REGISTRIES ---
+  // Τα registries (parts, vehicles, customers) τα κρατάμε ενεργά όσο ο χρήστης είναι συνδεδεμένος
+  // για να αποφύγουμε το "Initial Fetch" (reads) σε κάθε πλοήγηση.
+  useEffect(() => {
+    if (!store.user) return;
+
+    const unsubParts = FirestoreService.subscribeToParts((data) => store.setParts(data));
+    const unsubVehicles = FirestoreService.subscribeToVehicles((data) => store.setVehicles(data));
+    const unsubCustomers = FirestoreService.subscribeToCustomers((data) => store.setCustomers(data));
+
+    return () => {
+      unsubParts(); unsubVehicles(); unsubCustomers();
+    };
+  }, [store.user]); // Τρέχει μόνο όταν αλλάζει ο χρήστης
+
+  // --- LAZY ADMIN DATA ---
   useEffect(() => {
     if (!store.user) return;
     
-    const needsRegistries = currentPath === '/warranty/new' || currentPath.startsWith('/maintenance');
     const currentRole = store?.profile?.role || ONBOARDING_DEFAULTS.DEFAULT_USER_ROLE;
     const isAdmin = currentRole === 'ADMIN';
     
-    // Δικαιώματα (απλοποιημένα για το manager)
     const canSeeAudit = isAdmin || (store?.settings?.rolePermissions?.['auditLog'] || []).includes(currentRole);
     const canManageUsers = isAdmin || (store?.settings?.rolePermissions?.['users'] || []).includes(currentRole);
 
-    let unsubParts = () => {};
-    let unsubVehicles = () => {};
-    let unsubCustomers = () => {};
     let unsubUsers = () => {};
     let unsubAudit = () => {};
-
-    if (needsRegistries) {
-      unsubParts = FirestoreService.subscribeToParts((data) => store.setParts(data));
-      unsubVehicles = FirestoreService.subscribeToVehicles((data) => store.setVehicles(data));
-      unsubCustomers = FirestoreService.subscribeToCustomers((data) => store.setCustomers(data));
-    }
 
     if (canManageUsers && currentPath === '/users') {
       unsubUsers = FirestoreService.subscribeToUsers((data) => store.setUsers(data));
@@ -139,7 +146,7 @@ export const StateManager: React.FC = () => {
     }
 
     return () => {
-      unsubParts(); unsubVehicles(); unsubCustomers(); unsubUsers(); unsubAudit();
+      unsubUsers(); unsubAudit();
     };
   }, [store.user, currentPath, store.profile?.role, store.settings.rolePermissions, store.settings.limits?.auditLogFetchLimit]);
 
