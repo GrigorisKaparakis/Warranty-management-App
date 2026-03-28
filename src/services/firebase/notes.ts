@@ -3,14 +3,15 @@
  * Επιτρέπει την προσθήκη, διαγραφή και παρακολούθηση σημειώσεων σε πραγματικό χρόνο.
  */
 
-import { onSnapshot, query, orderBy, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { query, orderBy, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { monitoredOnSnapshot } from "./monitor";
 import { db, notesCollection, deepSanitize, handleFirestoreError, OperationType } from "./core";
 import { Note } from "../../core/types";
 
 export const NoteService = {
   subscribeToNotes(callback: (notes: Note[]) => void) {
     const q = query(notesCollection, orderBy("createdAt", "desc"));
-    return onSnapshot(q, (snapshot) => {
+    return monitoredOnSnapshot(q, (snapshot) => {
       const notes = snapshot.docs.map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as Note));
       callback(notes);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "notes"));

@@ -4,7 +4,8 @@
  * και τη μαζική ενημέρωση ημερομηνιών λήξης ή σημειώσεων.
  */
 
-import { getDocs, doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
+import { monitoredGetDocs } from "../monitor";
 import { db, entriesCollection, sanitizeEntry } from "../core";
 import { Entry } from "../../../core/types";
 import { EntryStatus } from "../../../core/config";
@@ -12,7 +13,7 @@ import { RegistryService } from "../registry";
 
 export const MaintenanceService = {
   async migrateParts(onProgress?: (count: number) => void): Promise<number> {
-    const snap = await getDocs(entriesCollection);
+    const snap = await monitoredGetDocs(entriesCollection);
     const partsMap = new Map<string, { desc: string, brand: string, count: number }>();
     for (const docSnap of snap.docs) {
       const rawData = docSnap.data();
@@ -45,7 +46,7 @@ export const MaintenanceService = {
   },
 
   async migrateVehicles(onProgress?: (count: number) => void): Promise<number> {
-    const snap = await getDocs(entriesCollection);
+    const snap = await monitoredGetDocs(entriesCollection);
     const vehicleMap = new Map<string, { brand: string, ownerName: string, count: number }>();
     for (const docSnap of snap.docs) {
       const entry = sanitizeEntry(docSnap.data(), docSnap.id);
@@ -70,7 +71,7 @@ export const MaintenanceService = {
   },
 
   async migrateCustomers(onProgress?: (count: number) => void): Promise<number> {
-    const snap = await getDocs(entriesCollection);
+    const snap = await monitoredGetDocs(entriesCollection);
     const customerMap = new Map<string, { vins: Set<string>, count: number }>();
     for (const docSnap of snap.docs) {
       const entry = sanitizeEntry(docSnap.data(), docSnap.id);
@@ -104,7 +105,7 @@ export const MaintenanceService = {
   },
 
   async migrateStatuses(mapping: Record<string, string>, onProgress?: (count: number) => void): Promise<number> {
-    const snap = await getDocs(entriesCollection);
+    const snap = await monitoredGetDocs(entriesCollection);
     let count = 0;
     for (const docSnap of snap.docs) {
       const data = docSnap.data();
@@ -118,7 +119,7 @@ export const MaintenanceService = {
   },
 
   async migrateExpiryDates(expiryRules: Record<string, string>, overwriteExisting: boolean, onProgress?: (count: number) => void): Promise<number> {
-    const snap = await getDocs(entriesCollection);
+    const snap = await monitoredGetDocs(entriesCollection);
     let count = 0;
     const validStatuses = [EntryStatus.COMPLETED, EntryStatus.WORKSHOP, EntryStatus.RETURNED, EntryStatus.ALERT];
     for (const docSnap of snap.docs) {
@@ -150,7 +151,7 @@ export const MaintenanceService = {
   },
 
   async migrateNotesToLogFormat(onProgress?: (count: number) => void): Promise<number> {
-    const snap = await getDocs(entriesCollection);
+    const snap = await monitoredGetDocs(entriesCollection);
     let count = 0;
     const actionPatterns = [
       { regex: /Τα ανταλλακτικά [ηή]ρθαν (\d{2}-\d{2}-\d{4})./, newText: "[admin] Ολοκληρωμένη στις {date} 00:00" },

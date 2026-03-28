@@ -13,28 +13,28 @@ export const AnalyticsService = {
    * Καταγραφή αλλαγής σελίδας / view.
    */
   logPageView: (viewName: string) => {
-    console.log(`[Analytics] Page View: ${viewName}`);
+    // Analytics log removed for production
   },
 
   /**
    * Καταγραφή δημιουργίας εγγύησης.
    */
   logWarrantyCreated: (brand: string, company: string) => {
-    console.log(`[Analytics] Warranty Created: ${brand} - ${company}`);
+    // Analytics log removed for production
   },
 
   /**
    * Καταγραφή χρήσης του AI Engine.
    */
   logAiUsage: (feature: string) => {
-    console.log(`[Analytics] AI Usage: ${feature}`);
+    // Analytics log removed for production
   },
 
   /**
    * Καταγραφή σύνδεσης χρήστη.
    */
   logLogin: (method: string = 'email') => {
-    console.log(`[Analytics] Login: ${method}`);
+    // Analytics log removed for production
   },
 
   /**
@@ -61,6 +61,6 @@ export const AnalyticsService = {
    * Καταγραφή εξαγωγής PDF.
    */
   logPdfExport: (type: string) => {
-    console.log(`[Analytics] PDF Export: ${type}`);
+    // Analytics log removed for production
   }
 };

@@ -68,7 +68,7 @@ export const useWarrantyCard = (entry: Entry, readOnly: boolean) => {
     }
 
     try {
-      await FirestoreService.updateEntry(entry.id, updates);
+      await FirestoreService.updateEntry(entry.id, updates, entry);
     } catch (err) {
       toast.error(formatError(err));
     }
@@ -80,7 +80,7 @@ export const useWarrantyCard = (entry: Entry, readOnly: boolean) => {
       p.id === partId ? { ...p, isReady: !p.isReady } : p
     );
     try {
-      await FirestoreService.updateEntry(entry.id, { parts: updatedParts, warrantyId: entry.warrantyId });
+      await FirestoreService.updateEntry(entry.id, { parts: updatedParts, warrantyId: entry.warrantyId }, entry);
     } catch (err) {
       toast.error(formatError(err));
     }
@@ -97,7 +97,7 @@ export const useWarrantyCard = (entry: Entry, readOnly: boolean) => {
       notes: currentNotes + (currentNotes ? '\n' : '') + logMsg
     };
     try {
-      await FirestoreService.updateEntry(entry.id, updates);
+      await FirestoreService.updateEntry(entry.id, updates, entry);
     } catch (err) {
       toast.error(formatError(err));
     }

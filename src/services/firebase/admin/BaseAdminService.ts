@@ -1,5 +1,6 @@
 
-import { doc, onSnapshot, addDoc, deleteDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, addDoc, deleteDoc, setDoc, updateDoc } from "firebase/firestore";
+import { monitoredOnSnapshot } from "../monitor";
 import { db, noticesCollection, auditCollection, usersCollection, deepSanitize, handleFirestoreError, OperationType } from "../core";
 import { GarageSettings, Notice, AuditEntry, UserProfile } from "../../../core/types";
 import { DB_CONFIG, FULL_GARAGE_DEFAULTS, EntryStatus } from "../../../core/config";
@@ -8,7 +9,7 @@ export const AdminService = {
   // Παρακολούθηση Ρυθμίσεων
   subscribeToSettings(callback: (settings: GarageSettings) => void) {
     const docRef = doc(db, DB_CONFIG.COLLECTIONS.SETTINGS, DB_CONFIG.SETTINGS_DOC_ID);
-    return onSnapshot(docRef, (snapshot) => {
+    return monitoredOnSnapshot(docRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = deepSanitize(snapshot.data()) as GarageSettings;
         
@@ -51,7 +52,7 @@ export const AdminService = {
   // Ανακοινώσεις
   subscribeToNotices(callback: (notices: Notice[]) => void) {
     const docRef = noticesCollection;
-    return onSnapshot(docRef, (snapshot) => {
+    return monitoredOnSnapshot(docRef, (snapshot) => {
       const notices = snapshot.docs.map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as Notice));
       callback(notices.sort((a,b) => b.createdAt - a.createdAt).slice(0, 5));
     }, (error) => handleFirestoreError(error, OperationType.LIST, "notices"));
@@ -76,7 +77,7 @@ export const AdminService = {
 
   // Audit Logs
   subscribeToAuditLogs(limitCount: number, callback: (logs: AuditEntry[]) => void) {
-    return onSnapshot(auditCollection, (snapshot) => {
+    return monitoredOnSnapshot(auditCollection, (snapshot) => {
       const logs = snapshot.docs
         .map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as AuditEntry))
         .sort((a,b) => b.timestamp - a.timestamp)
@@ -96,7 +97,7 @@ export const AdminService = {
 
   // Διαχείριση Χρηστών
   subscribeToUsers(callback: (users: UserProfile[]) => void) {
-    return onSnapshot(usersCollection, (snapshot) => {
+    return monitoredOnSnapshot(usersCollection, (snapshot) => {
       const users = snapshot.docs.map(snap => deepSanitize(snap.data()) as UserProfile);
       callback(users);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "users"));

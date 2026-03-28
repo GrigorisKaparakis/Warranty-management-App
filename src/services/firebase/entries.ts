@@ -3,7 +3,8 @@
  * Περιλαμβάνει CRUD λειτουργίες, μαζικές ενημερώσεις και audit logging.
  */
 
-import { doc, onSnapshot, query, orderBy, limit, addDoc, getDoc, updateDoc, deleteDoc, writeBatch, setDoc, where, getDocs } from "firebase/firestore";
+import { doc, query, orderBy, limit, addDoc, updateDoc, deleteDoc, writeBatch, setDoc, where } from "firebase/firestore";
+import { monitoredOnSnapshot, monitoredGetDocs, monitoredGetDoc } from "./monitor";
 import { db, entriesCollection, deepSanitize, sanitizeEntry, auth, handleFirestoreError, OperationType } from "./core";
 import { Entry, AuditEntry } from "../../core/types";
 import { AdminService } from "./admin";
@@ -15,8 +16,8 @@ export const EntryService = {
     if (limitCount) {
       q = query(q, limit(limitCount));
     }
-    return onSnapshot(q, (snapshot) => {
-      const entries = snapshot.docs.map(snap => sanitizeEntry(snap.data(), snap.id));
+    return monitoredOnSnapshot(q, (snapshot) => {
+      const entries = snapshot.docs.map((snap: any) => sanitizeEntry(snap.data(), snap.id));
       callback(entries);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "entries"));
   },
@@ -50,13 +51,15 @@ export const EntryService = {
     }
   },
 
-  async updateEntry(id: string, updates: Partial<Entry>): Promise<void> {
+  async updateEntry(id: string, updates: Partial<Entry>, existingData?: Entry): Promise<void> {
     const docId = id.trim();
     const docRef = doc(db, "entries", docId);
-    let oldData: any = null;
+    let oldData: any = existingData || null;
     try {
-      const snap = await getDoc(docRef);
-      oldData = snap.exists() ? deepSanitize(snap.data()) : null;
+      if (!oldData) {
+        const snap = await monitoredGetDoc(docRef);
+        oldData = snap.exists() ? deepSanitize(snap.data()) : null;
+      }
 
       const { id: _, ...cleanUpdates } = updates as any;
       await updateDoc(docRef, deepSanitize(cleanUpdates));
@@ -87,12 +90,15 @@ export const EntryService = {
     }
   },
 
-  async deleteEntry(id: string, warrantyId: string = 'N/A'): Promise<void> {
+  async deleteEntry(id: string, warrantyId: string = 'N/A', existingData?: Entry): Promise<void> {
     const docId = id.trim();
     const docRef = doc(db, "entries", docId);
     try {
-      const snap = await getDoc(docRef);
-      const oldData = snap.exists() ? deepSanitize(snap.data()) : null;
+      let oldData = existingData || null;
+      if (!oldData) {
+        const snap = await monitoredGetDoc(docRef);
+        oldData = snap.exists() ? deepSanitize(snap.data()) : null;
+      }
 
       await deleteDoc(docRef);
 
@@ -134,7 +140,7 @@ export const EntryService = {
     try {
       for (const id of ids) {
         const docRef = doc(db, "entries", id);
-        const snap = await getDoc(docRef);
+        const snap = await monitoredGetDoc(docRef);
         if (snap.exists()) {
           const currentData = snap.data() as Entry;
           const currentNotes = (currentData.notes || '').trim();
@@ -179,7 +185,7 @@ export const EntryService = {
     try {
       for (const id of ids) {
         const docRef = doc(db, "entries", id);
-        const snap = await getDoc(docRef);
+        const snap = await monitoredGetDoc(docRef);
         if (snap.exists()) {
           const currentData = snap.data() as Entry;
           batch.delete(docRef);

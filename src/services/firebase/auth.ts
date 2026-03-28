@@ -8,7 +8,8 @@ import {
   updatePassword
 } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { doc, setDoc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { monitoredGetDoc, monitoredOnSnapshot } from "./monitor";
 import { UserProfile, UserRole } from "../../core/types";
 import { auth, db } from "./db";
 
@@ -62,7 +63,7 @@ export const AuthService = {
    */
   getUserProfile: async (uid: string): Promise<UserProfile | null> => {
     try {
-      const docSnap = await getDoc(doc(db, "users", uid));
+      const docSnap = await monitoredGetDoc(doc(db, "users", uid));
       if (docSnap.exists()) {
         return docSnap.data() as UserProfile;
       }
@@ -77,7 +78,7 @@ export const AuthService = {
    */
   subscribeToProfile: (uid: string, callback: (profile: UserProfile | null) => void) => {
     const docRef = doc(db, "users", uid);
-    return onSnapshot(docRef, (snapshot) => {
+    return monitoredOnSnapshot(docRef, (snapshot) => {
       if (snapshot.exists()) {
         callback(snapshot.data() as UserProfile);
       } else {

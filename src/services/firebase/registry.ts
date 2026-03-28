@@ -3,14 +3,15 @@
  * Περιλαμβάνει λειτουργίες για Ανταλλακτικά (Parts), Οχήματα (Vehicles) και Πελάτες (Customers).
  */
 
-import { doc, onSnapshot, query, orderBy, getDoc, updateDoc, setDoc, deleteDoc } from "firebase/firestore";
+import { doc, query, orderBy, updateDoc, setDoc, deleteDoc, increment, arrayUnion, getDocFromCache, getDocFromServer } from "firebase/firestore";
+import { monitoredOnSnapshot, monitoredGetDoc } from "./monitor";
 import { db, partsCollection, vehiclesCollection, customersCollection, deepSanitize, handleFirestoreError, OperationType } from "./core";
 import { PartRegistryEntry, VehicleRegistryEntry, CustomerRegistryEntry } from "../../core/types";
 
 export const RegistryService = {
   subscribeToParts(callback: (parts: PartRegistryEntry[]) => void) {
     const q = query(partsCollection, orderBy("code", "asc"));
-    return onSnapshot(q, (snapshot) => {
+    return monitoredOnSnapshot(q, (snapshot) => {
       const parts = snapshot.docs.map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as PartRegistryEntry));
       callback(parts);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "parts"));
@@ -18,7 +19,7 @@ export const RegistryService = {
 
   subscribeToVehicles(callback: (vehicles: VehicleRegistryEntry[]) => void) {
     const q = query(vehiclesCollection, orderBy("vin", "asc"));
-    return onSnapshot(q, (snapshot) => {
+    return monitoredOnSnapshot(q, (snapshot) => {
       const vehicles = snapshot.docs.map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as VehicleRegistryEntry));
       callback(vehicles);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "vehicles"));
@@ -26,7 +27,7 @@ export const RegistryService = {
 
   subscribeToCustomers(callback: (customers: CustomerRegistryEntry[]) => void) {
     const q = query(customersCollection, orderBy("fullName", "asc"));
-    return onSnapshot(q, (snapshot) => {
+    return monitoredOnSnapshot(q, (snapshot) => {
       const customers = snapshot.docs.map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as CustomerRegistryEntry));
       callback(customers);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "customers"));
@@ -41,26 +42,40 @@ export const RegistryService = {
     
     try {
       const docRef = doc(db, "parts", docId);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        const finalDesc = (cleanDesc === '-' && data.description && data.description !== '-' && data.description !== 'ΠΕΡΙΓΡΑΦΗ ΑΠΟ ΙΣΤΟΡΙΚΟ') 
-          ? data.description 
-          : cleanDesc;
-        await updateDoc(docRef, {
-          description: finalDesc,
-          brand: brand || data.brand || '', 
-          lastUsed: Date.now(),
-          useCount: (data.useCount || 0) + 1
-        });
-      } else {
+      
+      // Αν έχουμε περιγραφή, μπορούμε να κάνουμε απευθείας setDoc με merge
+      // Αν η περιγραφή είναι '-', τότε μόνο χρειαζόμαστε getDoc για να δούμε αν υπάρχει παλιά
+      if (cleanDesc !== '-') {
         await setDoc(docRef, {
           code: cleanCode,
           description: cleanDesc,
           brand: brand || '',
           lastUsed: Date.now(),
-          useCount: 1
-        });
+          useCount: increment(1)
+        }, { merge: true });
+      } else {
+        // Μόνο αν η νέα περιγραφή είναι '-', ελέγχουμε την παλιά
+        const snap = await monitoredGetDoc(docRef);
+        if (snap.exists()) {
+          const data = snap.data();
+          const finalDesc = (data.description && data.description !== '-' && data.description !== 'ΠΕΡΙΓΡΑΦΗ ΑΠΟ ΙΣΤΟΡΙΚΟ') 
+            ? data.description 
+            : cleanDesc;
+          await updateDoc(docRef, {
+            description: finalDesc,
+            brand: brand || data.brand || '', 
+            lastUsed: Date.now(),
+            useCount: increment(1)
+          });
+        } else {
+          await setDoc(docRef, {
+            code: cleanCode,
+            description: cleanDesc,
+            brand: brand || '',
+            lastUsed: Date.now(),
+            useCount: 1
+          });
+        }
       }
     } catch (e) { 
       handleFirestoreError(e, OperationType.WRITE, `parts/${docId}`);
@@ -72,24 +87,14 @@ export const RegistryService = {
     const cleanVin = vin.trim().toUpperCase();
     try {
       const docRef = doc(db, "vehicles", cleanVin);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        await updateDoc(docRef, {
-          brand: brand || data.brand || '',
-          ownerName: ownerName || data.ownerName || '',
-          lastUsed: Date.now(),
-          useCount: (data.useCount || 0) + 1
-        });
-      } else {
-        await setDoc(docRef, {
-          vin: cleanVin,
-          brand: brand || '',
-          ownerName: ownerName || '',
-          lastUsed: Date.now(),
-          useCount: 1
-        });
-      }
+      // Χρήση setDoc με merge για αποφυγή του getDoc (0 reads αν το έγγραφο υπάρχει ήδη)
+      await setDoc(docRef, {
+        vin: cleanVin,
+        brand: brand || '',
+        ownerName: ownerName || '',
+        lastUsed: Date.now(),
+        useCount: increment(1)
+      }, { merge: true });
     } catch (e) { 
       handleFirestoreError(e, OperationType.WRITE, `vehicles/${cleanVin}`);
     }
@@ -101,26 +106,13 @@ export const RegistryService = {
     const docId = cleanName.replace(/\//g, '-');
     try {
       const docRef = doc(db, "customers", docId);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        const data = snap.data() as CustomerRegistryEntry;
-        const vins = data.vins || [];
-        if (vin && !vins.includes(vin.toUpperCase())) {
-          vins.push(vin.toUpperCase());
-        }
-        await updateDoc(docRef, {
-          vins: vins,
-          lastUsed: Date.now(),
-          useCount: (data.useCount || 0) + 1
-        });
-      } else {
-        await setDoc(docRef, {
-          fullName: cleanName,
-          vins: vin ? [vin.toUpperCase()] : [],
-          lastUsed: Date.now(),
-          useCount: 1
-        });
-      }
+      // Χρήση arrayUnion και increment για αποφυγή του getDoc
+      await setDoc(docRef, {
+        fullName: cleanName,
+        vins: vin ? arrayUnion(vin.toUpperCase()) : arrayUnion(),
+        lastUsed: Date.now(),
+        useCount: increment(1)
+      }, { merge: true });
     } catch (e) { 
       handleFirestoreError(e, OperationType.WRITE, `customers/${docId}`);
     }

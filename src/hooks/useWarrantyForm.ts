@@ -190,7 +190,7 @@ export const useWarrantyForm = () => {
   const executeSave = async (payload: any) => {
     setIsLoading(true);
     try {
-      if (editingEntry) await FirestoreService.updateEntry(editingEntry.id, payload);
+      if (editingEntry) await FirestoreService.updateEntry(editingEntry.id, payload, editingEntry);
       else await FirestoreService.addEntry(payload);
       
       // Registry updates
