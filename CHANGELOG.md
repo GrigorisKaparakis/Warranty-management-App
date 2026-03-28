@@ -9,6 +9,7 @@
 - **Registry Upsert Optimization**: Χρήση `setDoc` με `merge: true` και ατομικών τελεστών (`increment`, `arrayUnion`) στα μητρώα. Πλέον η ενημέρωση υπαρχόντων οχημάτων και πελατών γίνεται με **0 reads**.
 - **Audit Log Optimization**: Ανασχεδιασμός των `updateEntry` και `deleteEntry` ώστε να χρησιμοποιούν τα ήδη διαθέσιμα δεδομένα από το UI, καταργώντας το επιπλέον read που γινόταν για την καταγραφή στο ιστορικό.
 - **Code Cleanup**: Μαζική αφαίρεση των `console.log` και των εργαλείων debugging από τον κώδικα παραγωγής για βελτίωση της απόδοσης και καθαρότερο περιβάλλον browser.
+- **UI Enhancements**: Εμφάνιση του ονόματος χρήστη (από το email) δίπλα στον ρόλο στο Sidebar (π.χ. `ADMIN (ADMIN)`), βελτιώνοντας την εξατομίκευση της διεπαφής.
 
 ## [1.0.8] - 2026-03-27
 ### Deployment, Security Hardening & UI Fixes

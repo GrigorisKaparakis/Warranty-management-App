@@ -64,6 +64,7 @@ export const useAppPermissions = () => {
   }, [settings.rolePermissions, currentRole, isAdmin]);
 
   return {
+    profile,
     currentRole,
     isAdmin,
     fullMenu,
