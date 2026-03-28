@@ -16,8 +16,11 @@ import { useStore } from '../../store/useStore';
 export const Sidebar: React.FC = () => {
   const { 
     currentRole, 
-    dynamicMenu
+    dynamicMenu,
+    profile
   } = useAppState();
+
+  const userName = profile?.email ? profile.email.split('@')[0].toUpperCase() : '';
 
   const isLive = useStore(s => s?.isLive);
   const settings = useStore(s => s?.settings);
@@ -100,7 +103,9 @@ export const Sidebar: React.FC = () => {
             <h1 className="text-sm font-black text-white uppercase tracking-tighter leading-none">{companyName}</h1>
             <div className="mt-1">
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">{currentRole}</span>
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+                  {userName ? `${userName} (${currentRole})` : currentRole}
+                </span>
                 {isLive && <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>}
               </div>
               <span className="text-[8px] font-medium text-slate-600 uppercase tracking-widest block mt-0.5">v{APP_VERSION}</span>
