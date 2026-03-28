@@ -130,7 +130,7 @@ export const Sidebar: React.FC = () => {
 
         {/* Footer Sidebar */}
         <div className="p-6 border-t border-slate-800/50 bg-slate-900/50 space-y-2">
-          <button onClick={() => setIsChangePasswordModalOpen(true)} className="w-full py-2.5 bg-slate-800 text-slate-400 font-bold text-[10px] uppercase rounded-lg hover:text-blue-400 tracking-widest transition-all">ΑΛΛΑΓΗ ΚΩΔΙΚΟΥ!</button>
+          <button onClick={() => setIsChangePasswordModalOpen(true)} className="w-full py-2.5 bg-slate-800 text-slate-400 font-bold text-[10px] uppercase rounded-lg hover:text-blue-400 tracking-widest transition-all">ΑΛΛΑΓΗ ΚΩΔΙΚΟΥ</button>
           <button onClick={() => AuthService.logout()} className="w-full py-2.5 bg-slate-800 text-slate-400 font-bold text-[10px] uppercase rounded-lg hover:text-red-400 tracking-widest transition-all">ΑΠΟΣΥΝΔΕΣΗ</button>
         </div>
       </aside>
