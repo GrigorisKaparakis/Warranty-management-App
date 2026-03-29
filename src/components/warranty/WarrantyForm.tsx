@@ -18,7 +18,7 @@ export const WarrantyForm: React.FC = () => {
     vinHistory, showHistory, setShowHistory,
     pendingSave, setPendingSave,
     handleScanPDF, handleSave, executeSave,
-    settings, editingEntry, setEditingEntry, setInitialAiData, navigate
+    settings, editingEntry, setEditingEntry, setAiExtractedData, navigate
   } = useWarrantyForm();
 
   const partsRegistry = useStore(s => s.parts);
@@ -167,7 +167,7 @@ export const WarrantyForm: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-4 pb-12">
-          <button type="button" onClick={() => { setEditingEntry(null); setInitialAiData(null); navigate('/warranty/inventory'); }} className="flex-1 py-4 bg-slate-100 text-slate-600 font-black text-[11px] uppercase rounded-2xl">{UI_MESSAGES.LABELS.CANCEL}</button>
+          <button type="button" onClick={() => { setEditingEntry(null); setAiExtractedData(null); navigate('/warranty/inventory'); }} className="flex-1 py-4 bg-slate-100 text-slate-600 font-black text-[11px] uppercase rounded-2xl">{UI_MESSAGES.LABELS.CANCEL}</button>
           <button type="submit" className="flex-[2] py-4 bg-blue-600 text-white font-black text-[11px] uppercase rounded-2xl shadow-xl hover:bg-blue-700 transition-all">{UI_MESSAGES.LABELS.SAVE}</button>
         </div>
       </form>

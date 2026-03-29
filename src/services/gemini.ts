@@ -1,17 +1,21 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { DistributorRule } from "../core/types";
+import { AIFeedback, DistributorRule } from "../core/types";
 import { AI_CONFIG } from "../core/config";
+import { AIFeedbackService } from "./firebase/aiFeedback";
 
 /**
  * extractWarrantyFromPDF: Η "μαγεία" του OCR.
  * Μετατρέπει μια εικόνα ή PDF σε δομημένα δεδομένα (VIN, Ανταλλακτικά κλπ).
- * Χρησιμοποιεί τους Δυναμικούς Κανόνες (DistributorRules) που ορίζει ο Admin.
- * 
- * GeminiService: Διαχειρίζεται την επικοινωνία με το Google Gemini API
- * για την ανάλυση εγγράφων (OCR) και την επεξεργασία κειμένου.
+ * Χρησιμοποιεί τους Δυναμικούς Κανόνες (DistributorRules) και το AI Feedback.
  */
-export const extractWarrantyFromPDF = async (base64Data: string, mimeType: string, rules: DistributorRule[] = [], customPrompt?: string) => {
+export const extractWarrantyFromPDF = async (
+  base64Data: string, 
+  mimeType: string, 
+  rules: DistributorRule[] = [], 
+  customPrompt?: string,
+  companyHint?: string
+) => {
   // Use GEMINI_API_KEY with fallback to API_KEY for maximum compatibility
   const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
   
@@ -34,6 +38,22 @@ export const extractWarrantyFromPDF = async (base64Data: string, mimeType: strin
         .replace('{{rules}}', rulesString)
         .replace('{{garage_name}}', import.meta.env.VITE_APP_NAME || 'Warranty H&K');
 
+  // Ανάκτηση προηγούμενων λαθών/διορθώσεων για βελτίωση της ακρίβειας (Few-Shot Learning)
+  let feedbackString = "";
+  const recentFeedback = companyHint 
+    ? await AIFeedbackService.getFeedbackForCompany(companyHint)
+    : await AIFeedbackService.getRecentFeedback(5);
+
+  if (recentFeedback.length > 0) {
+    feedbackString = "\nPAST CORRECTIONS (Learn from these mistakes):\n";
+    recentFeedback.forEach((f, i) => {
+      feedbackString += `Example ${i+1} (${f.company || 'General'}):\n`;
+      feedbackString += `- AI initially extracted: ${JSON.stringify(f.originalData)}\n`;
+      feedbackString += `- User corrected it to: ${JSON.stringify(f.correctedData)}\n`;
+      feedbackString += `- Key errors to avoid: ${f.discrepancies.join(', ')}\n\n`;
+    });
+  }
+
   const enhancedPrompt = `
     THINKING STEP:
     1. Analyze the provided document (PDF or Image).
@@ -42,6 +62,8 @@ export const extractWarrantyFromPDF = async (base64Data: string, mimeType: strin
     4. List all parts with their codes and descriptions.
     5. Match the document to the following DISTRIBUTOR RULES to identify the 'company' and 'brand':
     ${rulesString}
+
+    ${feedbackString}
 
     CORE INSTRUCTION:
     ${prompt}

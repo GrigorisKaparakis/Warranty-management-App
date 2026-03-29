@@ -198,3 +198,16 @@ export interface GarageSettings {
   };
   rolePermissions?: Record<string, UserRole[]>;
 }
+
+/**
+ * AI Feedback: Καταγράφει τις διορθώσεις που έκανε ο χρήστης στα αποτελέσματα του AI.
+ */
+export interface AIFeedback {
+  id: string;
+  timestamp: number;
+  userId: string;
+  company: string;      // Ο διανομέας στον οποίο αφορά το λάθος
+  originalData: any;    // Τι έβγαλε το AI
+  correctedData: any;   // Τι έγραψε ο χρήστης
+  discrepancies: string[]; // Λίστα με τα πεδία που διέφεραν
+}
