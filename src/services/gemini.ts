@@ -4,6 +4,12 @@ import { AIFeedback, DistributorRule } from "../core/types";
 import { AI_CONFIG } from "../core/config";
 import { AIFeedbackService } from "./firebase/aiFeedback";
 
+const homoglyphMap: Record<string, string> = {
+  'Α': 'A', 'Β': 'B', 'Ε': 'E', 'Ζ': 'Z', 'Η': 'H', 'Ι': 'I', 'Κ': 'K', 'Μ': 'M', 'Ν': 'N', 'Ο': 'O', 'Ρ': 'P', 'Τ': 'T', 'Υ': 'Y', 'Χ': 'X'
+};
+const normalizeHomoglyphs = (str: string) => 
+  str.split('').map(char => homoglyphMap[char] || char).join('');
+
 /**
  * extractWarrantyFromPDF: Η "μαγεία" του OCR.
  * Μετατρέπει μια εικόνα ή PDF σε δομημένα δεδομένα (VIN, Ανταλλακτικά κλπ).
@@ -121,9 +127,11 @@ export const extractWarrantyFromPDF = async (
     }
 
     const result = JSON.parse(response.text.trim());
-    if (result.fullName) result.fullName = result.fullName.replace(/\n/g, ' ').trim();
-    if (result.warrantyId) result.warrantyId = result.warrantyId.replace(/\n/g, '').trim();
-    if (result.vin) result.vin = result.vin.replace(/\n/g, '').trim();
+    if (result.fullName) result.fullName = result.fullName.replace(/\n/g, ' ').trim().toUpperCase();
+    if (result.warrantyId) result.warrantyId = result.warrantyId.replace(/\n/g, '').trim().toUpperCase();
+    if (result.vin) result.vin = result.vin.replace(/\n/g, '').trim().toUpperCase();
+    if (result.brand) result.brand = result.brand.trim().toUpperCase();
+    if (result.company) result.company = result.company.trim().toUpperCase();
     return result;
   } catch (error) {
     console.error("Gemini OCR Error:", error);

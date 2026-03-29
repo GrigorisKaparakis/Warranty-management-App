@@ -180,11 +180,21 @@ export const useWarrantyForm = () => {
       // AI Feedback Loop: Σύγκριση αρχικών δεδομένων AI με τα τελικά δεδομένα
       if (originalAiData && !editingEntry) {
         const discrepancies: string[] = [];
-        if (originalAiData.vin !== formData.vin) discrepancies.push("VIN");
-        if (originalAiData.warrantyId !== formData.warrantyId) discrepancies.push("WarrantyID");
-        if (originalAiData.fullName !== formData.fullName) discrepancies.push("FullName");
-        if (originalAiData.company !== formData.company) discrepancies.push("Company");
-        if (originalAiData.brand !== formData.brand) discrepancies.push("Brand");
+        
+        const homoglyphMap: Record<string, string> = {
+          'Α': 'A', 'Β': 'B', 'Ε': 'E', 'Ζ': 'Z', 'Η': 'H', 'Ι': 'I', 'Κ': 'K', 'Μ': 'M', 'Ν': 'N', 'Ο': 'O', 'Ρ': 'P', 'Τ': 'T', 'Υ': 'Y', 'Χ': 'X'
+        };
+        const normalizeHomoglyphs = (str: string) => 
+          str.split('').map(char => homoglyphMap[char] || char).join('');
+
+        const norm = (val: any) => normalizeHomoglyphs((val || "").toString().trim().toUpperCase());
+        const normName = (val: any) => normalizeHomoglyphs((val || "").toString().trim().toUpperCase()).split(/\s+/).sort().join(" ");
+
+        if (norm(originalAiData.vin) !== norm(formData.vin)) discrepancies.push("VIN");
+        if (norm(originalAiData.warrantyId) !== norm(formData.warrantyId)) discrepancies.push("WarrantyID");
+        if (normName(originalAiData.fullName) !== normName(formData.fullName)) discrepancies.push("FullName");
+        if (norm(originalAiData.company) !== norm(formData.company)) discrepancies.push("Company");
+        if (norm(originalAiData.brand) !== norm(formData.brand)) discrepancies.push("Brand");
         
         // Σύγκριση ανταλλακτικών για εύρεση διαγραφών (π.χ. κωδικοί εργασίας)
         const originalCodes = (originalAiData.parts || []).map((p: any) => p.code?.trim().toUpperCase());
@@ -195,6 +205,24 @@ export const useWarrantyForm = () => {
 
         if (deletedCodes.length > 0) discrepancies.push(`DeletedParts: ${deletedCodes.join(', ')}`);
         if (addedCodes.length > 0) discrepancies.push(`AddedParts: ${addedCodes.join(', ')}`);
+
+        console.log("AI Discrepancy Check:", {
+          original: {
+            vin: originalAiData.vin,
+            warrantyId: originalAiData.warrantyId,
+            fullName: originalAiData.fullName,
+            company: originalAiData.company,
+            brand: originalAiData.brand
+          },
+          final: {
+            vin: formData.vin,
+            warrantyId: formData.warrantyId,
+            fullName: formData.fullName,
+            company: formData.company,
+            brand: formData.brand
+          },
+          discrepancies
+        });
 
         if (discrepancies.length > 0) {
           await AIFeedbackService.saveFeedback({
