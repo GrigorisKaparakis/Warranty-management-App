@@ -5,6 +5,7 @@ import { Entry, Part } from '../core/types';
 import { EntryStatus, VALIDATION_RULES, UI_MESSAGES } from '../core/config';
 import { FirestoreService } from '../services/firebase/db';
 import { extractWarrantyFromPDF } from '../services/gemini';
+import { AIFeedbackService } from '../services/firebase/aiFeedback';
 import { useStore } from '../store/useStore';
 import { toast } from '../utils/toast';
 import { getCompletionUpdates } from '../utils/warrantyLogic';
@@ -17,8 +18,8 @@ export const useWarrantyForm = () => {
   const setEditingEntry = useStore(s => s.setEditingEntry);
   const aiExtractedData = useStore(s => s.aiExtractedData);
   const setAiExtractedData = useStore(s => s.setAiExtractedData);
-  const initialAiData = aiExtractedData;
-  const setInitialAiData = setAiExtractedData;
+  const originalAiData = useStore(s => s.originalAiData);
+  const setOriginalAiData = useStore(s => s.setOriginalAiData);
 
   const user = useStore(s => s.user);
   const entries = useStore(s => s.entries);
@@ -54,17 +55,17 @@ export const useWarrantyForm = () => {
 
   // AI Data fill
   useEffect(() => {
-    if (initialAiData && !editingEntry) {
+    if (aiExtractedData && !editingEntry) {
       setFormData(prev => ({
         ...prev,
-        vin: (initialAiData.vin || prev.vin).trim().toUpperCase(),
-        warrantyId: (initialAiData.warrantyId || prev.warrantyId).trim().toUpperCase(),
-        fullName: (initialAiData.fullName || prev.fullName).trim(),
-        brand: (initialAiData.brand || prev.brand).trim().toUpperCase(),
-        company: (initialAiData.company || prev.company).trim().toUpperCase()
+        vin: (aiExtractedData.vin || prev.vin).trim().toUpperCase(),
+        warrantyId: (aiExtractedData.warrantyId || prev.warrantyId).trim().toUpperCase(),
+        fullName: (aiExtractedData.fullName || prev.fullName).trim(),
+        brand: (aiExtractedData.brand || prev.brand).trim().toUpperCase(),
+        company: (aiExtractedData.company || prev.company).trim().toUpperCase()
       }));
-      if (initialAiData.parts) {
-        setFormParts(initialAiData.parts.map((p: any) => ({
+      if (aiExtractedData.parts) {
+        setFormParts(aiExtractedData.parts.map((p: any) => ({
           ...p,
           code: (p.code || '').trim().toUpperCase(),
           description: (p.description || '').trim(),
@@ -72,9 +73,9 @@ export const useWarrantyForm = () => {
         })));
       }
       // Clear AI data after consumption to prevent re-filling if navigating back
-      setInitialAiData(null);
+      setAiExtractedData(null);
     }
-  }, [initialAiData, editingEntry, setInitialAiData]);
+  }, [aiExtractedData, editingEntry, setAiExtractedData]);
 
   // Edit entry fill
   useEffect(() => {
@@ -154,28 +155,14 @@ export const useWarrantyForm = () => {
         base64, 
         file.type, 
         settings.distributorRules || [], 
-        settings.aiPrompts?.pdfExtraction
+        settings.aiPrompts?.pdfExtraction,
+        formData.company // Pass current company as hint if available
       );
 
       setScanStatus("ΕΠΕΞΕΡΓΑΣΙΑ ΔΕΔΟΜΕΝΩΝ...");
 
-      setFormData(prev => ({ 
-        ...prev, 
-        vin: (data.vin || prev.vin).trim().toUpperCase(), 
-        warrantyId: (data.warrantyId || prev.warrantyId).trim().toUpperCase(), 
-        fullName: (data.fullName || prev.fullName).trim(), 
-        brand: (data.brand || prev.brand).trim().toUpperCase(), 
-        company: (data.company || prev.company).trim().toUpperCase() 
-      }));
-
-      if (data.parts) {
-        setFormParts(data.parts.map((p: any) => ({
-          ...p,
-          code: (p.code || '').trim().toUpperCase(),
-          description: (p.description || '').trim(),
-          isReady: false
-        })));
-      }
+      setAiExtractedData(data);
+      setOriginalAiData(data);
       
       toast.success(UI_MESSAGES.SUCCESS.ANALYZED);
     } catch (err) {
@@ -190,6 +177,43 @@ export const useWarrantyForm = () => {
   const executeSave = async (payload: any) => {
     setIsLoading(true);
     try {
+      // AI Feedback Loop: Σύγκριση αρχικών δεδομένων AI με τα τελικά δεδομένα
+      if (originalAiData && !editingEntry) {
+        const discrepancies: string[] = [];
+        if (originalAiData.vin !== formData.vin) discrepancies.push("VIN");
+        if (originalAiData.warrantyId !== formData.warrantyId) discrepancies.push("WarrantyID");
+        if (originalAiData.fullName !== formData.fullName) discrepancies.push("FullName");
+        if (originalAiData.company !== formData.company) discrepancies.push("Company");
+        if (originalAiData.brand !== formData.brand) discrepancies.push("Brand");
+        
+        // Σύγκριση ανταλλακτικών για εύρεση διαγραφών (π.χ. κωδικοί εργασίας)
+        const originalCodes = (originalAiData.parts || []).map((p: any) => p.code?.trim().toUpperCase());
+        const finalCodes = formParts.map(p => p.code?.trim().toUpperCase());
+        
+        const deletedCodes = originalCodes.filter(code => !finalCodes.includes(code));
+        const addedCodes = finalCodes.filter(code => !originalCodes.includes(code));
+
+        if (deletedCodes.length > 0) discrepancies.push(`DeletedParts: ${deletedCodes.join(', ')}`);
+        if (addedCodes.length > 0) discrepancies.push(`AddedParts: ${addedCodes.join(', ')}`);
+
+        if (discrepancies.length > 0) {
+          await AIFeedbackService.saveFeedback({
+            company: formData.company || originalAiData.company,
+            originalData: originalAiData,
+            correctedData: {
+              vin: formData.vin,
+              warrantyId: formData.warrantyId,
+              fullName: formData.fullName,
+              company: formData.company,
+              brand: formData.brand,
+              parts: formParts
+            },
+            discrepancies
+          });
+          console.log("AI Feedback saved for learning:", discrepancies);
+        }
+      }
+
       if (editingEntry) await FirestoreService.updateEntry(editingEntry.id, payload, editingEntry);
       else await FirestoreService.addEntry(payload);
       
@@ -202,7 +226,8 @@ export const useWarrantyForm = () => {
 
       toast.success(UI_MESSAGES.SUCCESS.SAVED);
       const savedId = editingEntry?.id;
-      setInitialAiData(null);
+      setAiExtractedData(null);
+      setOriginalAiData(null);
       setEditingEntry(null);
       navigate(savedId ? `/warranty/${savedId}` : '/warranty/inventory');
     } catch (err) { 
@@ -255,6 +280,6 @@ export const useWarrantyForm = () => {
     vinHistory, showHistory, setShowHistory,
     pendingSave, setPendingSave,
     handleScanPDF, handleSave, executeSave,
-    settings, editingEntry, setEditingEntry, setInitialAiData, navigate
+    settings, editingEntry, setEditingEntry, setAiExtractedData, navigate
   };
 };

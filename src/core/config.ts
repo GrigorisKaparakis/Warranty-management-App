@@ -308,6 +308,11 @@ export const AI_CONFIG = {
     - fullName: Customer's full name.
     - parts: Array of objects {code, description, quantity}.
 
+    CRITICAL INSTRUCTIONS:
+    - EXCLUDE any items that represent LABOR, WORK, or SERVICE CODES (e.g. "ΕΡΓΑΣΙΑ", "LABOR", "WORK", "SERVICE", or codes like "99-99-99").
+    - ONLY include physical spare parts (ΑΝΤΑΛΛΑΚΤΙΚΑ).
+    - If a part description contains "LABOR" or "ΕΡΓΑΣΙΑ", DO NOT include it.
+
     OUTPUT: Return ONLY a valid JSON object matching the requested schema. If a field is not found, return an empty string or 0 for numbers.`,
 
     NOTE_ANALYSIS: `Analyze the following garage note content and provide:
