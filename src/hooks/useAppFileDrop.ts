@@ -16,6 +16,7 @@ export const useAppFileDrop = () => {
   const setEditingEntry = useStore(s => s?.setEditingEntry);
   const setDeletingEntry = useStore(s => s?.setDeletingEntry);
   const setAiExtractedData = useStore(s => s?.setAiExtractedData);
+  const setOriginalAiData = useStore(s => s?.setOriginalAiData);
   const setDragActive = useStore(s => s?.setDragActive);
   const setDragCounter = useStore(s => s?.setDragCounter);
 
@@ -83,6 +84,7 @@ export const useAppFileDrop = () => {
 
           const data = await extractWarrantyFromPDF(base64, file.type, settings.distributorRules || [], settings.aiPrompts?.pdfExtraction);
           setAiExtractedData(data);
+          setOriginalAiData(data);
           setEditingEntry(null);
           navigate('/warranty/new');
           toast.success(UI_MESSAGES.SUCCESS.ANALYZED);

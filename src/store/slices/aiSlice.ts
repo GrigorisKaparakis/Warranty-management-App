@@ -13,14 +13,18 @@ export interface Message {
 
 export interface AISlice {
   aiExtractedData: any;
+  originalAiData: any; // Τα αρχικά δεδομένα για σύγκριση (Feedback)
   setAiExtractedData: (data: any) => void;
+  setOriginalAiData: (data: any) => void;
   chatHistory: Message[];
   setChatHistory: (history: Message[] | ((prev: Message[]) => Message[])) => void;
 }
 
 export const createAISlice: StateCreator<AISlice> = (set) => ({
   aiExtractedData: null,
+  originalAiData: null,
   setAiExtractedData: (aiExtractedData) => set({ aiExtractedData }),
+  setOriginalAiData: (originalAiData) => set({ originalAiData }),
   chatHistory: [
     {
       role: 'assistant',
