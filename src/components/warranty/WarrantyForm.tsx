@@ -113,7 +113,22 @@ export const WarrantyForm: React.FC = () => {
 
           <div className="space-y-1">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{UI_MESSAGES.LABELS.COMPANY}</label>
-            <select value={formData.company} onChange={e => setFormData({...formData, company: e.target.value, brand: ''})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none" required>
+            <select 
+              value={formData.company} 
+              onChange={e => {
+                const newCompany = e.target.value;
+                const currentBrand = formData.brand;
+                const validBrands = settings.companyBrandMap[newCompany] || [];
+                const shouldClearBrand = currentBrand && !validBrands.includes(currentBrand);
+                setFormData({
+                  ...formData, 
+                  company: newCompany, 
+                  brand: shouldClearBrand ? '' : currentBrand
+                });
+              }} 
+              className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none" 
+              required
+            >
               <option value="">{UI_MESSAGES.LABELS.SELECT_OPTION}</option>
               {Object.keys(settings.companyBrandMap || {}).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
