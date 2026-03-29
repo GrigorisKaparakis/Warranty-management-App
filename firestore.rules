@@ -137,5 +137,12 @@ service cloud.firestore {
       allow read: if isAuthenticated() && isNotDisabled();
       allow write: if isAuthenticated() && isNotDisabled() && hasPermission('entry');
     }
+
+    // Κανόνες για AI Feedback
+    match /aiFeedback/{feedbackId} {
+      allow read: if isAuthenticated() && isNotDisabled();
+      allow create: if isAuthenticated() && isNotDisabled();
+      allow update, delete: if isAuthenticated() && isNotDisabled() && isAdmin();
+    }
   }
 }
