@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { FirestoreService } from '../services/firebase/db';
-import { UI_LIMITS, UI_MESSAGES } from '../core/config';
+import { UI_LIMITS, UI_MESSAGES, PERFORMANCE_CONFIG } from '../core/config';
 import { useAppState } from './useAppState';
 import { useStore } from '../store/useStore';
 import { toast } from '../utils/toast';
@@ -58,7 +58,7 @@ export const useInventory = () => {
     handleSort
   } = useInventoryFilters(listFilters);
 
-  const debouncedSearchQuery = useDebounce(searchQuery, 600);
+  const debouncedSearchQuery = useDebounce(searchQuery, PERFORMANCE_CONFIG.DEBOUNCE.INVENTORY_SEARCH);
 
   useEffect(() => {
     setVisibleLimit(pageSize);

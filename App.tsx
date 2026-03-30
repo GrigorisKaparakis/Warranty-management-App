@@ -1,34 +1,47 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAppState } from './src/hooks/useAppState';
 import { useStore } from './src/store/useStore';
 import { AuthService } from './src/services/firebase/auth';
 import { Entry, ViewType } from './src/core/types';
-import { DashboardView } from './src/views/Dashboard';
-import { ListView } from './src/views/Inventory';
-import { VehicleHistoryView } from './src/views/VehicleHistoryView';
-import { AiAssistantView } from './src/views/AiChat';
+
+// Static imports for layout and critical components
 import { Sidebar } from './src/components/layout/Sidebar';
-import { WarrantyForm } from './src/components/warranty/WarrantyForm';
-import { WarrantyDetailView } from './src/views/WarrantyDetailView';
-import { CustomerHistoryView } from './src/views/CustomerHistoryView';
-import { NoteBoard } from './src/components/warranty/NoteBoard';
-import { UserTable } from './src/components/ui/UserTable';
-import { MaintenancePanel } from './src/components/maintenance/MaintenancePanel';
 import { NoticeTicker } from './src/components/layout/NoticeTicker';
-import { ExpiryTrackerView } from './src/views/ExpiryTrackerView';
-import { AuditLogView } from './src/views/AuditLogView';
-import { OnboardingView } from './src/views/Onboarding';
-import { Upload, FileText } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { ChangePasswordModal } from './src/components/ui/ChangePasswordModal';
 import { APP_DEFAULTS } from './src/core/config';
 import { StateManager } from './src/components/core/StateManager';
 import { ErrorBoundary } from './src/components/core/ErrorBoundary';
-
 import { formatError } from './src/utils/errorUtils';
 import { toast } from './src/utils/toast';
+import { Upload, FileText, Loader2 } from 'lucide-react';
+
+// Lazy loaded views
+const DashboardView = lazy(() => import('./src/views/Dashboard').then(m => ({ default: m.DashboardView })));
+const ListView = lazy(() => import('./src/views/Inventory').then(m => ({ default: m.ListView })));
+const VehicleHistoryView = lazy(() => import('./src/views/VehicleHistoryView').then(m => ({ default: m.VehicleHistoryView })));
+const AiAssistantView = lazy(() => import('./src/views/AiChat').then(m => ({ default: m.AiAssistantView })));
+const WarrantyForm = lazy(() => import('./src/components/warranty/WarrantyForm').then(m => ({ default: m.WarrantyForm })));
+const WarrantyDetailView = lazy(() => import('./src/views/WarrantyDetailView').then(m => ({ default: m.WarrantyDetailView })));
+const CustomerHistoryView = lazy(() => import('./src/views/CustomerHistoryView').then(m => ({ default: m.CustomerHistoryView })));
+const NoteBoard = lazy(() => import('./src/components/warranty/NoteBoard').then(m => ({ default: m.NoteBoard })));
+const UserTable = lazy(() => import('./src/components/ui/UserTable').then(m => ({ default: m.UserTable })));
+const MaintenancePanel = lazy(() => import('./src/components/maintenance/MaintenancePanel').then(m => ({ default: m.MaintenancePanel })));
+const ExpiryTrackerView = lazy(() => import('./src/views/ExpiryTrackerView').then(m => ({ default: m.ExpiryTrackerView })));
+const AuditLogView = lazy(() => import('./src/views/AuditLogView').then(m => ({ default: m.AuditLogView })));
+const OnboardingView = lazy(() => import('./src/views/Onboarding').then(m => ({ default: m.OnboardingView })));
+
+/**
+ * LoadingFallback: Εμφανίζεται κατά τη διάρκεια φόρτωσης των lazy components.
+ */
+const LoadingFallback = () => (
+  <div className="flex-1 flex flex-col items-center justify-center p-20 animate-in fade-in duration-500">
+    <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
+    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">ΦΟΡΤΩΣΗ ΣΕΛΙΔΑΣ...</p>
+  </div>
+);
 
 /**
  * App: Το κεντρικό component (Root) της εφαρμογής.
@@ -118,7 +131,9 @@ const App: React.FC = () => {
         </div>
       ) : isOnboardingRequired ? (
         /* Onboarding Mode για νέους Admin */
-        <OnboardingView />
+        <Suspense fallback={<LoadingFallback />}>
+          <OnboardingView />
+        </Suspense>
       ) : (
         <Routes>
           {/* Public/Login Route */}
@@ -192,34 +207,36 @@ const App: React.FC = () => {
                     
                     <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
                       <ErrorBoundary>
-                        <Routes>
-                          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                          <Route path="/dashboard" element={hasAccess('dashboard') ? <DashboardView /> : <Navigate to="/warranty/inventory" replace />} />
-                          <Route path="/paid" element={<ListView label="ΠΛΗΡΩΜΕΝΕΣ" />} />
-                          <Route path="/rejected" element={<ListView label="ΑΠΟΡΡΙΦΘΕΙΣΕΣ" />} />
-                          
-                          {/* Warranty Group */}
-                          <Route path="/warranty">
-                            <Route path="inventory" element={<ListView label="ΕΓΓΥΗΣΕΙΣ" />} />
-                            <Route path="new" element={hasAccess('entry') ? <WarrantyForm /> : <Navigate to="/dashboard" replace />} />
-                            <Route path="edit/:id" element={hasAccess('entry') ? <WarrantyForm /> : <Navigate to="/dashboard" replace />} />
-                            <Route path=":id" element={<WarrantyDetailView />} />
-                            <Route path="view/:view" element={<ListView label="ΦΙΛΤΡΑΡΙΣΜΕΝΗ ΠΡΟΒΟΛΗ" />} />
-                          </Route>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <Routes>
+                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                            <Route path="/dashboard" element={hasAccess('dashboard') ? <DashboardView /> : <Navigate to="/warranty/inventory" replace />} />
+                            <Route path="/paid" element={<ListView label="ΠΛΗΡΩΜΕΝΕΣ" />} />
+                            <Route path="/rejected" element={<ListView label="ΑΠΟΡΡΙΦΘΕΙΣΕΣ" />} />
+                            
+                            {/* Warranty Group */}
+                            <Route path="/warranty">
+                              <Route path="inventory" element={<ListView label="ΕΓΓΥΗΣΕΙΣ" />} />
+                              <Route path="new" element={hasAccess('entry') ? <WarrantyForm /> : <Navigate to="/dashboard" replace />} />
+                              <Route path="edit/:id" element={hasAccess('entry') ? <WarrantyForm /> : <Navigate to="/dashboard" replace />} />
+                              <Route path=":id" element={<WarrantyDetailView />} />
+                              <Route path="view/:view" element={<ListView label="ΦΙΛΤΡΑΡΙΣΜΕΝΗ ΠΡΟΒΟΛΗ" />} />
+                            </Route>
 
-                          <Route path="/vin-search" element={hasAccess('vinSearch') ? <VehicleHistoryView /> : <Navigate to="/dashboard" replace />} />
-                          <Route path="/vin-search/:vin" element={hasAccess('vinSearch') ? <VehicleHistoryView /> : <Navigate to="/dashboard" replace />} />
-                          <Route path="/customer/:name" element={<CustomerHistoryView />} />
-                          <Route path="/ai-assistant" element={hasAccess('aiAssistant') ? <AiAssistantView /> : <Navigate to="/dashboard" replace />} />
-                          <Route path="/notes" element={hasAccess('notes') ? <NoteBoard /> : <Navigate to="/dashboard" replace />} />
-                          <Route path="/users" element={hasAccess('users') ? <UserTable /> : <Navigate to="/dashboard" replace />} />
-                          <Route path="/maintenance/*" element={hasAccess('maintenance') ? <MaintenancePanel /> : <Navigate to="/dashboard" replace />} />
-                          <Route path="/expiry-tracker" element={hasAccess('expiryTracker') ? <ExpiryTrackerView /> : <Navigate to="/dashboard" replace />} />
-                          <Route path="/auditLog" element={hasAccess('auditLog') ? <AuditLogView /> : <Navigate to="/dashboard" replace />} />
-                          
-                          {/* Fallback for unknown paths */}
-                          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                        </Routes>
+                            <Route path="/vin-search" element={hasAccess('vinSearch') ? <VehicleHistoryView /> : <Navigate to="/dashboard" replace />} />
+                            <Route path="/vin-search/:vin" element={hasAccess('vinSearch') ? <VehicleHistoryView /> : <Navigate to="/dashboard" replace />} />
+                            <Route path="/customer/:name" element={<CustomerHistoryView />} />
+                            <Route path="/ai-assistant" element={hasAccess('aiAssistant') ? <AiAssistantView /> : <Navigate to="/dashboard" replace />} />
+                            <Route path="/notes" element={hasAccess('notes') ? <NoteBoard /> : <Navigate to="/dashboard" replace />} />
+                            <Route path="/users" element={hasAccess('users') ? <UserTable /> : <Navigate to="/dashboard" replace />} />
+                            <Route path="/maintenance/*" element={hasAccess('maintenance') ? <MaintenancePanel /> : <Navigate to="/dashboard" replace />} />
+                            <Route path="/expiry-tracker" element={hasAccess('expiryTracker') ? <ExpiryTrackerView /> : <Navigate to="/dashboard" replace />} />
+                            <Route path="/auditLog" element={hasAccess('auditLog') ? <AuditLogView /> : <Navigate to="/dashboard" replace />} />
+                            
+                            {/* Fallback for unknown paths */}
+                            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                          </Routes>
+                        </Suspense>
                       </ErrorBoundary>
                     </div>
                   </main>

@@ -30,6 +30,20 @@ export const APP_DEFAULTS = {
 };
 
 /**
+ * PERFORMANCE_CONFIG: Ρυθμίσεις για την απόδοση της εφαρμογής.
+ * Περιλαμβάνει χρονικά όρια (debounce) και μεγέθη παρτίδων (batch sizes).
+ */
+export const PERFORMANCE_CONFIG = {
+  DEBOUNCE: {
+    INVENTORY_SEARCH: 600,
+    PART_SUGGESTIONS: 500,
+  },
+  FIRESTORE: {
+    BATCH_SIZE: 500,
+  }
+};
+
+/**
  * UI_LIMITS: Όρια εμφάνισης στοιχείων στο UI.
  */
 export const UI_LIMITS = {
@@ -324,6 +338,8 @@ export const AI_CONFIG = {
     OUTPUT: Return ONLY a valid JSON object with keys "sentiment" and "category".`
   }
 };
+
+
 export const ONBOARDING_DEFAULTS = {
   INITIAL_STATUSES: [EntryStatus.WAITING, EntryStatus.REJECTED],
   DEFAULT_ROLES: FULL_GARAGE_DEFAULTS.availableRoles,

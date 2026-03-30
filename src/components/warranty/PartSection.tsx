@@ -3,9 +3,9 @@
  * PartSection.tsx: Διαχείριση της λίστας ανταλλακτικών μέσα στη φόρμα εγγύησης.
  * Επιτρέπει την προσθήκη, επεξεργασία και διαγραφή ανταλλακτικών, με υποστήριξη suggestions.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Part, PartRegistryEntry } from '../../core/types';
-import { UI_MESSAGES } from '../../core/config';
+import { UI_MESSAGES, PERFORMANCE_CONFIG } from '../../core/config';
 
 interface PartSectionProps {
   parts: Omit<Part, 'id'>[];
@@ -18,6 +18,14 @@ export const PartSection: React.FC<PartSectionProps> = ({ parts, setParts, parts
   const [tempPart, setTempPart] = useState({ code: '', description: '', quantity: 1, isReady: false });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(tempPart.code);
+    }, PERFORMANCE_CONFIG.DEBOUNCE.PART_SUGGESTIONS);
+    return () => clearTimeout(timer);
+  }, [tempPart.code]);
 
   const knownParts = useMemo(() => {
     const map = new Map<string, string>();
@@ -28,13 +36,13 @@ export const PartSection: React.FC<PartSectionProps> = ({ parts, setParts, parts
   }, [partsRegistry]);
 
   const suggestions = useMemo(() => {
-    if (!tempPart.code || tempPart.code.length < 2) return [];
-    const search = tempPart.code.toUpperCase().trim();
+    if (!debouncedSearch || debouncedSearch.length < 2) return [];
+    const search = debouncedSearch.toUpperCase().trim();
     return Array.from(knownParts.entries())
       .filter(([code]) => code.includes(search))
       .slice(0, 5)
       .map(([code, description]) => ({ code, description }));
-  }, [tempPart.code, knownParts]);
+  }, [debouncedSearch, knownParts]);
 
   const handleAddOrUpdate = () => {
     if (!tempPart.code.trim()) return;
