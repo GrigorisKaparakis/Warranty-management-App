@@ -1,0 +1,38 @@
+name: Autonomous Bridge Sync
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # Every 30 minutes
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Autonomous Bridge
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ secrets.STITCH_PROJECT_ID }}
+        run: npx tsx scripts/autonomous-bridge.ts
+
+      - name: Commit & Push Changes
+        run: |
+          git config --global user.name 'AntiGravity Autonomous Bridge'
+          git config --global user.email 'bridge@antigravity.ai'
+          git add .
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 autonomous: sync visuals from Google Stitch" && git push)

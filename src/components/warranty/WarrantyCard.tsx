@@ -82,21 +82,21 @@ export const WarrantyCard: React.FC<{
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ 
-        backgroundColor: isSelected ? 'rgba(239, 246, 255, 0.8)' : 'rgba(250, 250, 250, 0.8)',
+        backgroundColor: isSelected ? 'rgba(30, 58, 138, 0.4)' : 'rgba(255, 255, 255, 0.03)',
         x: 4,
         transition: { duration: 0.2 }
       }}
       onClick={() => isSelectionMode && onSelect?.(entry.id)}
       onDoubleClick={() => !isSelectionMode && navigate(`/warranty/${entry.id}`)}
-      className={`group bg-white border-b border-zinc-50 transition-all flex items-start gap-6 ${density.padding} ${density.minHeight} cursor-pointer ${isSelected ? 'bg-blue-50/50' : ''}`}
+      className={`group bg-transparent border-b border-white/5 transition-all flex items-start gap-6 ${density.padding} ${density.minHeight} cursor-pointer ${isSelected ? 'bg-blue-900/20' : ''}`}
     >
       {/* Selection Checkbox */}
       {isSelectionMode && (
         <div className="w-10 flex justify-center flex-shrink-0">
           <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
             isSelected 
-              ? 'bg-blue-600 border-blue-600 text-white shadow-lg' 
-              : 'border-zinc-200 bg-white'
+              ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-900/20' 
+              : 'border-white/10 bg-slate-900'
           }`}>
             {isSelected && <Check size={14} strokeWidth={4} />}
           </div>
@@ -136,52 +136,52 @@ export const WarrantyCard: React.FC<{
       </div>
 
       {/* IDs Column */}
-      <div className={`${colWidths.ids} flex-shrink-0 space-y-2`}>
+      <div className={`${colWidths.ids} flex-shrink-0 space-y-2 uppercase`}>
         <div className="flex items-center gap-2 group/id">
-          <span className={`${density.titleSize} font-black text-zinc-900 tracking-tighter uppercase leading-none`}>
+          <span className={`${density.titleSize} font-black text-white tracking-tighter uppercase leading-none`}>
             {entry.warrantyId}
           </span>
           <button 
             onClick={(e) => { e.stopPropagation(); copyToClipboard(entry.warrantyId, 'wid'); }} 
-            className="opacity-0 group-hover/id:opacity-100 transition-all p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-400"
+            className="opacity-0 group-hover/id:opacity-100 transition-all p-1.5 hover:bg-white/5 rounded-lg text-slate-500"
           >
-            {copiedField === 'wid' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+            {copiedField === 'wid' ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
           </button>
         </div>
         <div className="flex items-center gap-2 group/vin">
           <button 
             onClick={(e) => { e.stopPropagation(); onVinClick?.(entry.vin); }}
-            className={`inline-block bg-zinc-100 text-zinc-500 font-mono ${density.fontSize} px-2.5 py-1 rounded-lg leading-none uppercase font-black border border-zinc-200 shadow-sm hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all`}
+            className={`inline-block bg-white/5 text-slate-300 font-mono ${density.fontSize} px-2.5 py-1 rounded-lg leading-none uppercase font-black border border-white/5 shadow-sm hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all`}
           >
             {entry.vin}
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); copyToClipboard(entry.vin, 'vin'); }} 
-            className="opacity-0 group-hover/vin:opacity-100 transition-all p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-400"
+            className="opacity-0 group-hover/vin:opacity-100 transition-all p-1.5 hover:bg-white/5 rounded-lg text-slate-500"
           >
-            {copiedField === 'vin' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+            {copiedField === 'vin' ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
           </button>
         </div>
       </div>
 
       {/* Brand Column */}
       <div className={`${colWidths.brand} flex-shrink-0`}>
-        <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{entry.company || '-'}</div>
-        <div className={`${density.fontSize} font-black text-zinc-900 uppercase tracking-tight`}>{entry.brand}</div>
+        <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{entry.company || '-'}</div>
+        <div className={`${density.fontSize} font-black text-blue-400 uppercase tracking-tight`}>{entry.brand}</div>
       </div>
 
       {/* Date/Customer Column */}
       <div className={`${colWidths.customer} flex-shrink-0 space-y-2 relative`}>
-        <div className="flex items-center gap-2 text-zinc-400">
+        <div className="flex items-center gap-2 text-slate-500">
           <Calendar size={12} />
           <span className={`${density.fontSize} font-bold`}>{formattedDate}</span>
         </div>
         <div className="flex items-center gap-2">
-          <UserIcon size={12} className="text-zinc-400" />
+          <UserIcon size={12} className="text-slate-500" />
           <Link 
             to={`/customer/${encodeURIComponent(entry.fullName.replace(/\n/g, ' '))}`}
             onClick={(e) => e.stopPropagation()}
-            className={`${density.fontSize} font-black truncate uppercase tracking-tight text-blue-600 hover:underline decoration-2 underline-offset-4`}
+            className={`${density.fontSize} font-black truncate uppercase tracking-tight text-white hover:text-blue-400 transition-colors`}
           >
             {entry.fullName || '-'}
           </Link>
@@ -203,10 +203,10 @@ export const WarrantyCard: React.FC<{
               key={part.id || `part-${index}`}
               disabled={readOnly}
               onClick={(e) => { e.stopPropagation(); handleTogglePart(part.id); }}
-              className={`px-3 py-1.5 rounded-xl ${density.fontSize} font-black shadow-sm border transition-all active:scale-95 flex flex-col items-start ${
+              className={`px-3 py-1.5 rounded-xl ${density.fontSize} font-black shadow-sm border border-white/5 transition-all active:scale-95 flex flex-col items-start ${
                 part.isReady 
-                  ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
-                  : 'bg-amber-50 border-amber-100 text-amber-700'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                  : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
               }`}
               title={`${part.description || UI_MESSAGES.LABELS.NO_DESCRIPTION} (X${part.quantity})`}
             >
@@ -229,25 +229,25 @@ export const WarrantyCard: React.FC<{
 
       {/* Notes Column */}
       <div className="flex-1 min-w-0 px-4">
-        <div className={`${density.fontSize} font-medium text-zinc-600 whitespace-pre-line leading-relaxed transition-all`}>
+        <div className={`${density.fontSize} font-medium text-slate-400 whitespace-pre-line leading-relaxed transition-all group-hover:text-slate-100 italic`}>
           {entry.notes || '-'}
         </div>
       </div>
 
       {/* Actions Column */}
       {currentView !== 'expiryTracker' && (
-        <div className="w-[160px] flex-shrink-0 flex items-start justify-end gap-3 pl-4 border-l border-zinc-50 pt-1">
+        <div className="w-[160px] flex-shrink-0 flex items-start justify-end gap-3 pl-4 border-l border-white/5 pt-1">
           <button
             type="button"
             disabled={readOnly}
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); togglePayment(); }}
             className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border shadow-sm ${
               entry.isPaid 
-                ? 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100' 
-                : 'bg-rose-50 text-rose-500 border-rose-100'
+                ? 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-900/20' 
+                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
             }`}
           >
-            {entry.isPaid ? UI_MESSAGES.LABELS.PAID : UI_MESSAGES.LABELS.UNPAID}
+            {entry.isPaid ? 'ΕΞΟΦΛΗΘΗΚΕ' : 'ΑΝΕΞΟΦΛΗΤΟ'}
           </button>
           
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
@@ -255,7 +255,7 @@ export const WarrantyCard: React.FC<{
               variant="neutral" 
               size="icon" 
               onClick={(e) => { e.stopPropagation(); PDFService.exportSingleEntry(entry, settings); }}
-              className="w-9 h-9 rounded-xl border-zinc-100"
+              className="w-9 h-9 rounded-xl border-white/10 bg-slate-800/50 text-white hover:bg-blue-600"
               title="PDF"
             >
               <FileText size={14} />
@@ -266,7 +266,7 @@ export const WarrantyCard: React.FC<{
                 variant="neutral" 
                 size="icon" 
                 onClick={(e) => { e.stopPropagation(); navigate(`/warranty/edit/${entry.id}`); }}
-                className="w-9 h-9 rounded-xl border-zinc-100"
+                className="w-9 h-9 rounded-xl border-white/10 bg-slate-800/50 text-white hover:bg-blue-600"
               >
                 <Edit3 size={14} />
               </Button>
@@ -277,7 +277,7 @@ export const WarrantyCard: React.FC<{
                 variant="danger" 
                 size="icon" 
                 onClick={(e) => { e.stopPropagation(); onDelete({ id: entry.id, warrantyId: entry.warrantyId }); }}
-                className="w-9 h-9 rounded-xl"
+                className="w-9 h-9 rounded-xl shadow-lg shadow-rose-900/20"
               >
                 <Trash2 size={14} />
               </Button>

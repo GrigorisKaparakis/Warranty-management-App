@@ -60,32 +60,48 @@ export const CompanySettings: React.FC<CompanySettingsProps> = memo(({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in pb-32">
       <Card 
-        title="ΠΡΟΣΘΗΚΗ ΕΤΑΙΡΕΙΑΣ" 
-        subtitle="ΟΡΙΣΤΕ ΝΕΟΥΣ ΔΙΑΝΟΜΕΙΣ"
+        title="ENTITY REGISTRATION" 
+        subtitle="DEFINE NEW SYSTEM DISTRIBUTORS"
         actions={
           isDirty && (
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" onClick={onCancel}>ΑΚΥΡΩΣΗ</Button>
-              <Button variant="primary" size="sm" icon={Save} onClick={onSave}>ΑΠΟΘΗΚΕΥΣΗ</Button>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={onCancel}
+                className="h-10 px-6 rounded-xl bg-white/5 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-white transition-all border border-black/20 font-mono"
+              >
+                ABORT
+              </button>
+              <button 
+                onClick={onSave}
+                className="h-10 px-6 rounded-xl bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] border-none italic"
+              >
+                COMMIT SYNC
+              </button>
             </div>
           )
         }
       >
-        <div className="flex gap-4">
+        <div className="flex gap-4 pt-4">
           <input 
             type="text" 
-            placeholder="ΟΝΟΜΑ ΕΤΑΙΡΕΙΑΣ..." 
+            placeholder="ENTER ENTITY NAME (E.G. OPEL HELLAS)..." 
             value={newCompanyInput} 
             onChange={e => setNewCompanyInput(e.target.value)} 
-            className="flex-1 px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-xl font-bold outline-none text-sm" 
+            className="flex-1 px-6 py-4 bg-slate-950 border border-white/5 rounded-2xl font-black text-sm text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-800" 
           />
-          <Button onClick={handleAddCompany} icon={Plus}>ΠΡΟΣΘΗΚΗ</Button>
+          <button 
+            onClick={handleAddCompany}
+            className="px-8 bg-blue-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center gap-2 shadow-2xl shadow-blue-900/40 italic"
+          >
+            <Plus size={18} />
+            REGISTER
+          </button>
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {Object.entries(localCompanyMap).map(([company, brands]) => (
           <Card 
             key={company} 
@@ -93,45 +109,59 @@ export const CompanySettings: React.FC<CompanySettingsProps> = memo(({
             actions={
               <button 
                 onClick={() => handleRemoveCompany(company)} 
-                className={`transition-all ${confirmingDeleteCompany === company ? 'text-red-600 animate-pulse' : 'text-zinc-400 hover:text-red-500'}`}
+                className={`transition-all p-2 rounded-lg hover:bg-red-500/10 ${confirmingDeleteCompany === company ? 'text-red-500 animate-pulse' : 'text-slate-600 hover:text-red-400'}`}
               >
-                {confirmingDeleteCompany === company ? <span className="text-[10px] font-black uppercase">ΕΠΙΒΕΒΑΙΩΣΗ;</span> : <Trash2 size={16} />}
+                {confirmingDeleteCompany === company ? <span className="text-[10px] font-black uppercase italic tracking-tighter">CONFIRM PURGE?</span> : <Trash2 size={18} />}
               </button>
             }
           >
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2 min-h-[40px]">
+            <div className="space-y-6 pt-4">
+              <div className="flex flex-wrap gap-2 min-h-[50px] p-4 bg-slate-950/50 rounded-2xl border border-white/5 shadow-inner">
                 {(brands as string[]).map((b, i) => (
-                  <Badge key={i} variant="info" className="gap-1">
+                  <Badge 
+                    key={i} 
+                    variant="neutral" 
+                    className="gap-2 bg-blue-600/10 border-blue-500/20 text-blue-300 font-black text-[10px] uppercase tracking-widest pl-3 pr-2 py-1.5 rounded-xl hover:bg-blue-600/20 transition-all border group/badge"
+                  >
                     {b}
-                    <button onClick={() => onUpdateCompanies(company, (brands as string[]).filter((_, idx) => idx !== i))} className="hover:text-red-500">×</button>
+                    <button 
+                      onClick={() => onUpdateCompanies(company, (brands as string[]).filter((_, idx) => idx !== i))} 
+                      className="text-blue-500 group-hover/badge:text-red-400 transition-colors bg-white/5 rounded-md w-5 h-5 flex items-center justify-center"
+                    >
+                      ×
+                    </button>
                   </Badge>
                 ))}
               </div>
 
-              <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-100">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase mb-2 block">ΚΑΝΟΝΑΣ ΛΗΞΗΣ</label>
+              <div className="p-6 bg-slate-950 rounded-[2rem] border border-white/5 shadow-2xl">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-3 block italic">PROTOCOL: EXPIRY CALCULATION</label>
                 <select 
                   value={localExpiryRules?.[company] || ''} 
                   onChange={(e) => onUpdateExpiryRules(company, e.target.value)}
-                  className="w-full bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-xs font-bold outline-none"
+                  className="w-full bg-slate-900 border border-white/5 px-4 py-3 rounded-xl text-[11px] font-black text-blue-400 uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all appearance-none cursor-pointer"
                 >
-                  <option value="">ΧΩΡΙΣ ΚΑΝΟΝΑ</option>
-                  <option value="END_OF_NEXT_MONTH">ΤΕΛΟΣ ΕΠΟΜΕΝΟΥ ΜΗΝΑ</option>
-                  <option value="3 months">3 ΜΗΝΕΣ</option>
-                  <option value="6 months">6 ΜΗΝΕΣ</option>
+                  <option value="" className="bg-slate-950">NO CALCULATION RULE</option>
+                  <option value="END_OF_NEXT_MONTH" className="bg-slate-950">EOM + 30D OFFSET</option>
+                  <option value="3 months" className="bg-slate-950">QUARTERLY (90D)</option>
+                  <option value="6 months" className="bg-slate-950">BI-ANNUAL (180D)</option>
                 </select>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <input 
                   type="text" 
-                  placeholder="+ ΜΑΡΚΑ" 
+                  placeholder="+ REGISTER BRAND CODE" 
                   value={brandInputs[company] || ''} 
                   onChange={(e) => setBrandInputs(prev => ({ ...prev, [company]: e.target.value.toUpperCase() }))} 
-                  className="flex-1 px-3 py-1.5 bg-zinc-50 border border-zinc-100 rounded-lg text-xs font-bold outline-none focus:bg-white" 
+                  className="flex-1 px-5 py-3 bg-slate-950 border border-white/5 rounded-xl text-[11px] font-black text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-800" 
                 />
-                <Button size="sm" onClick={() => addBrandToCompany(company)} icon={Plus} />
+                <button 
+                  onClick={() => addBrandToCompany(company)}
+                  className="w-12 h-12 bg-white/5 text-blue-500 rounded-xl flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all border border-white/5 shadow-2xl"
+                >
+                  <Plus size={18} />
+                </button>
               </div>
             </div>
           </Card>

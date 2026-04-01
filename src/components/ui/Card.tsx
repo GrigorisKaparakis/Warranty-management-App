@@ -26,24 +26,24 @@ export const Card: React.FC<CardProps> = ({
   noPadding = false,
 }) => {
   return (
-    <div className={`bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden ${className}`}>
-      {(title || actions || Icon) && (
-        <div className="px-6 py-4 border-b border-zinc-50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+    <div className={`glass-dark rounded-[2.5rem] border border-white/5 shadow-2xl shadow-black/20 overflow-hidden backdrop-blur-md ${className}`}>
+      {(title || actions || Icon || subtitle) && (
+        <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+          <div className="flex items-center gap-4">
             {Icon && (
-              <div className="w-8 h-8 rounded-lg bg-zinc-50 flex items-center justify-center text-zinc-500">
-                <Icon size={16} />
+              <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 shadow-inner">
+                <Icon size={18} />
               </div>
             )}
             <div>
-              {title && <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>}
-              {subtitle && <p className="text-xs text-zinc-500 mt-0.5">{subtitle}</p>}
+              {title && <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{title}</h3>}
+              {subtitle && <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">{subtitle}</p>}
             </div>
           </div>
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       )}
-      <div className={noPadding ? '' : 'p-6'}>
+      <div className={noPadding ? '' : 'p-8'}>
         {children}
       </div>
     </div>

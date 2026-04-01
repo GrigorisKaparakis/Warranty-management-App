@@ -292,6 +292,14 @@ export const UI_MESSAGES = {
   },
   CONFIRMATIONS: {
     DELETE_BATCH: (count: number) => `ΕΙΣΤΕ ΣΙΓΟΥΡΟΙ ΟΤΙ ΘΕΛΕΤΕ ΝΑ ΔΙΑΓΡΑΨΕΤΕ ${count} ΕΓΓΡΑΦΕΣ;`
+  },
+  APP: {
+    NAME: "WARRANTY H&K",
+    TAGLINE: "SMART WARRANTY MANAGEMENT"
+  },
+  DASHBOARD: {
+    TITLE: "DASHBOARD",
+    INSIGHTS: "AI ΕΠΙΣΚΟΠΗΣΗ"
   }
 };
 
