@@ -101,81 +101,77 @@ export const VehicleHistoryView: React.FC = () => {
     <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-10 animate-fade-in pb-32">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-        <div className="flex items-center gap-8">
-          <button 
-            type="button"
+        <div className="flex items-center gap-6">
+          <Button 
+            variant="neutral" 
+            size="icon" 
             onClick={() => navigate(-1)}
-            className="w-16 h-16 flex items-center justify-center bg-white/5 text-slate-500 rounded-[1.5rem] border border-white/5 shadow-2xl hover:bg-white/10 hover:text-white transition-all scale-95 hover:scale-100"
+            className="w-14 h-14 rounded-2xl border-zinc-100 bg-white shadow-sm"
           >
-            <ArrowLeft size={24} />
-          </button>
+            <ArrowLeft size={20} />
+          </Button>
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <History size={14} className="text-blue-400" />
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">CHASSIS RECOGNITION UNIT</span>
+            <div className="flex items-center gap-2 mb-1">
+              <History size={12} className="text-blue-600" />
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">ΑΝΑΖΗΤΗΣΗ ΙΣΤΟΡΙΚΟΥ</span>
             </div>
-            <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-none">VEHICLE HISTORY</h1>
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tighter uppercase italic">ΙΣΤΟΡΙΚΟ ΟΧΗΜΑΤΟΣ</h1>
           </div>
         </div>
 
         {lastSearched && (
-          <button 
-            type="button"
+          <Button 
+            variant="neutral" 
             onClick={() => { setResults([]); setSearchVin(''); setLastSearched(''); onClearVin(null); navigate('/vin-search'); }}
-            className="h-16 px-10 rounded-[1.5rem] bg-white/5 border border-white/5 font-black text-[10px] tracking-widest text-slate-500 hover:text-white hover:bg-white/10 transition-all shadow-2xl flex items-center gap-3"
+            className="h-14 px-8 rounded-2xl border-zinc-100 bg-white shadow-sm font-black text-[10px] tracking-widest text-zinc-400 hover:text-zinc-900"
           >
-            <X size={18} />
-            CLEAR SCAN
-          </button>
+            <X size={14} className="mr-2" />
+            ΚΑΘΑΡΙΣΜΟΣ
+          </Button>
         )}
       </div>
 
       {/* Search Input Section */}
-      <Card className="p-16 rounded-[4rem] border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden relative group">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full -mr-64 -mt-64 blur-[120px] pointer-events-none group-hover:bg-blue-600/10 transition-all" />
+      <Card className="p-10 rounded-[3rem] border-zinc-100 shadow-2xl shadow-zinc-100 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full -mr-32 -mt-32 blur-3xl" />
         
-        <form onSubmit={handleSearchSubmit} className="relative z-10 flex flex-col gap-10">
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="relative flex-1 group/input">
-              <div className="absolute left-8 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center border border-white/10 group-focus-within/input:border-blue-500/50 transition-all">
-                <Search className="w-5 h-5 text-slate-500 group-focus-within/input:text-blue-400 transition-colors" />
-              </div>
+        <form onSubmit={handleSearchSubmit} className="relative z-10">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-zinc-300" />
               <input 
                 type="text" 
-                placeholder="ENTER CHASSIS DIGITS (E.G. 123456)..." 
+                placeholder="Εισάγετε τα τελευταία ψηφία του VIN (π.χ. 123456)..." 
                 value={searchVin}
                 onChange={e => setSearchVin(e.target.value.toUpperCase())}
-                className="w-full pl-24 pr-10 py-7 bg-slate-900/50 border border-white/5 rounded-[2.5rem] text-2xl font-black text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-700 uppercase tracking-widest"
+                className="w-full pl-16 pr-8 py-6 bg-zinc-50 border border-zinc-100 rounded-[2rem] text-xl font-black outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-zinc-300 uppercase tracking-widest"
               />
             </div>
-            <button 
+            <Button 
               type="submit" 
               disabled={isSearching || searchVin.length < 3}
-              className="h-[84px] px-14 rounded-[2.5rem] bg-blue-600 text-white font-black text-xs tracking-[0.3em] uppercase shadow-2xl shadow-blue-900/40 hover:bg-blue-500 active:scale-95 transition-all disabled:opacity-50 disabled:bg-slate-800 disabled:shadow-none border-none"
+              className="h-[76px] px-12 rounded-[2rem] bg-zinc-900 text-white font-black text-xs tracking-widest uppercase shadow-xl hover:shadow-zinc-200 active:scale-95 transition-all"
             >
-              {isSearching ? (
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : 'INVOKE SEARCH'}
-            </button>
+              {isSearching ? 'ΑΝΑΖΗΤΗΣΗ...' : 'ΑΝΑΖΗΤΗΣΗ'}
+            </Button>
           </div>
         </form>
 
         {summary && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 animate-in zoom-in-95 duration-500">
-            <div className="p-10 bg-blue-600/5 rounded-[2.5rem] border border-blue-500/10 shadow-2xl group/stat">
-              <div className="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-[0.3em] group-hover/stat:text-blue-400 transition-colors">TOTAL WARRANTS</div>
-              <div className="text-5xl font-black text-white tracking-tighter italic leading-none">{summary.total}</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 animate-fade-in">
+            <div className="p-8 bg-blue-50/50 rounded-[2rem] border border-blue-100">
+              <div className="text-[9px] font-black text-blue-400 uppercase mb-2 tracking-widest">ΣΥΝΟΛΟ ΕΓΓΥΗΣΕΩΝ</div>
+              <div className="text-3xl font-black text-blue-700 tracking-tighter">{summary.total}</div>
             </div>
-            <div className="p-10 bg-white/[0.02] rounded-[2.5rem] border border-white/5 shadow-2xl group/stat">
-              <div className="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-[0.3em] group-hover/stat:text-blue-400 transition-colors">LAST DEPLOYMENT</div>
-              <div className="text-4xl font-black text-white tracking-tighter mb-2 italic leading-none">{summary.lastVisit}</div>
-              <div className="text-[10px] font-black text-blue-500/60 uppercase tracking-widest mt-4 bg-blue-500/5 px-4 py-1.5 rounded-full inline-block">EXPIRED {summary.daysSince} DAYS AGO</div>
+            <div className="p-8 bg-zinc-50 rounded-[2rem] border border-zinc-100">
+              <div className="text-[9px] font-black text-zinc-400 uppercase mb-2 tracking-widest">ΤΕΛΕΥΤΑΙΑ ΕΠΙΣΚΕΨΗ</div>
+              <div className="text-3xl font-black text-zinc-900 tracking-tighter">{summary.lastVisit}</div>
+              <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight mt-1">Πριν από {summary.daysSince} ημέρες</div>
             </div>
-            <div className="p-10 bg-slate-900 rounded-[2.5rem] shadow-[0_0_40px_rgba(37,99,235,0.1)] border border-blue-500/20 group/stat relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-3xl group-hover/stat:bg-blue-500/20 transition-all"></div>
-              <div className="text-[10px] font-black text-blue-400 uppercase mb-4 tracking-[0.3em] relative z-10">ENTITY DETECTED</div>
-              <div className="text-2xl font-black text-white tracking-tighter uppercase italic mb-2 relative z-10">{summary.latestBrand}</div>
-              <div className="text-[11px] font-black text-slate-500 uppercase tracking-widest relative z-10">{summary.latestCompany}</div>
+            <div className="p-8 bg-zinc-900 rounded-[2rem] shadow-xl text-white">
+              <div className="text-[9px] font-black text-zinc-500 uppercase mb-2 tracking-widest">ΟΧΗΜΑ</div>
+              <div className="text-xl font-black tracking-tighter uppercase italic mb-1">{summary.latestBrand}</div>
+              <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{summary.latestCompany}</div>
             </div>
           </div>
         )}
@@ -188,78 +184,78 @@ export const VehicleHistoryView: React.FC = () => {
           <p className="text-xs font-black text-zinc-400 uppercase tracking-widest italic">Αναζήτηση στο αρχείο...</p>
         </div>
       ) : results.length > 0 ? (
-        <div className="space-y-12 mt-12">
-          <div className="flex items-center gap-6 px-10">
-            <div className="h-px flex-1 bg-white/5" />
-            <span className="text-[11px] font-black text-slate-700 uppercase tracking-[0.5em] italic">STREAMING RESULTS [{results.length}]</span>
-            <div className="h-px flex-1 bg-white/5" />
+        <div className="space-y-10">
+          <div className="flex items-center gap-4 px-6">
+            <div className="h-px flex-1 bg-zinc-100" />
+            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.3em]">ΑΠΟΤΕΛΕΣΜΑΤΑ ({results.length})</span>
+            <div className="h-px flex-1 bg-zinc-100" />
           </div>
 
-          <div className="relative space-y-12 before:absolute before:inset-0 before:ml-12 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-blue-600/30 before:via-blue-600/10 before:to-transparent">
+          <div className="relative space-y-8 before:absolute before:inset-0 before:ml-10 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-zinc-100 before:via-zinc-100 before:to-transparent">
             {results.map((entry, idx) => {
               const config = getStatusConfig(entry.status);
               return (
-                <div key={entry.id} className="relative flex items-start gap-16 group">
+                <div key={entry.id} className="relative flex items-start gap-12 group">
                   {/* Timeline Dot */}
-                  <div className="absolute left-12 -translate-x-1/2 w-6 h-6 rounded-full border-4 border-slate-950 bg-slate-800 shadow-2xl z-20 group-hover:bg-blue-600 group-hover:border-blue-400 transition-all scale-75 group-hover:scale-110" />
+                  <div className="absolute left-10 -translate-x-1/2 w-4 h-4 rounded-full border-4 border-white bg-blue-600 shadow-sm z-10 group-hover:scale-150 transition-transform" />
                   
                   {/* Date */}
-                  <div className="min-w-[100px] pt-2 text-right">
-                    <div className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 font-mono">
+                  <div className="min-w-[80px] pt-1 text-right">
+                    <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">
                       {new Date(entry.createdAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' })}
                     </div>
-                    <div className="text-2xl font-black text-white tracking-tighter italic leading-none">{new Date(entry.createdAt).getFullYear()}</div>
+                    <div className="text-lg font-black text-zinc-900 tracking-tighter">{new Date(entry.createdAt).getFullYear()}</div>
                   </div>
- 
+
                   {/* Content */}
                   <Link 
                     to={`/warranty/${entry.id}`}
-                    className="flex-1 p-10 bg-white/[0.02] rounded-[3rem] border border-white/5 hover:border-blue-500/30 hover:bg-slate-900 shadow-2xl transition-all scale-[0.99] hover:scale-100 group/item"
+                    className="flex-1 p-8 bg-white rounded-[2.5rem] border border-zinc-100 hover:border-zinc-900 hover:shadow-2xl hover:shadow-zinc-200 transition-all"
                   >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                       <div>
-                        <div className="flex items-center gap-4 mb-4">
-                          <span className="text-[12px] font-black text-slate-100 uppercase tracking-widest">RECORD #{entry.warrantyId}</span>
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="text-[11px] font-black text-zinc-900 uppercase tracking-tighter">#{entry.warrantyId}</span>
                           <Badge 
                             variant="neutral"
-                            style={{ backgroundColor: `${config.color}15`, color: config.color, boxShadow: `0 0 15px ${config.color}10` }}
-                            className="text-[10px] px-3 py-1 border-none font-black uppercase tracking-wider"
+                            style={{ backgroundColor: `${config.color}15`, color: config.color }}
+                            className="text-[9px] px-2.5 py-0.5 border-none font-black"
                           >
                             {config.label}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-4 text-slate-400 group-hover/item:text-slate-200 transition-colors">
-                          <User size={18} className="text-slate-600" />
-                          <span className="text-lg font-black uppercase tracking-tight italic">{entry.fullName}</span>
+                        <div className="flex items-center gap-3 text-zinc-600">
+                          <User size={14} className="text-zinc-400" />
+                          <span className="text-sm font-black uppercase tracking-tight">{entry.fullName}</span>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-8">
+                      <div className="flex items-center gap-6">
                         <div className="text-right hidden md:block">
-                          <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">{entry.brand}</div>
-                          <div className="text-sm font-black text-white uppercase tracking-tighter italic">{entry.company}</div>
+                          <div className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">{entry.brand}</div>
+                          <div className="text-xs font-black text-zinc-900 uppercase tracking-tight">{entry.company}</div>
                         </div>
-                        <div className="w-16 h-16 rounded-[1.2rem] bg-white/5 border border-white/5 flex items-center justify-center text-slate-500 group-hover/item:text-white group-hover/item:bg-blue-600 group-hover/item:border-blue-400 transition-all shadow-2xl">
-                          <ChevronRight size={28} />
+                        <div className="w-12 h-12 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-300 group-hover:text-zinc-900 group-hover:border-zinc-900 transition-all">
+                          <ChevronRight size={20} />
                         </div>
                       </div>
                     </div>
 
                     {/* Parts & Notes Preview */}
-                    <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-white/5">
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-zinc-50">
                       <div>
-                        <div className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-5">INSTALLED PARTS INDEX</div>
-                        <div className="flex flex-wrap gap-3">
+                        <div className="text-[9px] font-black text-zinc-300 uppercase tracking-widest mb-4">ΑΝΤΑΛΛΑΚΤΙΚΑ</div>
+                        <div className="flex flex-wrap gap-2">
                           {entry.parts.map((p, pIdx) => (
-                            <div key={p.id || `p-${pIdx}`} className="px-5 py-2.5 bg-black/20 border border-white/5 rounded-2xl shadow-xl transition-all hover:border-blue-500/30">
-                              <div className="text-[11px] font-black text-blue-400 uppercase tracking-[0.1em]">{p.code} <span className="text-slate-600 ml-2 font-normal">x{p.quantity}</span></div>
+                            <div key={p.id || `p-${pIdx}`} className="px-3 py-1.5 bg-zinc-50 border border-zinc-100 rounded-xl">
+                              <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{p.code} <span className="text-zinc-400 ml-1">x{p.quantity}</span></div>
                             </div>
                           ))}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-5">LOG DATA PERSISTENCE</div>
-                        <p className="text-[12px] font-bold text-slate-500 italic leading-relaxed line-clamp-2 bg-white/[0.01] p-5 rounded-2xl border border-white/5">{entry.notes || 'No extended logs found.'}</p>
+                        <div className="text-[9px] font-black text-zinc-300 uppercase tracking-widest mb-4">ΠΑΡΑΤΗΡΗΣΕΙΣ</div>
+                        <p className="text-[11px] font-medium text-zinc-500 italic leading-relaxed line-clamp-2">{entry.notes || 'Δεν υπάρχουν σημειώσεις.'}</p>
                       </div>
                     </div>
                   </Link>
@@ -269,23 +265,20 @@ export const VehicleHistoryView: React.FC = () => {
           </div>
         </div>
       ) : lastSearched ? (
-        <div className="py-48 text-center glass-dark rounded-[4rem] border border-white/5 shadow-inner">
-          <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-10 shadow-2xl relative">
-            <div className="absolute inset-0 bg-red-600/5 rounded-full blur-xl animate-pulse"></div>
-            <Car size={40} strokeWidth={1.5} className="text-slate-600 relative z-10" />
+        <div className="py-32 text-center">
+          <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Car size={32} strokeWidth={1} className="text-zinc-200" />
           </div>
-          <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4 leading-none">NO INDEX MATCHES</h3>
-          <p className="text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] italic mb-8">VERIFY CHASSIS DIGITS AND RETRY</p>
+          <h3 className="text-xl font-black text-zinc-900 uppercase italic tracking-tighter mb-2">ΔΕΝ ΒΡΕΘΗΚΑΝ ΑΠΟΤΕΛΕΣΜΑΤΑ</h3>
+          <p className="text-xs font-black text-zinc-300 uppercase tracking-widest italic">Δοκιμάστε με διαφορετικά ψηφία VIN.</p>
         </div>
       ) : (
-        <div className="py-48 text-center glass-dark rounded-[4rem] border border-white/5 shadow-inner relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-32 bg-blue-600/5 blur-[80px] rounded-full"></div>
-          <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-10 shadow-2xl relative">
-            <div className="absolute inset-0 bg-blue-600/5 rounded-full blur-xl"></div>
-            <Search size={40} strokeWidth={1.5} className="text-blue-500 relative z-10" />
+        <div className="py-32 text-center">
+          <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Search size={32} strokeWidth={1} className="text-blue-200" />
           </div>
-          <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4 leading-none">SYSTEM READY FOR UPLINK</h3>
-          <p className="text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] italic mb-8">ENTER AT LEAST 3 DIGITS TO START RETRIEVAL</p>
+          <h3 className="text-xl font-black text-zinc-900 uppercase italic tracking-tighter mb-2">ΕΤΟΙΜΟ ΓΙΑ ΑΝΑΖΗΤΗΣΗ</h3>
+          <p className="text-xs font-black text-zinc-300 uppercase tracking-widest italic">Εισάγετε τουλάχιστον 3 ψηφία για να ξεκινήσετε.</p>
         </div>
       )}
     </div>

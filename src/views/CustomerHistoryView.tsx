@@ -54,33 +54,33 @@ export const CustomerHistoryView: React.FC = () => {
   return (
     <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-10 animate-fade-in pb-32">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
-        <div className="flex items-center gap-8">
-          <button 
-            type="button"
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div className="flex items-center gap-6">
+          <Button 
+            variant="neutral" 
+            size="icon" 
             onClick={() => navigate(-1)}
-            className="w-16 h-16 flex items-center justify-center bg-white/5 text-slate-500 rounded-[1.5rem] border border-white/5 shadow-2xl hover:bg-white/10 hover:text-white transition-all scale-95 hover:scale-100"
+            className="w-14 h-14 rounded-2xl border-zinc-100 bg-white shadow-sm"
           >
-            <ArrowLeft size={24} />
-          </button>
+            <ArrowLeft size={20} />
+          </Button>
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <User size={14} className="text-blue-400" />
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">USER PROFILE DATABASE</span>
+            <div className="flex items-center gap-2 mb-1">
+              <User size={12} className="text-blue-600" />
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">ΠΡΟΦΙΛ ΠΕΛΑΤΗ</span>
             </div>
-            <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-none">{name}</h1>
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tighter uppercase italic">{name}</h1>
           </div>
         </div>
 
         {customer?.phone && (
-          <div className="flex items-center gap-6 px-10 py-6 bg-blue-600/5 rounded-[2.5rem] border border-blue-500/10 shadow-2xl relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="w-14 h-14 bg-blue-600/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-xl relative z-10 transition-transform group-hover:scale-110">
-              <Phone size={24} className="text-blue-400" />
+          <div className="flex items-center gap-4 px-8 py-4 bg-blue-50/50 rounded-[2rem] border border-blue-100 shadow-sm">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <Phone size={18} className="text-blue-600" />
             </div>
-            <div className="relative z-10">
-              <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">CONTACT MOBILE</div>
-              <div className="text-2xl font-black text-blue-400 tracking-tight italic font-mono transition-colors group-hover:text-blue-300">{customer.phone}</div>
+            <div>
+              <div className="text-[9px] font-black text-blue-400 uppercase tracking-widest">ΤΗΛΕΦΩΝΟ</div>
+              <div className="text-lg font-black text-blue-700 tracking-tight">{customer.phone}</div>
             </div>
           </div>
         )}
@@ -90,44 +90,44 @@ export const CustomerHistoryView: React.FC = () => {
         {/* Left Column: Stats & Vehicles */}
         <div className="lg:col-span-4 space-y-10">
           {/* Stats Card */}
-          <Card className="p-12 rounded-[3.5rem] overflow-hidden group">
-            <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] mb-10 flex items-center gap-3">
-              <Hash size={16} className="text-blue-500" />
-              SYSTEM METRICS
+          <Card className="p-10 rounded-[3rem]">
+            <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-8 flex items-center gap-2">
+              <Hash size={14} className="text-blue-600" />
+              ΣΤΑΤΙΣΤΙΚΑ ΣΤΟΙΧΕΙΑ
             </h3>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="p-8 bg-black/20 rounded-[2.5rem] border border-white/5 hover:border-blue-500/30 transition-all shadow-xl group/stat">
-                <div className="text-[10px] font-black text-slate-500 uppercase mb-3 tracking-[0.2em] group-hover/stat:text-blue-400 transition-colors">WARRANTIES</div>
-                <div className="text-4xl font-black text-white tracking-tighter italic leading-none">{customerEntries.length}</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-6 bg-zinc-50 rounded-[2rem] border border-zinc-100">
+                <div className="text-[9px] font-black text-zinc-400 uppercase mb-2 tracking-widest">ΕΓΓΥΗΣΕΙΣ</div>
+                <div className="text-3xl font-black text-zinc-900 tracking-tighter">{customerEntries.length}</div>
               </div>
-              <div className="p-8 bg-black/20 rounded-[2.5rem] border border-white/5 hover:border-blue-500/30 transition-all shadow-xl group/stat">
-                <div className="text-[10px] font-black text-slate-500 uppercase mb-3 tracking-[0.2em] group-hover/stat:text-blue-400 transition-colors">VEHICLES</div>
-                <div className="text-4xl font-black text-white tracking-tighter italic leading-none">{customer?.vins?.length || 0}</div>
+              <div className="p-6 bg-zinc-50 rounded-[2rem] border border-zinc-100">
+                <div className="text-[9px] font-black text-zinc-400 uppercase mb-2 tracking-widest">ΟΧΗΜΑΤΑ</div>
+                <div className="text-3xl font-black text-zinc-900 tracking-tighter">{customer?.vins?.length || 0}</div>
               </div>
             </div>
           </Card>
 
           {/* Vehicles Card */}
-          <Card className="p-12 rounded-[3.5rem] group">
-            <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] mb-10 flex items-center gap-3">
-              <Car size={16} className="text-blue-500" />
-              REGISTERED FLEET
+          <Card className="p-10 rounded-[3rem]">
+            <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-8 flex items-center gap-2">
+              <Car size={14} className="text-blue-600" />
+              ΟΧΗΜΑΤΑ ΠΕΛΑΤΗ
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {customer?.vins && customer.vins.length > 0 ? (
                 customer.vins.map(vin => (
                   <Link 
                     key={vin}
                     to={`/vin-search/${vin}`}
-                    className="flex items-center justify-between p-6 bg-white/[0.02] rounded-2xl border border-white/5 hover:bg-blue-600 hover:border-blue-500 hover:shadow-[0_0_30px_rgba(37,99,235,0.2)] transition-all group/vin"
+                    className="flex items-center justify-between p-5 bg-zinc-50 rounded-2xl border border-zinc-100 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all group"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center border border-white/5 group-hover/vin:bg-blue-700 group-hover/vin:border-blue-400 transition-colors shadow-2xl">
-                        <Car size={18} className="text-slate-500 group-hover/vin:text-white" />
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center group-hover:bg-zinc-800 transition-colors">
+                        <Car size={14} className="text-zinc-400 group-hover:text-white" />
                       </div>
-                      <span className="text-sm font-mono font-black tracking-[0.2em] group-hover/vin:text-white text-slate-200 transition-colors uppercase">{vin}</span>
+                      <span className="text-xs font-mono font-black tracking-widest">{vin}</span>
                     </div>
-                    <ChevronRight size={18} className="text-slate-600 group-hover/vin:text-white opacity-0 group-hover/vin:opacity-100 transition-all -translate-x-2 group-hover/vin:translate-x-0" />
+                    <ExternalLink size={14} className="text-zinc-300 group-hover:text-white opacity-0 group-hover:opacity-100 transition-all" />
                   </Link>
                 ))
               ) : (
@@ -141,14 +141,13 @@ export const CustomerHistoryView: React.FC = () => {
 
         {/* Right Column: Warranty History */}
         <div className="lg:col-span-8">
-          <Card className="p-12 rounded-[3.5rem] h-full shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-blue-600/10 transition-all"></div>
-            <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mb-12 flex items-center gap-4 relative z-10">
-              <FileText size={18} className="text-blue-500" />
-              WARRANTY ARCHIVE EVENT STREAM
+          <Card className="p-10 rounded-[3rem] h-full">
+            <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-10 flex items-center gap-2">
+              <FileText size={14} className="text-blue-600" />
+              ΠΛΗΡΕΣ ΙΣΤΟΡΙΚΟ ΕΓΓΥΗΣΕΩΝ
             </h3>
             
-            <div className="space-y-6 relative z-10">
+            <div className="space-y-4">
               {customerEntries.length > 0 ? (
                 customerEntries.map(entry => {
                   const config = getStatusConfig(entry.status);
@@ -156,53 +155,53 @@ export const CustomerHistoryView: React.FC = () => {
                     <Link 
                       key={entry.id}
                       to={`/warranty/${entry.id}`}
-                      className="flex flex-col md:flex-row md:items-center justify-between p-10 bg-white/[0.02] rounded-[3rem] border border-white/5 hover:border-blue-500/30 hover:bg-slate-900 shadow-2xl transition-all group scale-[0.99] hover:scale-100"
+                      className="flex flex-col md:flex-row md:items-center justify-between p-8 bg-zinc-50 rounded-[2.5rem] border border-zinc-100 hover:border-zinc-900 hover:bg-white hover:shadow-2xl hover:shadow-zinc-200 transition-all group"
                     >
-                      <div className="flex items-center gap-10">
-                        <div className="text-center min-w-[100px] border-r border-white/5 pr-10">
-                          <div className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 font-mono">
+                      <div className="flex items-center gap-8">
+                        <div className="text-center min-w-[70px]">
+                          <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">
                             {new Date(entry.createdAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' })}
                           </div>
-                          <div className="text-3xl font-black text-white tracking-tighter italic leading-none">{new Date(entry.createdAt).getFullYear()}</div>
+                          <div className="text-xl font-black text-zinc-900 tracking-tighter">{new Date(entry.createdAt).getFullYear()}</div>
                         </div>
+                        <div className="h-12 w-px bg-zinc-200 hidden md:block" />
                         <div>
-                          <div className="flex items-center gap-4 mb-3">
-                            <span className="text-[12px] font-black text-slate-100 uppercase tracking-widest">RECORD #{entry.warrantyId}</span>
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-[11px] font-black text-zinc-900 uppercase tracking-tighter">#{entry.warrantyId}</span>
                             <Badge 
                               variant="neutral"
-                              style={{ backgroundColor: `${config.color}15`, color: config.color, boxShadow: `0 0 15px ${config.color}10` }}
-                              className="text-[10px] px-3 py-1 border-none font-black uppercase tracking-wider"
+                              style={{ backgroundColor: `${config.color}15`, color: config.color }}
+                              className="text-[9px] px-2.5 py-0.5 border-none font-black"
                             >
                               {config.label}
                             </Badge>
                           </div>
-                          <div className="text-xl font-black text-white uppercase tracking-tighter italic group-hover:text-blue-400 transition-colors">
+                          <div className="text-base font-black text-zinc-900 uppercase tracking-tight">
                             {entry.brand} 
-                            <span className="text-slate-500 font-mono text-[12px] ml-4 tracking-[0.2em] font-normal group-hover:text-slate-300 transition-colors">{entry.vin}</span>
+                            <span className="text-zinc-400 font-mono text-[11px] ml-3 tracking-widest">{entry.vin}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="mt-8 md:mt-0 flex items-center gap-10">
+                      <div className="mt-6 md:mt-0 flex items-center gap-6">
                         <div className="text-right hidden md:block">
-                          <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">{entry.company}</div>
-                          <Badge variant={entry.isPaid ? 'success' : 'danger'} className="text-[10px] px-4 py-1.5 border-none shadow-2xl font-black tracking-widest">
-                            {entry.isPaid ? 'PAID - SYSTEM OK' : 'PENDING ACTION'}
+                          <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{entry.company}</div>
+                          <Badge variant={entry.isPaid ? 'success' : 'danger'} className="text-[9px] px-3 py-1 border-none shadow-sm">
+                            {entry.isPaid ? 'ΕΞΟΦΛΗΜΕΝΗ' : 'ΕΚΚΡΕΜΕΙ'}
                           </Badge>
                         </div>
-                        <div className="w-16 h-16 rounded-[1.2rem] bg-white/5 border border-white/5 flex items-center justify-center text-slate-500 group-hover:text-white group-hover:bg-blue-600 group-hover:border-blue-400 transition-all shadow-2xl">
-                          <ChevronRight size={28} />
+                        <div className="w-12 h-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center text-zinc-300 group-hover:text-zinc-900 group-hover:border-zinc-900 transition-all">
+                          <ChevronRight size={20} />
                         </div>
                       </div>
                     </Link>
                   );
                 })
               ) : (
-                <div className="py-40 text-center glass-dark rounded-[4rem] border border-white/5 shadow-inner">
-                  <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl relative">
-                    <div className="absolute inset-0 bg-blue-600/5 rounded-full blur-xl"></div>
-                    <FileText size={40} strokeWidth={1.5} className="text-slate-600 relative z-10" />
+                <div className="py-32 text-center">
+                  <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <FileText size={32} strokeWidth={1} className="text-zinc-200" />
                   </div>
-                  <p className="text-[12px] font-black text-slate-600 uppercase italic tracking-[0.5em] animate-pulse">NO WARRANTIES INDEXED IN THE ARCHIVE</p>
+                  <p className="text-xs font-black text-zinc-300 uppercase italic tracking-widest">Δεν βρέθηκαν εγγυήσεις για αυτόν τον πελάτη.</p>
                 </div>
               )}
             </div>

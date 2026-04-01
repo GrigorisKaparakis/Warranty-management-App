@@ -6,34 +6,7 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
-@layer base {
-  body {
-    @apply bg-slate-950 text-slate-100 selection:bg-blue-500/30 font-sans antialiased;
-    background-image: radial-gradient(circle at top right, rgba(30,58,138,0.1) 0%, transparent 40%),
-                      radial-gradient(circle at bottom left, rgba(15,23,42,0.5) 0%, transparent 40%);
-  }
-
-  input, select, textarea {
-    @apply bg-slate-900/50 text-white border-white/10 selection:bg-blue-500/30;
-    color-scheme: dark;
-  }
-}
-
-/* Premium Utilities */
-@utility glass {
-  @apply backdrop-blur-md bg-white/5 border border-white/10 shadow-xl;
-}
-
-@utility glass-dark {
-  @apply backdrop-blur-xl bg-slate-950/60 border border-white/5 shadow-2xl;
-}
-
-@utility text-gradient {
-  background-clip: text;
-  color: transparent;
-  background-image: linear-gradient(to bottom right, #ffffff, #cbd5e1);
-}
-
-@utility premium-card {
-  @apply bg-slate-900/40 border border-white/5 backdrop-blur-sm rounded-[2rem] shadow-2xl transition-all duration-300;
+/* Custom styles can go here */
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

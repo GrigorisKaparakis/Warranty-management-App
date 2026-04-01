@@ -35,49 +35,49 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ activeTab })
   };
 
   return (
-    <div className="animate-slide-up space-y-8 pb-32">
+    <div className="animate-slide-up space-y-6">
       {/* Permissions Tab Content */}
       {activeTab === 'permissions' && (
-        <Card title="SECURITY CLEARANCE MATRIX" subtitle="COMMAND PERMISSIONS & ACCESS CONTROL PROTOCOLS" noPadding>
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-white/[0.02] border-b border-white/5">
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">ENDPOINT / MODULE</th>
+        <Card title="ΔΙΑΧΕΙΡΙΣΗ ΔΙΚΑΙΩΜΑΤΩΝ" subtitle="ΟΡΙΣΤΕ ΠΟΙΟΙ ΡΟΛΟΙ ΕΧΟΥΝ ΠΡΟΣΒΑΣΗ ΣΕ ΚΑΘΕ ΛΕΙΤΟΥΡΓΙΑ" noPadding>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-zinc-50 border-b border-zinc-100">
+                <tr>
+                  <th className="px-8 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Σελίδα / Λειτουργία</th>
                   {availableRoles.map(role => (
-                    <th key={role} className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic text-center">{role}</th>
+                    <th key={role} className="px-8 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-wider text-center">{role}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
-                <tr className="bg-blue-600/[0.02]">
-                  <td colSpan={availableRoles.length + 1} className="px-8 py-3 text-[9px] font-black text-blue-500 uppercase tracking-[0.4em] italic bg-blue-600/5">
-                    CMD: CORE SYSTEM OPERATIONS
+              <tbody className="divide-y divide-zinc-50">
+                <tr className="bg-zinc-50/50">
+                  <td colSpan={availableRoles.length + 1} className="px-8 py-3 text-[9px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
+                    Ειδικές Λειτουργίες
                   </td>
                 </tr>
                 {[
-                  { id: 'delete_entry', label: 'PURGE WARRANTY RECORD', defaultRoles: ['ADMIN'] },
-                  { id: 'broadcast_notice', label: 'DISPATCH GLOBAL SYSTEM NOTICE', defaultRoles: ['ADMIN', 'EMPLOYEE'] },
-                  { id: 'auditLog', label: 'ACCESS SYSTEM AUDIT LOGS', defaultRoles: ['ADMIN', 'EMPLOYEE'] }
+                  { id: 'delete_entry', label: 'Διαγραφή Εγγύησης', defaultRoles: ['ADMIN'] },
+                  { id: 'broadcast_notice', label: 'Αποστολή Ανακοίνωσης', defaultRoles: ['ADMIN', 'EMPLOYEE'] },
+                  { id: 'auditLog', label: 'Προβολή Ιστορικού', defaultRoles: ['ADMIN', 'EMPLOYEE'] }
                 ].map(feature => {
                   const allowedRoles = settings.rolePermissions?.[feature.id] || feature.defaultRoles;
                   return (
-                    <tr key={feature.id} className="group hover:bg-white/[0.03] transition-all">
+                    <tr key={feature.id} className="hover:bg-zinc-50/30 transition-colors">
                       <td className="px-8 py-6">
-                        <div className="text-[12px] font-black text-blue-400 uppercase tracking-tighter italic">{feature.label}</div>
-                        <div className="text-[9px] font-black text-slate-700 uppercase tracking-widest font-mono">ID: {feature.id}</div>
+                        <div className="text-[12px] font-bold text-blue-600 uppercase">{feature.label}</div>
+                        <div className="text-[9px] font-bold text-zinc-400 uppercase">ACTION_ID: {feature.id}</div>
                       </td>
                       {availableRoles.map(role => (
                         <td key={role} className="px-8 py-6 text-center">
                           <button 
                             onClick={() => handleUpdatePermission(feature.id, role)}
-                            className={`w-12 h-12 rounded-2xl transition-all flex items-center justify-center mx-auto border italic shadow-2xl ${
+                            className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center mx-auto border ${
                               allowedRoles.includes(role) 
-                                ? 'bg-blue-600 border-blue-400 text-white shadow-blue-900/40' 
-                                : 'bg-slate-950 text-slate-700 border-white/5 hover:border-slate-700'
+                                ? 'bg-blue-50 text-blue-600 border-blue-100 shadow-sm' 
+                                : 'bg-zinc-50 text-zinc-300 border-zinc-100'
                             }`}
                           >
-                            {allowedRoles.includes(role) ? <Check size={20} strokeWidth={3} /> : <X size={18} strokeWidth={3} />}
+                            {allowedRoles.includes(role) ? <Check size={18} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
                           </button>
                         </td>
                       ))}
@@ -85,18 +85,18 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ activeTab })
                   );
                 })}
 
-                <tr className="bg-emerald-600/[0.02]">
-                  <td colSpan={availableRoles.length + 1} className="px-8 py-3 text-[9px] font-black text-emerald-500 uppercase tracking-[0.4em] italic bg-emerald-600/5">
-                    NAV: INTERFACE LAYER COUPLING
+                <tr className="bg-zinc-50/50">
+                  <td colSpan={availableRoles.length + 1} className="px-8 py-3 text-[9px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
+                    Πρόσβαση σε Σελίδες
                   </td>
                 </tr>
                 {fullMenu.map(item => {
                   const allowedRoles = settings.rolePermissions?.[item.id] || item.roles || [];
                   return (
-                    <tr key={item.id} className="group hover:bg-white/[0.03] transition-all">
+                    <tr key={item.id} className="hover:bg-zinc-50/30 transition-colors">
                       <td className="px-8 py-6">
-                        <div className="text-[12px] font-black text-white uppercase tracking-tighter italic">{item.label}</div>
-                        <div className="text-[9px] font-black text-slate-700 uppercase tracking-widest font-mono">PATH: /{item.id}</div>
+                        <div className="text-[12px] font-bold text-zinc-900 uppercase">{item.label}</div>
+                        <div className="text-[9px] font-bold text-zinc-400 uppercase">{item.id}</div>
                       </td>
                       {availableRoles.map(role => {
                         const isLockedAdmin = (role === 'ADMIN' && item.id === 'maintenance') || item.id === 'users';
@@ -105,13 +105,13 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ activeTab })
                             <button 
                               onClick={() => !isLockedAdmin && handleUpdatePermission(item.id, role)}
                               disabled={isLockedAdmin}
-                              className={`w-12 h-12 rounded-2xl transition-all flex items-center justify-center mx-auto border italic shadow-2xl ${
+                              className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center mx-auto border ${
                                 allowedRoles.includes(role) 
-                                  ? 'bg-emerald-600 border-emerald-400 text-white shadow-emerald-900/40' 
-                                  : 'bg-slate-950 text-slate-700 border-white/5 hover:border-slate-700'
-                              } ${isLockedAdmin ? 'opacity-20 cursor-not-allowed scale-90 grayscale' : ''}`}
+                                  ? 'bg-emerald-50 text-emerald-600 border-emerald-100 shadow-sm' 
+                                  : 'bg-zinc-50 text-zinc-300 border-zinc-100'
+                              } ${isLockedAdmin ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                              {allowedRoles.includes(role) ? <Check size={20} strokeWidth={3} /> : <X size={18} strokeWidth={3} />}
+                              {allowedRoles.includes(role) ? <Check size={18} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
                             </button>
                           </td>
                         );
@@ -122,12 +122,10 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ activeTab })
               </tbody>
             </table>
           </div>
-          <div className="m-8 p-6 glass-dark rounded-[2rem] border border-blue-500/20 flex gap-4 shadow-2xl relative overflow-hidden group/info">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl pointer-events-none group-hover/info:bg-blue-600/20 transition-all"></div>
-            <Info size={20} className="text-blue-500 shrink-0 mt-1" />
-            <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.1em] leading-relaxed italic relative z-10">
-              PERMISSIONS ARE UPDATED IN REAL-TIME ACROSS ALL DISTRIBUTED INSTANCES. <br/>
-              <span className="text-blue-400 font-black">SECURITY LOCK:</span> 'ADMIN' ROLE MAINTAINS IMMUTABLE CLEARANCE TO MAINTENANCE & USER REGISTRIES.
+          <div className="m-8 p-4 bg-blue-50 rounded-xl border border-blue-100 flex gap-3">
+            <Info size={16} className="text-blue-600 shrink-0" />
+            <p className="text-[10px] font-bold text-blue-600 uppercase leading-relaxed italic">
+              ΟΙ ΑΛΛΑΓΕΣ ΕΦΑΡΜΟΖΟΝΤΑΙ ΑΜΕΣΑ. Ο ΡΟΛΟΣ ADMIN ΕΧΕΙ ΠΑΝΤΑ ΠΡΟΣΒΑΣΗ ΣΤΗ ΣΥΝΤΗΡΗΣΗ ΚΑΙ ΣΤΟΥΣ ΧΡΗΣΤΕΣ.
             </p>
           </div>
         </Card>

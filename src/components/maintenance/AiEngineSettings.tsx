@@ -69,18 +69,18 @@ export const AiEngineSettings: React.FC<AiEngineSettingsProps> = ({ activeTab })
   };
 
   return (
-    <div className="animate-slide-up space-y-8 pb-32">
+    <div className="animate-slide-up space-y-6">
       {/* Sub-Navigation */}
-      <div className="flex gap-2 p-1.5 bg-white/5 rounded-2xl w-fit border border-white/5 shadow-2xl backdrop-blur-md">
+      <div className="flex gap-2 p-1 bg-zinc-100 rounded-2xl w-fit">
         <button 
           onClick={() => setSubTab('prompts')}
-          className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${subTab === 'prompts' ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]' : 'text-slate-500 hover:text-white'}`}
+          className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${subTab === 'prompts' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
         >
           AI PROMPTS
         </button>
         <button 
           onClick={() => setSubTab('knowledge')}
-          className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${subTab === 'knowledge' ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]' : 'text-slate-500 hover:text-white'}`}
+          className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${subTab === 'knowledge' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
         >
           KNOWLEDGE BASE
         </button>
@@ -88,138 +88,121 @@ export const AiEngineSettings: React.FC<AiEngineSettingsProps> = ({ activeTab })
 
       {subTab === 'prompts' ? (
         <Card 
-          title="AI SYNTAX ARCHITECT" 
-          subtitle="CONFIGURE CORE SYSTEM INSTRUCTIONS"
-          actions={<Button onClick={handleSavePrompt} icon={Save} size="sm" className="bg-blue-600 hover:bg-blue-500 shadow-2xl shadow-blue-900/40 border-none transition-all">COMMIT CHANGES</Button>}
+          title="ΔΙΑΧΕΙΡΙΣΗ AI PROMPTS" 
+          subtitle="ΟΡΙΣΤΕ ΤΙΣ ΟΔΗΓΙΕΣ ΓΙΑ ΤΟ AI"
+          actions={<Button onClick={handleSavePrompt} icon={Save} size="sm">ΑΠΟΘΗΚΕΥΣΗ</Button>}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Prompt Selector */}
-            <div className="lg:col-span-1 space-y-3">
+            <div className="lg:col-span-1 space-y-2">
               {[
-                { id: 'pdf', label: 'PDF ANALYZER', desc: 'EXTRACTION ENGINE', icon: BookOpen },
-                { id: 'bot', label: 'ASSISTANT', desc: 'CONVERSATION FLOW', icon: MessageSquare },
+                { id: 'pdf', label: 'PDF ANALYZER', desc: 'ΑΝΑΛΥΣΗ ΕΓΓΡΑΦΩΝ', icon: BookOpen },
+                { id: 'bot', label: 'CHAT ASSISTANT', desc: 'ΟΔΗΓΙΕΣ BOT', icon: MessageSquare },
               ].map((p) => (
                 <button 
                   key={p.id}
                   onClick={() => setSelectedPrompt(p.id as any)}
-                  className={`w-full text-left p-6 rounded-[1.5rem] border transition-all relative overflow-hidden group ${selectedPrompt === p.id ? 'border-blue-500/50 bg-blue-600/5 shadow-2xl' : 'border-white/5 hover:border-white/10 hover:bg-white/5'}`}
+                  className={`w-full text-left p-4 rounded-xl border transition-all ${selectedPrompt === p.id ? 'border-zinc-900 bg-zinc-50' : 'border-zinc-100 hover:border-zinc-200'}`}
                 >
-                  {selectedPrompt === p.id && <div className="absolute right-0 top-0 w-16 h-16 bg-blue-600/10 rounded-full blur-2xl -mr-8 -mt-8"></div>}
-                  <div className="flex items-center gap-3 mb-2 relative z-10">
-                    <p.icon size={18} className={selectedPrompt === p.id ? 'text-blue-400' : 'text-slate-600 group-hover:text-slate-400'} />
-                    <span className={`text-[12px] font-black uppercase tracking-tighter ${selectedPrompt === p.id ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`}>{p.label}</span>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p.icon size={14} className={selectedPrompt === p.id ? 'text-zinc-900' : 'text-zinc-400'} />
+                    <span className="text-[10px] font-bold text-zinc-900 uppercase">{p.label}</span>
                   </div>
-                  <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest relative z-10">{p.desc}</div>
+                  <div className="text-[9px] font-bold text-zinc-400 uppercase">{p.desc}</div>
                 </button>
               ))}
             </div>
 
             {/* Editor Area */}
-            <div className="lg:col-span-3 space-y-6">
+            <div className="lg:col-span-3 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-6 bg-blue-500 rounded-full"></div>
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest italic">
-                    {selectedPrompt === 'pdf' ? 'ENTITY RECOGNITION TEMPLATE' : 'SYSTEM BEHAVIOR INSTRUCTIONS'}
-                  </label>
-                </div>
-                <div className="flex gap-3">
-                  <Badge variant="neutral" className="bg-slate-900 border-white/5 text-blue-400">{'{{rules}}'}</Badge>
-                  <Badge variant="neutral" className="bg-slate-900 border-white/5 text-blue-400">{'{{garage_name}}'}</Badge>
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                  {selectedPrompt === 'pdf' ? 'PDF Extraction Template' : 'Bot System Instructions'}
+                </label>
+                <div className="flex gap-2">
+                  <Badge variant="neutral">{'{{rules}}'}</Badge>
+                  <Badge variant="neutral">{'{{garage_name}}'}</Badge>
                 </div>
               </div>
               
               <textarea 
-                className="w-full h-96 p-8 bg-slate-900/50 border border-white/5 rounded-[2.5rem] font-mono text-sm text-slate-100 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all leading-relaxed custom-scrollbar shadow-inner"
+                className="w-full h-80 p-6 bg-zinc-50 border border-zinc-100 rounded-2xl font-mono text-xs outline-none focus:bg-white focus:ring-2 focus:ring-zinc-900/5 transition-all leading-relaxed"
                 value={selectedPrompt === 'pdf' ? localPrompts.pdfExtraction : localPrompts.botInstructions}
                 onChange={e => {
                   const field = selectedPrompt === 'pdf' ? 'pdfExtraction' : 'botInstructions';
                   setLocalPrompts(prev => ({ ...prev, [field]: e.target.value }));
                 }}
-                placeholder="DEFINE INSTRUCTIONS..."
+                placeholder="ΕΙΣΑΓΕΤΕ ΤΙΣ ΟΔΗΓΙΕΣ..."
               />
               
-              <div className="p-6 bg-blue-600/5 rounded-[2rem] border border-blue-500/20 flex gap-4 shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-blue-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <Info size={18} className="text-blue-400 shrink-0 mt-1 relative z-10" />
-                <p className="text-[11px] font-bold text-slate-400 uppercase leading-relaxed italic relative z-10">
-                  VARIABLE INJECTION ENABLED. THE <span className="text-blue-400">{'{{rules}}'}</span> TOKEN WILL BE REPLACED BY THE ACTIVE KNOWLEDGE BASE ENTITIES DURING INFERENCE.
+              <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3">
+                <Info size={16} className="text-amber-600 shrink-0" />
+                <p className="text-[10px] font-bold text-amber-700 uppercase leading-relaxed italic">
+                  ΧΡΗΣΙΜΟΠΟΙΗΣΤΕ ΤΙΣ ΜΕΤΑΒΛΗΤΕΣ ΓΙΑ ΝΑ ΕΙΣΑΧΘΟΥΝ ΑΥΤΟΜΑΤΑ ΟΙ ΚΑΝΟΝΕΣ ΤΗΣ KNOWLEDGE BASE.
                 </p>
               </div>
             </div>
           </div>
         </Card>
       ) : (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <Card title="NEURAL KNOWLEDGE BASE" subtitle="REGISTER RECOGNITION PATTERNS">
-            <div className="space-y-8 bg-slate-900/40 p-10 rounded-[3rem] border border-white/5 shadow-inner">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">ENTITY SELECTION</label>
+        <div className="space-y-6">
+          <Card title="KNOWLEDGE BASE" subtitle="ΚΑΝΟΝΕΣ ΑΝΑΓΝΩΡΙΣΗΣ ΔΙΑΝΟΜΕΩΝ">
+            <div className="space-y-4 bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider ml-1">ΕΤΑΙΡΕΙΑ (ΔΙΑΝΟΜΕΑΣ)</label>
                   <select 
                     value={newAiRule.company} 
                     onChange={e => setNewAiRule({...newAiRule, company: e.target.value, brand: ''})} 
-                    className="w-full px-6 py-4 bg-slate-950 border border-white/10 rounded-[1.5rem] font-black text-[12px] text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all appearance-none cursor-pointer"
+                    className="w-full px-4 py-2.5 bg-white border border-zinc-200 rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-zinc-900/5 transition-all"
                   >
-                    <option value="" className="bg-slate-950">SELECT DISTRIBUTOR...</option>
+                    <option value="">ΕΠΙΛΕΞΤΕ ΕΤΑΙΡΕΙΑ...</option>
                     {Object.keys(settings.companyBrandMap || {}).map(c => (
-                      <option key={c} value={c} className="bg-slate-950">{c}</option>
+                      <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">MODEL/BRAND VARIATION</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider ml-1">ΜΑΡΚΑ / ΜΟΝΤΕΛΟ</label>
                   <select 
                     value={newAiRule.brand} 
                     onChange={e => setNewAiRule({...newAiRule, brand: e.target.value})} 
                     disabled={!newAiRule.company}
-                    className="w-full px-6 py-4 bg-slate-950 border border-white/10 rounded-[1.5rem] font-black text-[12px] text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all appearance-none cursor-pointer disabled:opacity-20"
+                    className="w-full px-4 py-2.5 bg-white border border-zinc-200 rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-zinc-900/5 transition-all disabled:opacity-50"
                   >
-                    <option value="" className="bg-slate-950">SELECT BRAND...</option>
+                    <option value="">ΕΠΙΛΕΞΤΕ ΜΑΡΚΑ...</option>
                     {newAiRule.company && settings.companyBrandMap[newAiRule.company]?.map(b => (
-                      <option key={b} value={b} className="bg-slate-950">{b}</option>
+                      <option key={b} value={b}>{b}</option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">RECOGNITION MARKERS (CSS/TEXT PATTERNS)</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider ml-1">MARKERS (ΛΕΞΕΙΣ ΚΛΕΙΔΙΑ ΓΙΑ ΤΟ AI)</label>
                 <textarea 
-                  placeholder="DEFINE KEYWORDS / ADDRESSES / IDENTIFIERS THAT THE AI SHOULD DETECT..." 
+                  placeholder="ΕΙΣΑΓΕΤΕ ΤΑ ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ ΠΟΥ ΕΝΤΟΠΙΖΕΙ ΤΟ AI ΣΤΟ PDF (Π.Χ. ΔΙΕΥΘΥΝΣΗ, ΑΦΜ, ΛΟΓΟΤΥΠΟ)..." 
                   value={newAiRule.markers} 
                   onChange={e => setNewAiRule({...newAiRule, markers: e.target.value})} 
-                  className="w-full px-6 py-6 bg-slate-950 border border-white/10 rounded-[2rem] font-bold text-sm text-white outline-none h-40 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all resize-none leading-relaxed shadow-inner placeholder:text-slate-800" 
+                  className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl font-medium text-xs outline-none h-32 focus:ring-2 focus:ring-zinc-900/5 transition-all resize-none leading-relaxed" 
                 />
               </div>
 
-              <button 
-                onClick={addAiRule}
-                className="w-full h-16 bg-blue-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest shadow-[0_10px_40px_rgba(37,99,235,0.3)] hover:bg-blue-500 transition-all flex items-center justify-center gap-3 border-none italic"
-              >
-                <Plus size={20} />
-                REGISTER KNOWLEDGE NODE
-              </button>
+              <Button onClick={addAiRule} icon={Plus} className="w-full py-4">ΠΡΟΣΘΗΚΗ ΣΤΗ ΓΝΩΣΗ AI</Button>
             </div>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {(settings.distributorRules || []).map(rule => (
-              <div key={rule.id} className="flex items-center gap-6 p-8 glass-dark border border-white/5 rounded-[2.5rem] hover:border-blue-500/30 transition-all group/rule shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-full blur-3xl pointer-events-none group-hover/rule:bg-blue-600/10 transition-all"></div>
-                <div className="w-28 shrink-0 relative z-10">
-                  <div className="text-[12px] font-black text-white uppercase tracking-tighter italic">{rule.company}</div>
-                  <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest mt-1">{rule.brand}</div>
+              <div key={rule.id} className="flex items-center gap-4 p-4 bg-white border border-zinc-100 rounded-xl hover:border-zinc-200 transition-all group">
+                <div className="w-24 shrink-0">
+                  <div className="text-[10px] font-bold text-zinc-900 uppercase">{rule.company}</div>
+                  <div className="text-[9px] font-bold text-zinc-400 uppercase">{rule.brand}</div>
                 </div>
-                <div className="flex-1 text-[11px] font-black text-slate-500 italic line-clamp-3 bg-white/[0.02] p-4 rounded-xl border border-white/5 relative z-10 leading-relaxed">
-                   "{rule.markers}"
-                </div>
-                <button 
-                  onClick={() => removeAiRule(rule.id)} 
-                  className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-xl text-slate-700 hover:text-red-500 hover:bg-red-500/10 transition-all opacity-0 group-hover/rule:opacity-100 relative z-10 border border-white/5"
-                >
-                  <Trash2 size={20} />
+                <div className="flex-1 text-[10px] font-medium text-zinc-500 italic line-clamp-2">"{rule.markers}"</div>
+                <button onClick={() => removeAiRule(rule.id)} className="text-zinc-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                  <Trash2 size={16} />
                 </button>
               </div>
             ))}

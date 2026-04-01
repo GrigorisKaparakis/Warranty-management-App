@@ -26,8 +26,8 @@ const DiffViewer: React.FC<{ oldData: any, newData: any }> = ({ oldData, newData
   };
 
   return (
-    <div className="bg-black/40 rounded-[2rem] p-8 mt-6 font-mono text-[10px] space-y-3 animate-slide-up border border-white/5">
-      <div className="grid grid-cols-3 gap-6 border-b border-white/10 pb-4 mb-4 text-slate-500 uppercase font-black tracking-[0.3em]">
+    <div className="bg-zinc-900 rounded-2xl p-6 mt-4 font-mono text-[10px] space-y-2 animate-slide-up">
+      <div className="grid grid-cols-3 gap-4 border-b border-zinc-800 pb-2 mb-2 opacity-50 uppercase font-bold tracking-widest">
         <span>ΠΕΔΙΟ</span>
         <span>ΠΡΙΝ</span>
         <span>ΜΕΤΑ</span>
@@ -38,10 +38,10 @@ const DiffViewer: React.FC<{ oldData: any, newData: any }> = ({ oldData, newData
         const isDifferent = JSON.stringify(oldVal) !== JSON.stringify(newVal);
         if (!isDifferent) return null;
         return (
-          <div key={key} className="grid grid-cols-3 gap-6 py-2 border-b border-white/5 last:border-0 group">
-            <span className="text-slate-500 font-black group-hover:text-blue-400 transition-colors uppercase tracking-widest">{key}</span>
-            <span className="text-rose-400 break-all bg-rose-500/5 px-2 py-1 rounded-lg">{renderValue(oldVal)}</span>
-            <span className="text-emerald-400 break-all bg-emerald-500/5 px-2 py-1 rounded-lg">{renderValue(newVal)}</span>
+          <div key={key} className="grid grid-cols-3 gap-4 py-1 border-b border-zinc-800/50 last:border-0">
+            <span className="text-zinc-500 font-bold">{key.toUpperCase()}</span>
+            <span className="text-rose-400 break-all">{renderValue(oldVal)}</span>
+            <span className="text-emerald-400 break-all">{renderValue(newVal)}</span>
           </div>
         );
       })}
@@ -100,80 +100,79 @@ export const AuditLogView: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <PageHeader title="ΙΣΤΟΡΙΚΟ ΑΛΛΑΓΩΝ" subtitle="ΠΛΗΡΗΣ ΚΑΤΑΓΡΑΦΗ ΕΝΕΡΓΕΙΩΝ & ΕΠΑΝΑΦΟΡΑ ΔΕΔΟΜΕΝΩΝ" />
         
-        <div className="flex flex-col sm:flex-row gap-6 w-full md:w-auto">
-          <div className="relative flex-1 sm:w-80 group">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-hover:text-blue-400 transition-colors" size={18} />
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
             <input 
               type="text" 
-              placeholder="ΑΝΑΖΗΤΗΣΗ ΣΤΟ ΙΣΤΟΡΙΚΟ..." 
+              placeholder="ΑΝΑΖΗΤΗΣΗ..." 
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-14 pr-6 py-4 bg-slate-900/60 border border-white/5 rounded-[1.5rem] text-[11px] font-black text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-700 uppercase tracking-widest"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-zinc-100 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
             />
           </div>
-          <div className="relative sm:w-60 group">
-            <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-hover:text-amber-400 transition-colors" size={18} />
+          <div className="relative sm:w-48">
+            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
             <select 
               value={filterAction}
               onChange={e => setFilterAction(e.target.value)}
-              className="w-full pl-14 pr-6 py-4 bg-slate-900/60 border border-white/5 rounded-[1.5rem] text-[11px] font-black text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all appearance-none uppercase tracking-widest"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-zinc-100 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm appearance-none"
             >
               {actions.map(a => (
-                <option key={a} value={a} className="bg-slate-900">{a}</option>
+                <option key={a} value={a}>{a}</option>
               ))}
             </select>
           </div>
         </div>
       </div>
 
-      <Card title="EVENT STREAM" icon={History}>
-        <div className="space-y-6">
+      <Card title="LOG ENTRIES" icon={History}>
+        <div className="space-y-4">
           {filteredLogs.length > 0 ? (
             filteredLogs.map(log => (
-              <div key={log.id} className="flex flex-col p-8 bg-white/[0.02] rounded-[2.5rem] border border-white/5 hover:border-blue-500/20 transition-all group relative overflow-hidden backdrop-blur-sm">
-                <div className="absolute top-0 left-0 w-1 h-full bg-blue-600/0 group-hover:bg-blue-600 transition-all"></div>
-                <div className="flex flex-col lg:flex-row lg:items-center gap-10 relative z-10">
-                  <div className="text-[10px] font-black text-slate-500 w-40 shrink-0 tracking-[0.2em] uppercase">
+              <div key={log.id} className="flex flex-col p-5 bg-zinc-50 rounded-[2rem] border border-zinc-100 hover:border-blue-200 transition-all group">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+                  <div className="text-[10px] font-black text-zinc-400 w-32 shrink-0 tracking-widest">
                     {new Date(log.timestamp).toLocaleString('el-GR')}
                   </div>
-                  <div className="w-32 shrink-0">
-                    <Badge variant={getActionColor(log.action) as any} className="w-full justify-center shadow-xl font-black">
+                  <div className="w-28 shrink-0">
+                    <Badge variant={getActionColor(log.action) as any} className="w-full justify-center shadow-sm">
                       {log.action}
                     </Badge>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-4 mb-2">
-                      <div className="text-[12px] font-black text-white uppercase tracking-tighter truncate">{log.userEmail}</div>
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                      <div className="text-[12px] font-black text-blue-400 uppercase tracking-widest">{log.targetWarrantyId}</div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="text-[11px] font-black text-zinc-900 uppercase truncate">{log.userEmail}</div>
+                      <span className="text-zinc-300">•</span>
+                      <div className="text-[11px] font-black text-blue-600 uppercase">{log.targetWarrantyId}</div>
                     </div>
-                    <div className="text-[11px] font-bold text-slate-500 italic uppercase tracking-tighter whitespace-pre-wrap leading-relaxed group-hover:text-slate-300 transition-colors">
+                    <div className="text-[10px] font-bold text-zinc-500 italic uppercase tracking-tighter whitespace-pre-wrap leading-relaxed">
                       {log.details.split(' | ').map((detail, i) => (
-                        <div key={i} className="py-1 flex items-center gap-2">
-                           <span className="w-1 h-1 rounded-full bg-blue-500/30"></span>
-                           {detail}
-                        </div>
+                        <div key={i} className="py-0.5">• {detail}</div>
                       ))}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0 mt-6 lg:mt-0">
+                  <div className="flex items-center gap-2 shrink-0 mt-4 lg:mt-0">
                     {log.oldData && (
-                      <button 
+                      <Button 
+                        variant="neutral" 
+                        size="sm" 
                         onClick={() => setSelectedLogId(selectedLogId === log.id ? null : log.id)}
-                        className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
-                          selectedLogId === log.id ? 'bg-white/10 text-white' : 'bg-white/5 text-slate-500 hover:text-white hover:bg-white/10'
-                        }`}
+                        className="rounded-xl"
                       >
-                        {selectedLogId === log.id ? 'HIDE DIFF' : 'VIEW DIFF'}
-                      </button>
+                        {selectedLogId === log.id ? 'ΚΛΕΙΣΙΜΟ' : 'ΣΥΓΚΡΙΣΗ'}
+                      </Button>
                     )}
                     {(log.action === 'UPDATE' || log.action === 'DELETE') && log.oldData && (
-                      <button 
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        icon={RotateCcw}
                         onClick={() => setPendingRestore(log)}
-                        className="px-6 py-3 bg-blue-600 text-white font-black text-[10px] uppercase rounded-xl tracking-widest shadow-xl shadow-blue-950/20 hover:bg-blue-500 transition-all flex items-center gap-2"
+                        className="rounded-xl shadow-lg shadow-blue-100"
                       >
-                        <RotateCcw size={14} /> RESTORE
-                      </button>
+                        ΕΠΑΝΑΦΟΡΑ
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -181,8 +180,8 @@ export const AuditLogView: React.FC = () => {
               </div>
             ))
           ) : (
-            <div className="p-32 text-center border-2 border-dashed border-white/5 rounded-[4rem] bg-white/[0.01]">
-              <p className="text-[12px] font-black text-slate-700 uppercase italic tracking-[0.5em] animate-pulse">ΔΕΝ ΒΡΕΘΗΚΑΝ ΕΓΓΡΑΦΕΣ ΙΣΤΟΡΙΚΟΥ</p>
+            <div className="p-20 text-center border-2 border-dashed border-zinc-100 rounded-[3rem]">
+              <p className="text-[10px] font-black text-zinc-300 uppercase italic tracking-[0.3em]">ΔΕΝ ΒΡΕΘΗΚΑΝ ΕΓΓΡΑΦΕΣ ΙΣΤΟΡΙΚΟΥ</p>
             </div>
           )}
         </div>
@@ -190,56 +189,44 @@ export const AuditLogView: React.FC = () => {
 
       {/* Restore Confirmation Overlay */}
       {pendingRestore && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="glass-dark rounded-[3.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 p-12 max-w-xl w-full space-y-10 animate-in zoom-in-95 duration-300">
-            <div className="flex items-center gap-8">
-              <div className="w-20 h-20 bg-amber-500/10 rounded-[2rem] flex items-center justify-center text-amber-500 shadow-inner border border-amber-500/20">
-                <AlertTriangle size={40} strokeWidth={2.5} className="drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+        <div className="fixed inset-0 bg-zinc-900/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[3rem] shadow-2xl border border-zinc-100 p-12 max-w-xl w-full space-y-8 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 bg-amber-100 rounded-3xl flex items-center justify-center text-amber-600 shadow-inner">
+                <AlertTriangle size={32} strokeWidth={2.5} />
               </div>
               <div>
-                <h3 className="text-3xl font-black text-white uppercase tracking-tight italic leading-tight">SYSTEM RESTORE</h3>
-                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] italic mt-1">ΑΝΑΙΡΕΣΗ ΕΝΕΡΓΕΙΑΣ ΣΤΟ OS</p>
+                <h3 className="text-2xl font-black text-zinc-900 uppercase tracking-tight italic">ΕΠΙΒΕΒΑΙΩΣΗ ΕΠΑΝΑΦΟΡΑΣ</h3>
+                <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest italic">ΠΡΟΚΕΙΤΑΙ ΝΑ ΑΝΑΙΡΕΣΕΤΕ ΜΙΑ ΑΛΛΑΓΗ ΣΤΟ ΣΥΣΤΗΜΑ</p>
               </div>
             </div>
 
-            <div className="p-10 bg-white/[0.02] rounded-[2.5rem] border border-white/5 space-y-8 shadow-inner">
-              <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-[0.2em]">
-                <span className="text-slate-500">ΕΝΕΡΓΕΙΑ</span>
-                <span className="text-blue-400">{pendingRestore.action}</span>
+            <div className="p-8 bg-zinc-50 rounded-[2rem] border border-zinc-100 space-y-5">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                <span>ΕΝΕΡΓΕΙΑ</span>
+                <span className="text-zinc-900">{pendingRestore.action}</span>
               </div>
-              <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-[0.2em]">
-                <span className="text-slate-500">ΧΡΗΣΤΗΣ</span>
-                <span className="text-white truncate max-w-[200px]">{pendingRestore.userEmail}</span>
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                <span>ΧΡΗΣΤΗΣ</span>
+                <span className="text-zinc-900">{pendingRestore.userEmail}</span>
               </div>
-              <div className="pt-8 border-t border-white/5">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 mb-4">LOG DETAILS</div>
-                <div className="text-[13px] font-bold text-slate-300 italic leading-relaxed uppercase tracking-tighter bg-black/20 p-6 rounded-2xl border border-white/5">
-                  "{pendingRestore.details}"
-                </div>
+              <div className="pt-5 border-t border-zinc-200">
+                <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">ΛΕΠΤΟΜΕΡΕΙΕΣ</div>
+                <div className="text-xs font-bold text-zinc-600 italic leading-relaxed uppercase tracking-tighter">"{pendingRestore.details}"</div>
               </div>
             </div>
 
-            <div className="flex gap-6">
-              <button 
-                className="flex-1 py-5 rounded-[2rem] bg-white/5 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-white hover:bg-white/10 transition-all border border-white/5" 
-                onClick={() => setPendingRestore(null)}
-              >
-                BACK
-              </button>
-              <button 
-                className="flex-[2] py-5 rounded-[2rem] bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-blue-900/40 hover:bg-blue-500 transition-all flex items-center justify-center gap-3" 
+            <div className="flex gap-4">
+              <Button variant="neutral" className="flex-1 py-4 rounded-2xl" onClick={() => setPendingRestore(null)}>ΑΚΥΡΩΣΗ</Button>
+              <Button 
+                variant="primary" 
+                className="flex-1 py-4 rounded-2xl shadow-xl shadow-blue-100" 
                 onClick={handleRestore}
-                disabled={isRestoring}
+                loading={isRestoring}
+                icon={RotateCcw}
               >
-                {isRestoring ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <RotateCcw size={16} /> 
-                    CONFIRM RESTORE
-                  </>
-                )}
-              </button>
+                ΕΠΙΒΕΒΑΙΩΣΗ
+              </Button>
             </div>
           </div>
         </div>

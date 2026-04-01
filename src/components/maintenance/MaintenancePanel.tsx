@@ -129,38 +129,34 @@ export const MaintenancePanel: React.FC = () => {
   }
 
   return (
-    <div className="p-8 md:p-12 space-y-12 pb-32 animate-fade-in">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] italic">SYSTEM CORE PROTOCOLS</span>
-        </div>
-        <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-none">MAINTENANCE PANEL</h1>
-        <p className="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] mt-2 italic">ADMIN CONTROL CENTER & CONFIGURATION SYNC</p>
-      </div>
+    <div className="p-8 md:p-12 space-y-10 pb-24">
+      <PageHeader 
+        title="ΣΥΝΤΗΡΗΣΗ ΣΥΣΤΗΜΑΤΟΣ" 
+        subtitle="ADMIN CONTROL PANEL & SYSTEM CONFIGURATION" 
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Sidebar Navigation */}
         <aside className="lg:col-span-3 space-y-10">
           {categories.map(cat => (
-            <div key={cat.id} className="space-y-6">
-              <div className="flex items-center gap-3 px-5">
-                <cat.icon size={16} className="text-blue-500/50" />
-                <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] italic">{cat.label}</h4>
+            <div key={cat.id} className="space-y-4">
+              <div className="flex items-center gap-2 px-4">
+                <cat.icon size={14} className="text-zinc-400" />
+                <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">{cat.label}</h4>
               </div>
               <div className="space-y-1">
                 {cat.items.map(item => (
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`w-full text-left px-6 py-4 rounded-[1.2rem] text-[11px] font-black uppercase transition-all flex items-center justify-between group/btn border border-transparent ${
+                    className={`w-full text-left px-5 py-3.5 rounded-2xl text-[11px] font-bold uppercase transition-all flex items-center justify-between group ${
                       activeTab === item.id 
-                        ? 'bg-blue-600 text-white shadow-[0_0_30px_rgba(37,99,235,0.3)] translate-x-2 border-blue-400/50' 
-                        : 'text-slate-500 hover:bg-white/5 hover:text-white'
+                        ? 'bg-zinc-900 text-white shadow-xl shadow-zinc-200 translate-x-1' 
+                        : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
                     }`}
                   >
-                    <span className="tracking-widest italic">{item.label}</span>
-                    <ChevronRight size={16} className={`transition-all ${activeTab === item.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0'}`} />
+                    <span>{item.label}</span>
+                    <ChevronRight size={14} className={`transition-all ${activeTab === item.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'}`} />
                   </button>
                 ))}
               </div>
@@ -179,9 +175,9 @@ export const MaintenancePanel: React.FC = () => {
               transition={{ duration: 0.2 }}
             >
               <Suspense fallback={
-                <div className="flex flex-col items-center justify-center h-96 space-y-8 animate-fade-in glass-dark rounded-[4rem] border border-white/5">
-                  <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin shadow-[0_0_30px_rgba(37,99,235,0.2)]"></div>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] italic animate-pulse">UPLINKING MODULE CONTENT</p>
+                <div className="flex flex-col items-center justify-center h-96 space-y-4 animate-fade-in">
+                  <div className="w-12 h-12 border-4 border-zinc-900 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">ΦΟΡΤΩΣΗ ΕΝΟΤΗΤΑΣ...</p>
                 </div>
               }>
                 {category === 'settings' && (

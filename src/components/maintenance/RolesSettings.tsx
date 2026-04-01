@@ -5,7 +5,7 @@ import { useSettingsActions } from '../../hooks/useSettingsActions';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { Plus, Trash2, Shield } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface RolesSettingsProps {
   activeTab: string;
@@ -79,46 +79,37 @@ export const RolesSettings: React.FC<RolesSettingsProps> = ({ activeTab }) => {
   };
 
   return (
-    <Card 
-      title="CLEARANCE PROTOCOLS" 
-      subtitle="MANAGE SYSTEM ACCESS ROLES & SECURITY CLEARANCE"
-    >
-      <div className="space-y-8 pt-4">
-        <div className="flex flex-wrap gap-3 p-6 bg-slate-950/50 rounded-[2rem] border border-white/5 shadow-inner min-h-[80px] items-center">
+    <Card title="ΔΙΑΘΕΣΙΜΟΙ ΡΟΛΟΙ ΣΥΣΤΗΜΑΤΟΣ" subtitle="ΔΙΑΧΕΙΡΙΣΗ ΡΟΛΩΝ ΧΡΗΣΤΩΝ ΓΙΑ ΤΟΝ ΕΛΕΓΧΟ ΠΡΟΣΒΑΣΗΣ">
+      <div className="space-y-6">
+        <div className="flex flex-wrap gap-2">
           {availableRoles.map(role => (
-            <div 
+            <Badge 
               key={role} 
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border font-black text-[10px] uppercase tracking-[0.2em] transition-all group/role ${role === 'ADMIN' ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]' : (confirmingDeleteRole === role ? 'bg-red-600 border-red-500 text-white animate-pulse' : 'bg-slate-900 border-white/5 text-slate-500 hover:text-slate-300')}`}
+              variant={role === 'ADMIN' ? 'success' : (confirmingDeleteRole === role ? 'danger' : 'neutral')} 
+              className={`px-4 py-2 text-[10px] font-bold gap-2 transition-all ${confirmingDeleteRole === role ? 'animate-pulse' : ''}`}
             >
-              <Shield size={12} className={role === 'ADMIN' ? 'text-blue-200' : 'text-slate-600 group-hover/role:text-blue-400'} />
-              {confirmingDeleteRole === role ? 'CONFIRM PURGE?' : role}
+              {confirmingDeleteRole === role ? 'ΕΠΙΒΕΒΑΙΩΣΗ;' : role}
               {role !== 'ADMIN' && (
                 <button 
                   onClick={() => handleDeleteRole(role)}
-                  className="w-5 h-5 flex items-center justify-center rounded-md bg-white/5 hover:bg-red-500 hover:text-white transition-all ml-1"
+                  className="hover:text-red-500 transition-colors"
                 >
-                  <Trash2 size={10} />
+                  <Trash2 size={12} />
                 </button>
               )}
-            </div>
+            </Badge>
           ))}
         </div>
 
-        <div className="flex gap-4 p-6 bg-slate-950 rounded-[2.5rem] border border-white/5 shadow-2xl group/add">
+        <div className="flex gap-4 p-4 bg-zinc-50 rounded-xl border border-zinc-100">
           <input 
             type="text" 
-            placeholder="REGISTER NEW SECURITY ROLE (E.G. MANAGER)..." 
+            placeholder="ΝΕΟΣ ΡΟΛΟΣ (Π.Χ. MANAGER)..." 
             value={newRole}
             onChange={e => setNewRole(e.target.value)}
-            className="flex-1 px-6 py-4 bg-slate-900 border border-white/5 rounded-2xl font-black text-sm text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-800 uppercase" 
+            className="flex-1 px-4 py-2 bg-white border border-zinc-200 rounded-xl font-bold outline-none text-sm" 
           />
-          <button 
-            onClick={handleAddRole}
-            className="px-8 bg-blue-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center gap-2 shadow-2xl shadow-blue-900/40 italic"
-          >
-            <Plus size={18} />
-            AUTHORIZE
-          </button>
+          <Button onClick={handleAddRole} icon={Plus}>ΠΡΟΣΘΗΚΗ ΡΟΛΟΥ</Button>
         </div>
       </div>
     </Card>

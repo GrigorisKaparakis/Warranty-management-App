@@ -71,32 +71,32 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
           <div className="flex flex-wrap gap-4">
             {/* Search */}
             <div className="relative flex-1 min-w-[320px] group">
-              <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
+              <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-zinc-900 transition-colors" />
               <input 
                 type="text" 
                 placeholder="ΑΝΑΖΗΤΗΣΗ ΣΕ ΟΛΑ ΤΑ ΠΕΔΙΑ..." 
                 value={searchQuery} 
                 onChange={e => setSearchQuery(e.target.value)} 
-                className="w-full pl-14 pr-6 py-4 bg-slate-900/60 border border-white/5 rounded-[1.5rem] text-[11px] font-bold outline-none shadow-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-600 text-white" 
+                className="w-full pl-14 pr-6 py-4 bg-white border border-zinc-100 rounded-[1.5rem] text-[11px] font-bold outline-none shadow-sm focus:ring-4 focus:ring-zinc-50 focus:border-zinc-200 transition-all placeholder:text-zinc-300" 
               />
             </div>
             
             {/* Date Range */}
-            <div className="flex items-center gap-3 bg-slate-900/60 border border-white/5 rounded-[1.5rem] px-6 py-2 shadow-sm">
-               <Calendar size={14} className="text-slate-500" />
-               <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="text-[10px] font-bold outline-none bg-transparent uppercase text-white" />
-               <span className="text-white/10">—</span>
-               <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="text-[10px] font-bold outline-none bg-transparent uppercase text-white" />
+            <div className="flex items-center gap-3 bg-white border border-zinc-100 rounded-[1.5rem] px-6 py-2 shadow-sm">
+               <Calendar size={14} className="text-zinc-400" />
+               <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="text-[10px] font-bold outline-none bg-transparent uppercase" />
+               <span className="text-zinc-300">—</span>
+               <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="text-[10px] font-bold outline-none bg-transparent uppercase" />
             </div>
 
             {/* Filters */}
             <div className="flex gap-2">
-              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-6 py-4 bg-slate-900/60 border border-white/5 rounded-[1.5rem] text-[10px] font-black uppercase outline-none shadow-sm cursor-pointer hover:bg-slate-800 transition-all appearance-none text-white">
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-6 py-4 bg-white border border-zinc-100 rounded-[1.5rem] text-[10px] font-black uppercase outline-none shadow-sm cursor-pointer hover:bg-zinc-50 transition-all appearance-none">
                 <option value="ALL">ΚΑΤΑΣΤΑΣΗ: ΟΛΕΣ</option>
                 {allStatusKeys.map(s => <option key={s} value={s}>{getStatusLabel(s)}</option>)}
               </select>
 
-              <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="px-6 py-4 bg-slate-900/60 border border-white/5 rounded-[1.5rem] text-[10px] font-black uppercase outline-none shadow-sm cursor-pointer hover:bg-slate-800 transition-all appearance-none text-white">
+              <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="px-6 py-4 bg-white border border-zinc-100 rounded-[1.5rem] text-[10px] font-black uppercase outline-none shadow-sm cursor-pointer hover:bg-zinc-50 transition-all appearance-none">
                 <option value="ALL">ΕΤΑΙΡΕΙΑ: ΟΛΕΣ</option>
                 {Object.keys(settings?.companyBrandMap || {}).map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -111,19 +111,19 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 bg-slate-900/60 border border-white/5 rounded-2xl p-1.5 shadow-sm">
+          <div className="flex items-center gap-1 bg-white border border-zinc-100 rounded-2xl p-1.5 shadow-sm">
             <button
               onClick={() => setIsSelectionMode(!isSelectionMode)}
               className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
                 isSelectionMode 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-                  : 'text-slate-500 hover:bg-slate-800'
+                  ? 'bg-blue-600 text-white shadow-lg' 
+                  : 'text-zinc-400 hover:bg-zinc-50'
               }`}
               title="ΜΑΖΙΚΗ ΕΠΙΛΟΓΗ"
             >
               <CheckSquare size={16} />
             </button>
-            <div className="w-px h-6 bg-white/5 mx-1" />
+            <div className="w-px h-6 bg-zinc-100 mx-1" />
             {[
               { id: 'compact', icon: LayoutGrid },
               { id: 'standard', icon: ListIcon },
@@ -134,8 +134,8 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
                 onClick={() => handleDensityChange(d.id as any)}
                 className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
                   displayDensity === d.id 
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-                    : 'text-slate-500 hover:bg-slate-800'
+                    ? 'bg-zinc-900 text-white shadow-lg' 
+                    : 'text-zinc-400 hover:bg-zinc-50'
                 }`}
               >
                 <d.icon size={16} />
@@ -147,7 +147,7 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
             variant="neutral" 
             onClick={() => PDFService.exportEntryList(entries, settings)}
             icon={Download}
-            className="rounded-2xl h-14 px-8 border-white/5 bg-slate-900/60 text-white hover:bg-slate-800"
+            className="rounded-2xl h-14 px-8 border-zinc-100"
           >
             EXPORT PDF
           </Button>
@@ -155,47 +155,47 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
       </div>
       
       {/* Table Section */}
-      <div className="bg-slate-950/40 rounded-[3rem] shadow-2xl shadow-black/20 border border-white/5 overflow-hidden min-h-[600px] backdrop-blur-sm">
+      <div className="bg-white rounded-[3rem] shadow-2xl shadow-zinc-200/50 border border-zinc-100 overflow-hidden min-h-[600px]">
         <div className="overflow-x-auto">
           <div className="min-w-[1400px]">
             {/* Table Header */}
-            <div className="flex items-center gap-6 px-6 py-6 border-b border-white/5 bg-slate-900/50 sticky top-0 z-10">
+            <div className="flex items-center gap-6 px-6 py-6 border-b border-zinc-100 bg-zinc-50/50 sticky top-0 z-10">
               {isSelectionMode && (
                 <div className="w-10 flex justify-center flex-shrink-0">
                   <button 
                     onClick={selectedIds.size === entries.slice(0, visibleLimit).length ? deselectAll : selectAll}
-                    className="text-slate-500 hover:text-blue-400 transition-colors"
+                    className="text-zinc-400 hover:text-blue-600 transition-colors"
                   >
                     {selectedIds.size === entries.slice(0, visibleLimit).length ? <CheckSquare size={18} /> : <Square size={18} />}
                   </button>
                 </div>
               )}
-              <div className="w-[140px] text-[10px] font-black text-slate-500 uppercase tracking-widest">ΚΑΤΑΣΤΑΣΗ</div>
+              <div className="w-[140px] text-[10px] font-black text-zinc-400 uppercase tracking-widest">ΚΑΤΑΣΤΑΣΗ</div>
               <button 
-                className="w-[180px] text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 hover:text-white transition-colors"
+                className="w-[180px] text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2 hover:text-zinc-900 transition-colors"
                 onClick={() => handleSort('warrantyId')}
               >
-                ΕΓΓΥΗΣΗ / VIN <ArrowUpDown size={12} className={sortConfig.key === 'warrantyId' ? 'text-blue-400' : 'opacity-20'} />
+                ΕΓΓΥΗΣΗ / VIN <ArrowUpDown size={12} className={sortConfig.key === 'warrantyId' ? 'text-blue-600' : 'opacity-20'} />
               </button>
               <button 
-                className="w-[140px] text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 hover:text-white transition-colors"
+                className="w-[140px] text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2 hover:text-zinc-900 transition-colors"
                 onClick={() => handleSort('brand')}
               >
-                ΕΤΑΙΡΕΙΑ / ΜΑΡΚΑ <ArrowUpDown size={12} className={sortConfig.key === 'brand' ? 'text-blue-400' : 'opacity-20'} />
+                ΕΤΑΙΡΕΙΑ / ΜΑΡΚΑ <ArrowUpDown size={12} className={sortConfig.key === 'brand' ? 'text-blue-600' : 'opacity-20'} />
               </button>
               <button 
-                className="w-[160px] text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 hover:text-white transition-colors"
+                className="w-[160px] text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2 hover:text-zinc-900 transition-colors"
                 onClick={() => handleSort('createdAt')}
               >
-                ΗΜ/ΝΙΑ / ΠΕΛΑΤΗΣ <ArrowUpDown size={12} className={sortConfig.key === 'createdAt' ? 'text-blue-400' : 'opacity-20'} />
+                ΗΜ/ΝΙΑ / ΠΕΛΑΤΗΣ <ArrowUpDown size={12} className={sortConfig.key === 'createdAt' ? 'text-blue-600' : 'opacity-20'} />
               </button>
-              <div className="w-[220px] text-[10px] font-black text-slate-500 uppercase tracking-widest">ΑΝΤΑΛΛΑΚΤΙΚΑ</div>
-              <div className="flex-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">ΠΑΡΑΤΗΡΗΣΕΙΣ</div>
-              <div className="w-[160px] text-right text-[10px] font-black text-slate-500 uppercase tracking-widest pr-6">ΕΝΕΡΓΕΙΕΣ</div>
+              <div className="w-[220px] text-[10px] font-black text-zinc-400 uppercase tracking-widest">ΑΝΤΑΛΛΑΚΤΙΚΑ</div>
+              <div className="flex-1 text-[10px] font-black text-zinc-400 uppercase tracking-widest">ΠΑΡΑΤΗΡΗΣΕΙΣ</div>
+              <div className="w-[160px] text-right text-[10px] font-black text-zinc-400 uppercase tracking-widest pr-6">ΕΝΕΡΓΕΙΕΣ</div>
             </div>
             
             {/* Table Body */}
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-zinc-50">
               <AnimatePresence mode="popLayout">
                 {entries.length === 0 ? (
                   <motion.div 

@@ -54,106 +54,100 @@ export const DatabaseSettings: React.FC<DatabaseSettingsProps> = ({ activeTab })
   };
 
   return (
-    <div className="animate-slide-up space-y-8 pb-32">
+    <div className="animate-slide-up space-y-6">
       {/* Customers Tab Content */}
       {activeTab === 'customers' && (
         <Card 
-          title="CUSTOMER REGISTRY" 
-          subtitle="MANAGE SYSTEM-WIDE CLIENT DATABASE"
+          title="ΒΑΣΗ ΠΕΛΑΤΩΝ" 
+          subtitle="ΔΙΑΧΕΙΡΙΣΗ ΤΩΝ ΠΕΛΑΤΩΝ ΠΟΥ ΕΧΟΥΝ ΚΑΤΑΓΡΑΦΕΙ"
           actions={
-            <div className="bg-emerald-600/10 px-6 py-2 rounded-2xl border border-emerald-500/20 text-center shadow-2xl">
-              <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest italic">TOTAL NODES</div>
-              <div className="text-xl font-black text-white leading-none">{customers.length}</div>
+            <div className="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100 text-center">
+              <div className="text-[9px] font-bold text-emerald-400 uppercase">ΣΥΝΟΛΟ</div>
+              <div className="text-xl font-bold text-emerald-600 leading-none">{customers.length}</div>
             </div>
           }
         >
-          <div className="space-y-8 pt-4">
-            <div className="p-8 bg-slate-950 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-8 group/sync relative overflow-hidden shadow-inner">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-600/5 rounded-full blur-3xl group-hover/sync:bg-emerald-600/10 transition-all"></div>
-              <div className="space-y-2 relative z-10">
-                <h4 className="text-xs font-black text-white uppercase tracking-widest italic">CUSTOMER NODE SYNCHRONIZATION</h4>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">SCAN WARRANTY HISTORY & INJECT INTO REGISTRY</p>
+          <div className="space-y-6">
+            <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-zinc-900 uppercase">ΣΥΓΧΡΟΝΙΣΜΟΣ ΠΕΛΑΤΩΝ</h4>
+                <p className="text-[10px] font-medium text-zinc-500 italic uppercase">ΣΚΑΝΑΡΙΣΜΑ ΕΓΓΥΗΣΕΩΝ ΚΑΙ ΕΝΗΜΕΡΩΣΗ REGISTRY</p>
               </div>
-              <button 
+              <Button 
                 onClick={async () => {
                   setIsMigratingCustomers(true);
                   setMigrationCount(0);
                   try {
                     const total = await FirestoreService.migrateCustomers((count) => setMigrationCount(count));
-                    toast.success(`SYNC COMPLETE: ${total} NODES AUTHORIZED.`);
+                    toast.success(`ΟΛΟΚΛΗΡΩΘΗΚΕ! ${total} ΠΕΛΑΤΕΣ.`);
                   } catch (e: any) {
-                    toast.error("PROTOCOL FAILURE");
+                    toast.error("ΣΦΑΛΜΑ");
                   } finally {
                     setIsMigratingCustomers(false);
                   }
                 }}
-                disabled={isMigratingCustomers}
-                className="px-8 h-14 bg-emerald-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-emerald-500 transition-all flex items-center gap-3 shadow-[0_10px_30px_rgba(16,185,129,0.3)] border-none italic disabled:opacity-50 relative z-10"
+                loading={isMigratingCustomers}
+                icon={RefreshCw}
+                variant="primary"
               >
-                {isMigratingCustomers ? (
-                  <>
-                    <RefreshCw size={18} className="animate-spin" />
-                    SYNCING ({migrationCount})
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw size={18} />
-                    INITIATE SYNC
-                  </>
-                )}
-              </button>
+                {isMigratingCustomers ? `ΣΥΓΧΡΟΝΙΣΜΟΣ (${migrationCount})` : 'ΕΝΑΡΞΗ ΣΥΓΧΡΟΝΙΣΜΟΥ'}
+              </Button>
             </div>
 
-            <div className="relative group">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 group-focus-within:text-blue-500 transition-colors" size={20} />
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
               <input 
                 type="text" 
-                placeholder="SEARCH CUSTOMER REGISTRY (NAME / IDENTIFIER)..." 
+                placeholder="ΑΝΑΖΗΤΗΣΗ ΠΕΛΑΤΗ (ΟΝΟΜΑ)..." 
                 value={customerSearch}
                 onChange={e => setCustomerSearch(e.target.value)}
-                className="w-full pl-16 pr-8 py-5 bg-slate-950 border border-white/5 rounded-[2rem] font-black outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all text-sm text-white placeholder:text-slate-800 uppercase tracking-tighter"
+                className="w-full pl-12 pr-6 py-3 bg-zinc-50 border border-zinc-200 rounded-xl font-bold outline-none focus:bg-white transition-all text-sm"
               />
             </div>
 
-            <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-white/[0.02] border-b border-white/5">
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">ENTITY NAME / ID</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">ASSOCIATED VINs</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic text-center">UTILIZATION</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic text-right">COMMAND</th>
+                  <tr className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-100">
+                    <th className="pb-4 pl-4">ΟΝΟΜΑΤΕΠΩΝΥΜΟ</th>
+                    <th className="pb-4">ΟΧΗΜΑΤΑ (VINs)</th>
+                    <th className="pb-4">ΧΡΗΣΕΙΣ</th>
+                    <th className="pb-4 text-right pr-4">ΕΝΕΡΓΕΙΕΣ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-zinc-50">
                   {customers
                     .filter(c => c.fullName.toLowerCase().includes(customerSearch.toLowerCase()))
                     .map(customer => (
-                    <tr key={customer.id} className="group hover:bg-white/[0.03] transition-all">
-                      <td className="px-8 py-5">
-                        <Link to={`/customer/${encodeURIComponent(customer.fullName.replace(/\n/g, ' '))}`} className="text-[12px] font-black text-blue-400 uppercase tracking-tighter italic hover:text-blue-300 transition-all flex items-center gap-2">
-                          <User size={14} />
+                    <tr key={customer.id} className="group hover:bg-zinc-50/50 transition-colors">
+                      <td className="py-4 pl-4">
+                        <Link to={`/customer/${encodeURIComponent(customer.fullName.replace(/\n/g, ' '))}`} className="text-xs font-bold text-blue-600 uppercase hover:underline flex items-center gap-2">
+                          <User size={12} />
                           {customer.fullName}
                         </Link>
-                        <div className="text-[9px] font-black text-slate-700 uppercase tracking-widest font-mono mt-1">UUID: {customer.id}</div>
+                        <div className="text-[9px] font-bold text-zinc-400 uppercase">ID: {customer.id}</div>
                       </td>
-                      <td className="px-8 py-5">
-                        <div className="flex flex-wrap gap-2">
+                      <td className="py-4">
+                        <div className="flex flex-wrap gap-1">
                           {customer.vins?.map(vin => (
-                            <span key={vin} className="px-2 py-1 bg-slate-900 border border-white/5 rounded-lg text-[9px] font-black text-slate-500 font-mono tracking-tighter">{vin}</span>
+                            <Badge key={vin} variant="neutral" className="text-[9px]">{vin}</Badge>
                           ))}
                         </div>
                       </td>
-                      <td className="px-8 py-5 text-center">
-                        <span className="px-3 py-1 bg-blue-600/10 border border-blue-500/20 text-blue-400 rounded-xl text-[10px] font-black font-mono">x{customer.useCount || 0}</span>
+                      <td className="py-4">
+                        <Badge variant="info">{customer.useCount || 0}</Badge>
                       </td>
-                      <td className="px-8 py-5 text-right">
-                        <button 
-                          onClick={() => handleDeleteCustomer(customer.id, customer.fullName)}
-                          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all border shadow-2xl opacity-0 group-hover:opacity-100 ${confirmingDeleteCustomerId === customer.id ? 'bg-red-600 border-red-500 text-white shadow-red-900/40' : 'bg-slate-950 border-white/5 text-slate-700 hover:text-red-500 hover:border-red-500/30'}`}
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                      <td className="py-4 text-right pr-4">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                          <Button 
+                            variant={confirmingDeleteCustomerId === customer.id ? "danger" : "neutral"} 
+                            size="sm" 
+                            icon={Trash2}
+                            onClick={() => handleDeleteCustomer(customer.id, customer.fullName)}
+                          >
+                            {confirmingDeleteCustomerId === customer.id && <span className="text-[9px] ml-2">ΕΠΙΒΕΒΑΙΩΣΗ;</span>}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -167,75 +161,65 @@ export const DatabaseSettings: React.FC<DatabaseSettingsProps> = ({ activeTab })
       {/* Vehicles Tab Content */}
       {activeTab === 'vehicles' && (
         <Card 
-          title="VEHICLE REGISTRY" 
-          subtitle="MONITOR SYSTEM-WIDE SHIPMENT & ASSET DATABASE"
+          title="ΔΙΑΧΕΙΡΙΣΗ ΟΧΗΜΑΤΩΝ" 
+          subtitle="ΠΡΟΒΟΛΗ ΚΑΙ ΕΠΕΞΕΡΓΑΣΙΑ ΤΗΣ ΒΑΣΗΣ ΟΧΗΜΑΤΩΝ"
           actions={
-            <div className="bg-indigo-600/10 px-6 py-2 rounded-2xl border border-indigo-500/20 text-center shadow-2xl">
-              <div className="text-[9px] font-black text-indigo-500 uppercase tracking-widest italic">TOTAL NODES</div>
-              <div className="text-xl font-black text-white leading-none">{vehicles.length}</div>
+            <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 text-center">
+              <div className="text-[9px] font-bold text-indigo-400 uppercase">ΣΥΝΟΛΟ</div>
+              <div className="text-xl font-bold text-indigo-600 leading-none">{vehicles.length}</div>
             </div>
           }
         >
-          <div className="space-y-8 pt-4">
-            <div className="p-8 bg-slate-950 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-8 group/sync relative overflow-hidden shadow-inner">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 rounded-full blur-3xl group-hover/sync:bg-indigo-600/10 transition-all"></div>
-              <div className="space-y-2 relative z-10">
-                <h4 className="text-xs font-black text-white uppercase tracking-widest italic">VEHICLE ASSET SYNCHRONIZATION</h4>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">MAP VIN IDENTIFIERS FROM GLOBAL RECORDS</p>
+          <div className="space-y-6">
+            <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-zinc-900 uppercase">ΣΥΓΧΡΟΝΙΣΜΟΣ ΟΧΗΜΑΤΩΝ</h4>
+                <p className="text-[10px] font-medium text-zinc-500 italic uppercase">ΣΚΑΝΑΡΙΣΜΑ ΕΓΓΥΗΣΕΩΝ ΚΑΙ ΕΝΗΜΕΡΩΣΗ REGISTRY</p>
               </div>
-              <button 
+              <Button 
                 onClick={async () => {
                   setIsMigratingVehicles(true);
                   setMigrationCount(0);
                   try {
                     const total = await FirestoreService.migrateVehicles((count) => setMigrationCount(count));
-                    toast.success(`SYNC COMPLETE: ${total} ASSETS INDEXED.`);
+                    toast.success(`ΟΛΟΚΛΗΡΩΘΗΚΕ! ${total} ΟΧΗΜΑΤΑ.`);
                   } catch (e: any) {
-                    toast.error("PROTOCOL FAILURE");
+                    toast.error("ΣΦΑΛΜΑ");
                   } finally {
                     setIsMigratingVehicles(false);
                   }
                 }}
-                disabled={isMigratingVehicles}
-                className="px-8 h-14 bg-indigo-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-indigo-500 transition-all flex items-center gap-3 shadow-[0_10px_30px_rgba(79,70,229,0.3)] border-none italic disabled:opacity-50 relative z-10"
+                loading={isMigratingVehicles}
+                icon={RefreshCw}
+                variant="primary"
               >
-                {isMigratingVehicles ? (
-                  <>
-                    <RefreshCw size={18} className="animate-spin" />
-                    INDEXING ({migrationCount})
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw size={18} />
-                    INITIATE INDEX
-                  </>
-                )}
-              </button>
+                {isMigratingVehicles ? `ΣΥΓΧΡΟΝΙΣΜΟΣ (${migrationCount})` : 'ΕΝΑΡΞΗ ΣΥΓΧΡΟΝΙΣΜΟΥ'}
+              </Button>
             </div>
 
-            <div className="relative group">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 group-focus-within:text-blue-500 transition-colors" size={20} />
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
               <input 
                 type="text" 
-                placeholder="SEARCH VEHICLE ASSETS (VIN / OWNER)..." 
+                placeholder="ΑΝΑΖΗΤΗΣΗ VIN Η ΙΔΙΟΚΤΗΤΗ..." 
                 value={vehicleSearch}
                 onChange={e => setVehicleSearch(e.target.value)}
-                className="w-full pl-16 pr-8 py-5 bg-slate-950 border border-white/5 rounded-[2rem] font-black outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all text-sm text-white placeholder:text-slate-800 uppercase tracking-tighter"
+                className="w-full pl-12 pr-6 py-3 bg-zinc-50 border border-zinc-200 rounded-xl font-bold outline-none focus:bg-white transition-all text-sm"
               />
             </div>
 
-            <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-white/[0.02] border-b border-white/5">
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">VIN IDENTIFIER</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">BRAND CLASS</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">NODE OWNER</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic text-center">USAGE</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic text-right">COMMAND</th>
+                  <tr className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-100">
+                    <th className="px-6 py-4">VIN</th>
+                    <th className="px-6 py-4">ΜΑΡΚΑ</th>
+                    <th className="px-6 py-4">ΙΔΙΟΚΤΗΤΗΣ</th>
+                    <th className="px-6 py-4 text-center">ΧΡΗΣΕΙΣ</th>
+                    <th className="px-6 py-4 text-right">ΕΝΕΡΓΕΙΕΣ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-zinc-50">
                   {vehicles
                     .filter(v => 
                       v.vin.includes(vehicleSearch.toUpperCase()) || 
@@ -243,58 +227,58 @@ export const DatabaseSettings: React.FC<DatabaseSettingsProps> = ({ activeTab })
                     )
                     .slice(0, 50)
                     .map(vehicle => (
-                    <tr key={vehicle.id} className="group hover:bg-white/[0.03] transition-all">
-                      <td className="px-8 py-5">
-                        <span className="text-[12px] font-black text-indigo-400 uppercase tracking-tighter font-mono italic flex items-center gap-2">
-                          <Car size={14} />
+                    <tr key={vehicle.id} className="hover:bg-zinc-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <span className="text-[11px] font-bold text-indigo-600 uppercase flex items-center gap-2">
+                          <Car size={12} />
                           {vehicle.vin}
                         </span>
                       </td>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-4">
                         {editingVehicleId === vehicle.id ? (
                           <input 
                             type="text" 
                             value={vehicleEditData.brand} 
                             onChange={e => setVehicleEditData({ ...vehicleEditData, brand: e.target.value.toUpperCase() })}
-                            className="w-full px-4 py-2 bg-slate-950 border border-indigo-500/30 rounded-xl text-[11px] font-black text-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all uppercase tracking-widest"
+                            className="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-[11px] font-bold outline-none"
                           />
                         ) : (
-                          <span className="px-3 py-1 bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 rounded-xl text-[9px] font-black uppercase tracking-widest italic">{vehicle.brand || '---'}</span>
+                          <Badge variant="info">{vehicle.brand || '---'}</Badge>
                         )}
                       </td>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-4">
                         {editingVehicleId === vehicle.id ? (
                           <input 
                             type="text" 
                             value={vehicleEditData.ownerName} 
                             onChange={e => setVehicleEditData({ ...vehicleEditData, ownerName: e.target.value })}
-                            className="w-full px-4 py-2 bg-slate-950 border border-indigo-500/30 rounded-xl text-[11px] font-black text-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                            className="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-[11px] font-bold outline-none"
                             autoFocus
                           />
                         ) : (
-                          <span className="text-[11px] font-black text-slate-400 uppercase tracking-tighter italic">{vehicle.ownerName}</span>
+                          <span className="text-[11px] font-bold text-zinc-600">{vehicle.ownerName}</span>
                         )}
                       </td>
-                      <td className="px-8 py-5 text-center">
-                        <span className="px-3 py-1 bg-slate-900 border border-white/5 text-slate-500 rounded-xl text-[10px] font-black font-mono">x{vehicle.useCount || 0}</span>
+                      <td className="px-6 py-4 text-center">
+                        <Badge variant="neutral">x{vehicle.useCount || 0}</Badge>
                       </td>
-                      <td className="px-8 py-5 text-right">
+                      <td className="px-6 py-4 text-right">
                         {editingVehicleId === vehicle.id ? (
-                          <div className="flex justify-end gap-2">
-                            <button onClick={async () => {
+                          <div className="flex justify-end gap-1">
+                            <Button size="sm" variant="primary" icon={Check} onClick={async () => {
                               try {
                                 await FirestoreService.upsertVehicle(vehicle.vin, vehicleEditData.brand, vehicleEditData.ownerName);
                                 setEditingVehicleId(null);
-                                toast.success("ASSET PATCHED");
-                              } catch (e) { toast.error("IO_ERROR"); }
-                            }} className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-xl shadow-2xl hover:bg-blue-500 transition-all"><Check size={18} /></button>
-                            <button onClick={() => setEditingVehicleId(null)} className="w-10 h-10 flex items-center justify-center bg-slate-900 text-slate-500 rounded-xl border border-white/5 hover:bg-slate-800 transition-all"><X size={18} /></button>
+                                toast.success("ΕΝΗΜΕΡΩΘΗΚΕ!");
+                              } catch (e) { toast.error("ΣΦΑΛΜΑ"); }
+                            }} />
+                            <Button size="sm" variant="neutral" icon={X} onClick={() => setEditingVehicleId(null)} />
                           </div>
                         ) : (
-                          <button onClick={() => {
+                          <Button size="sm" variant="neutral" icon={Edit2} onClick={() => {
                             setEditingVehicleId(vehicle.id);
                             setVehicleEditData({ ownerName: vehicle.ownerName, brand: vehicle.brand || '' });
-                          }} className="w-10 h-10 flex items-center justify-center bg-slate-950 border border-white/5 text-slate-700 hover:text-blue-400 hover:border-blue-500/30 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all"><Edit2 size={18} /></button>
+                          }} className="opacity-0 group-hover:opacity-100" />
                         )}
                       </td>
                     </tr>
@@ -309,75 +293,65 @@ export const DatabaseSettings: React.FC<DatabaseSettingsProps> = ({ activeTab })
       {/* Parts Tab Content */}
       {activeTab === 'database' && (
         <Card 
-          title="PARTS REGISTRY" 
-          subtitle="MONITOR SYSTEM-WIDE COMPONENT & SKU DATABASE"
+          title="ΔΙΑΧΕΙΡΙΣΗ ΑΝΤΑΛΛΑΚΤΙΚΩΝ" 
+          subtitle="ΠΡΟΒΟΛΗ ΚΑΙ ΕΠΕΞΕΡΓΑΣΙΑ ΤΗΣ ΒΑΣΗΣ ΑΝΤΑΛΛΑΚΤΙΚΩΝ"
           actions={
-            <div className="bg-blue-600/10 px-6 py-2 rounded-2xl border border-blue-500/20 text-center shadow-2xl">
-              <div className="text-[9px] font-black text-blue-500 uppercase tracking-widest italic">TOTAL NODES</div>
-              <div className="text-xl font-black text-white leading-none">{parts.length}</div>
+            <div className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 text-center">
+              <div className="text-[9px] font-bold text-blue-400 uppercase">ΣΥΝΟΛΟ</div>
+              <div className="text-xl font-bold text-blue-600 leading-none">{parts.length}</div>
             </div>
           }
         >
-          <div className="space-y-8 pt-4">
-            <div className="p-8 bg-slate-950 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-8 group/sync relative overflow-hidden shadow-inner">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-full blur-3xl group-hover/sync:bg-blue-600/10 transition-all"></div>
-              <div className="space-y-2 relative z-10">
-                <h4 className="text-xs font-black text-white uppercase tracking-widest italic">COMPONENT DATA SYNCHRONIZATION</h4>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">EXTRACT SKU CODES FROM WARRANTY STREAM</p>
+          <div className="space-y-6">
+            <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-zinc-900 uppercase">ΣΥΓΧΡΟΝΙΣΜΟΣ ΑΝΤΑΛΛΑΚΤΙΚΩΝ</h4>
+                <p className="text-[10px] font-medium text-zinc-500 italic uppercase">ΤΡΑΒΗΞΤΕ ΚΩΔΙΚΟΥΣ ΑΠΟ ΤΟ ΙΣΤΟΡΙΚΟ ΕΓΓΥΗΣΕΩΝ</p>
               </div>
-              <button 
+              <Button 
                 onClick={async () => {
                   setIsMigrating(true);
                   setMigrationCount(0);
                   try {
                     const total = await FirestoreService.migrateParts((count) => setMigrationCount(count));
-                    toast.success(`SYNC COMPLETE: ${total} SKUs CACHED.`);
+                    toast.success(`ΟΛΟΚΛΗΡΩΘΗΚΕ! ${total} ΑΝΤΑΛΛΑΚΤΙΚΑ.`);
                   } catch (e: any) {
-                    toast.error("PROTOCOL FAILURE");
+                    toast.error("ΣΦΑΛΜΑ");
                   } finally {
                     setIsMigrating(false);
                   }
                 }}
-                disabled={isMigrating}
-                className="px-8 h-14 bg-blue-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center gap-3 shadow-[0_10px_30px_rgba(37,99,235,0.3)] border-none italic disabled:opacity-50 relative z-10"
+                loading={isMigrating}
+                icon={RefreshCw}
+                variant="primary"
               >
-                {isMigrating ? (
-                  <>
-                    <RefreshCw size={18} className="animate-spin" />
-                    CACHING ({migrationCount})
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw size={18} />
-                    INITIATE CACHE
-                  </>
-                )}
-              </button>
+                {isMigrating ? `ΕΠΕΞΕΡΓΑΣΙΑ (${migrationCount})` : 'ΕΝΑΡΞΗ ΣΥΓΧΡΟΝΙΣΜΟΥ'}
+              </Button>
             </div>
 
-            <div className="relative group">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 group-focus-within:text-blue-500 transition-colors" size={20} />
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
               <input 
                 type="text" 
-                placeholder="SEARCH COMPONENT REGISTRY (CODE / DESCRIPTION)..." 
+                placeholder="ΑΝΑΖΗΤΗΣΗ ΚΩΔΙΚΟΥ Η ΠΕΡΙΓΡΑΦΗΣ..." 
                 value={partSearch}
                 onChange={e => setPartSearch(e.target.value)}
-                className="w-full pl-16 pr-8 py-5 bg-slate-950 border border-white/5 rounded-[2rem] font-black outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all text-sm text-white placeholder:text-slate-800 uppercase tracking-tighter"
+                className="w-full pl-12 pr-6 py-3 bg-zinc-50 border border-zinc-200 rounded-xl font-bold outline-none focus:bg-white transition-all text-sm"
               />
             </div>
 
-            <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-white/[0.02] border-b border-white/5">
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">SKU / COMPONENT CODE</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">MANUFACTURER</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">SPECIFICATION</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic text-center">USAGE</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic text-right">COMMAND</th>
+                  <tr className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-100">
+                    <th className="px-6 py-4">ΚΩΔΙΚΟΣ</th>
+                    <th className="px-6 py-4">ΜΑΡΚΑ</th>
+                    <th className="px-6 py-4">ΠΕΡΙΓΡΑΦΗ</th>
+                    <th className="px-6 py-4 text-center">ΧΡΗΣΕΙΣ</th>
+                    <th className="px-6 py-4 text-right">ΕΝΕΡΓΕΙΕΣ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-zinc-50">
                   {parts
                     .filter(p => 
                       p.code.includes(partSearch.toUpperCase()) || 
@@ -386,58 +360,58 @@ export const DatabaseSettings: React.FC<DatabaseSettingsProps> = ({ activeTab })
                     )
                     .slice(0, 50)
                     .map(part => (
-                    <tr key={part.id} className="group hover:bg-white/[0.03] transition-all">
-                      <td className="px-8 py-5">
-                        <span className="text-[12px] font-black text-blue-400 uppercase tracking-tighter font-mono italic flex items-center gap-2">
-                          <Box size={14} />
+                    <tr key={part.id} className="hover:bg-zinc-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <span className="text-[11px] font-bold text-blue-600 uppercase flex items-center gap-2">
+                          <Box size={12} />
                           {part.code}
                         </span>
                       </td>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-4">
                         {editingPartId === part.id ? (
                           <input 
                             type="text" 
                             value={partEditData.brand} 
                             onChange={e => setPartEditData({ ...partEditData, brand: e.target.value.toUpperCase() })}
-                            className="w-full px-4 py-2 bg-slate-950 border border-blue-500/30 rounded-xl text-[11px] font-black text-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all uppercase tracking-widest"
+                            className="w-full px-3 py-1.5 bg-white border border-blue-200 rounded-lg text-[11px] font-bold outline-none"
                           />
                         ) : (
-                          <span className="px-3 py-1 bg-blue-600/10 border border-blue-500/20 text-blue-400 rounded-xl text-[9px] font-black uppercase tracking-widest italic">{part.brand || '---'}</span>
+                          <Badge variant="info">{part.brand || '---'}</Badge>
                         )}
                       </td>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-4">
                         {editingPartId === part.id ? (
                           <input 
                             type="text" 
                             value={partEditData.description} 
                             onChange={e => setPartEditData({ ...partEditData, description: e.target.value })}
-                            className="w-full px-4 py-2 bg-slate-950 border border-blue-500/30 rounded-xl text-[11px] font-black text-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                            className="w-full px-3 py-1.5 bg-white border border-blue-200 rounded-lg text-[11px] font-bold outline-none"
                             autoFocus
                           />
                         ) : (
-                          <span className="text-[11px] font-black text-slate-400 uppercase tracking-tighter italic">{part.description}</span>
+                          <span className="text-[11px] font-bold text-zinc-600">{part.description}</span>
                         )}
                       </td>
-                      <td className="px-8 py-5 text-center">
-                        <span className="px-3 py-1 bg-slate-900 border border-white/5 text-slate-500 rounded-xl text-[10px] font-black font-mono">x{part.useCount || 0}</span>
+                      <td className="px-6 py-4 text-center">
+                        <Badge variant="neutral">x{part.useCount || 0}</Badge>
                       </td>
-                      <td className="px-8 py-5 text-right">
+                      <td className="px-6 py-4 text-right">
                         {editingPartId === part.id ? (
-                          <div className="flex justify-end gap-2">
-                            <button onClick={async () => {
+                          <div className="flex justify-end gap-1">
+                            <Button size="sm" variant="primary" icon={Check} onClick={async () => {
                               try {
                                 await FirestoreService.upsertPart(part.code, partEditData.description, partEditData.brand);
                                 setEditingPartId(null);
-                                toast.success("SKU PATCHED");
-                              } catch (e) { toast.error("IO_ERROR"); }
-                            }} className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-xl shadow-2xl hover:bg-blue-500 transition-all"><Check size={18} /></button>
-                            <button onClick={() => setEditingPartId(null)} className="w-10 h-10 flex items-center justify-center bg-slate-900 text-slate-500 rounded-xl border border-white/5 hover:bg-slate-800 transition-all"><X size={18} /></button>
+                                toast.success("ΕΝΗΜΕΡΩΘΗΚΕ!");
+                              } catch (e) { toast.error("ΣΦΑΛΜΑ"); }
+                            }} />
+                            <Button size="sm" variant="neutral" icon={X} onClick={() => setEditingPartId(null)} />
                           </div>
                         ) : (
-                          <button onClick={() => {
+                          <Button size="sm" variant="neutral" icon={Edit2} onClick={() => {
                             setEditingPartId(part.id);
                             setPartEditData({ description: part.description, brand: part.brand || '' });
-                          }} className="w-10 h-10 flex items-center justify-center bg-slate-950 border border-white/5 text-slate-700 hover:text-blue-400 hover:border-blue-500/30 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all"><Edit2 size={18} /></button>
+                          }} className="opacity-0 group-hover:opacity-100" />
                         )}
                       </td>
                     </tr>

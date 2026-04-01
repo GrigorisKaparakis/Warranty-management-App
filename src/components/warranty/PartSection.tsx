@@ -55,9 +55,9 @@ export const PartSection: React.FC<PartSectionProps> = ({ parts, setParts, parts
   };
 
   return (
-    <div className="glass-dark p-10 rounded-[2.5rem] border border-white/5 shadow-2xl shadow-black/20">
-      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-8">{UI_MESSAGES.LABELS.PARTS}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 relative">
+    <div className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm">
+      <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-6">{UI_MESSAGES.LABELS.PARTS}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 relative">
         <div className="relative">
           <input 
             type="text" 
@@ -66,41 +66,41 @@ export const PartSection: React.FC<PartSectionProps> = ({ parts, setParts, parts
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             onChange={e => setTempPart({...tempPart, code: e.target.value.toUpperCase()})} 
-            className="w-full px-6 py-4 bg-slate-900/60 border border-white/5 rounded-2xl font-bold text-white text-[11px] outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-700" 
+            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-blue-500" 
           />
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute bottom-full left-0 right-0 z-[120] mb-3 bg-slate-900 border border-white/10 rounded-[1.5rem] shadow-2xl p-2 animate-in slide-in-from-bottom-2 backdrop-blur-xl">
+            <div className="absolute bottom-full left-0 right-0 z-[120] mb-2 bg-white border border-slate-100 rounded-xl shadow-2xl p-2 animate-in slide-in-from-bottom-2">
               {suggestions.map((s, idx) => (
                 <button 
                   key={idx}
                   type="button"
                   onClick={() => { setTempPart({ ...tempPart, code: s.code, description: s.description }); setShowSuggestions(false); }}
-                  className="w-full text-left px-5 py-4 hover:bg-white/5 rounded-xl transition-colors border-b border-white/5 last:border-0 group"
+                  className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-lg transition-colors border-b border-slate-50 last:border-0"
                 >
-                  <div className="text-[10px] font-black text-blue-400 uppercase tracking-wider group-hover:text-blue-300 transition-colors">{s.code}</div>
-                  <div className="text-[11px] font-bold text-slate-500 group-hover:text-slate-300 transition-colors">{s.description}</div>
+                  <div className="text-[10px] font-black text-blue-600 uppercase">{s.code}</div>
+                  <div className="text-[11px] font-bold text-slate-500">{s.description}</div>
                 </button>
               ))}
             </div>
           )}
         </div>
-        <input type="text" placeholder={UI_MESSAGES.LABELS.DESCRIPTION} value={tempPart.description} onChange={e => setTempPart({...tempPart, description: e.target.value})} className="px-6 py-4 bg-slate-900/60 border border-white/5 rounded-2xl font-bold text-white text-[11px] outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-700" />
-        <input type="number" value={tempPart.quantity} onChange={e => setTempPart({...tempPart, quantity: parseInt(e.target.value) || 1})} className="px-6 py-4 bg-slate-900/60 border border-white/5 rounded-2xl font-bold text-white text-[11px] outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all" />
-        <button type="button" onClick={handleAddOrUpdate} className="bg-blue-600 text-white font-black text-[10px] uppercase rounded-2xl tracking-widest shadow-xl shadow-blue-900/20 hover:bg-blue-500 transition-all">
+        <input type="text" placeholder={UI_MESSAGES.LABELS.DESCRIPTION} value={tempPart.description} onChange={e => setTempPart({...tempPart, description: e.target.value})} className="px-5 py-3 bg-slate-50 border rounded-xl font-bold text-xs outline-none" />
+        <input type="number" value={tempPart.quantity} onChange={e => setTempPart({...tempPart, quantity: parseInt(e.target.value) || 1})} className="px-5 py-3 bg-slate-50 border rounded-xl font-bold text-xs outline-none" />
+        <button type="button" onClick={handleAddOrUpdate} className="bg-slate-800 text-white font-black text-[10px] uppercase rounded-xl tracking-widest hover:bg-blue-600 transition-all">
           {editingIndex !== null ? UI_MESSAGES.LABELS.UPDATE : UI_MESSAGES.LABELS.ADD}
         </button>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-2">
         {parts.map((p, i) => (
-          <div key={i} className="flex items-center justify-between p-5 bg-white/[0.03] border border-white/5 rounded-2xl group hover:border-blue-500/30 transition-all backdrop-blur-sm">
-            <div className="flex items-center gap-6 text-[11px] font-bold uppercase tracking-tight">
-              <span className="text-blue-400 font-black tracking-widest">{p.code}</span>
-              <span className="text-slate-300 truncate max-w-[150px] md:max-w-[400px]">{p.description}</span>
-              <span className="text-slate-500 font-black">X{p.quantity}</span>
+          <div key={i} className="flex items-center justify-between p-4 bg-slate-50 border rounded-xl group hover:border-blue-200">
+            <div className="flex items-center gap-4 text-xs font-bold uppercase">
+              <span className="text-blue-600 font-black">{p.code}</span>
+              <span className="text-slate-600">{p.description}</span>
+              <span className="text-slate-400">x{p.quantity}</span>
             </div>
-            <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
-              <button type="button" onClick={() => { setEditingIndex(i); setTempPart(p as any); }} className="w-10 h-10 flex items-center justify-center text-blue-400 bg-white/5 border border-white/10 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-xl">✎</button>
-              <button type="button" onClick={() => setParts(parts.filter((_, idx) => idx !== i))} className="w-10 h-10 flex items-center justify-center text-red-400 bg-white/5 border border-white/10 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-xl">×</button>
+            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+              <button type="button" onClick={() => { setEditingIndex(i); setTempPart(p as any); }} className="p-2 text-blue-500 bg-white border rounded-lg shadow-sm">✎</button>
+              <button type="button" onClick={() => setParts(parts.filter((_, idx) => idx !== i))} className="p-2 text-red-500 bg-white border rounded-lg shadow-sm">×</button>
             </div>
           </div>
         ))}

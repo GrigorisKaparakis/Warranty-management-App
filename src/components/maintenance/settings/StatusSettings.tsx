@@ -75,101 +75,70 @@ export const StatusSettings: React.FC<StatusSettingsProps> = memo(({
 
   return (
     <Card 
-      title="WORKFLOW ARCHITECT" 
-      subtitle="CONFIGURE SYSTEM STATUS STATES & CLEARANCE"
+      title="WORKFLOW & STATUS EDITOR" 
+      subtitle="ΔΙΑΧΕΙΡΙΣΗ ΤΩΝ ΣΤΑΔΙΩΝ ΤΗΣ ΕΓΓΥΗΣΗΣ"
       actions={
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {isDirty && (
             <>
-              <button 
-                onClick={onCancel}
-                className="h-10 px-6 rounded-xl bg-white/5 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-white transition-all border border-black/20 font-mono"
-              >
-                ABORT
-              </button>
-              <button 
-                onClick={onSave}
-                className="h-10 px-6 rounded-xl bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] border-none italic"
-              >
-                COMMIT SYNC
-              </button>
+              <Button variant="secondary" size="sm" onClick={onCancel}>ΑΚΥΡΩΣΗ</Button>
+              <Button variant="primary" size="sm" icon={Save} onClick={onSave}>ΑΠΟΘΗΚΕΥΣΗ</Button>
             </>
           )}
-          <button 
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            icon={RotateCcw}
             onClick={handleMigrateStatuses}
-            disabled={isMigratingStatuses}
-            className="h-10 px-6 rounded-xl bg-slate-900 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 hover:text-white transition-all border border-white/5 flex items-center gap-2 italic disabled:opacity-50"
+            loading={isMigratingStatuses}
           >
-            {isMigratingStatuses ? (
-              <>
-                <RotateCcw size={14} className="animate-spin" />
-                SYNCING ({migrationCount})...
-              </>
-            ) : (
-              <>
-                <RotateCcw size={14} />
-                LEGACY SYNC
-              </>
-            )}
-          </button>
+            {isMigratingStatuses ? `ΣΥΓΧΡΟΝΙΣΜΟΣ (${migrationCount})...` : 'ΔΙΟΡΘΩΣΗ ΠΑΛΙΩΝ STATUS'}
+          </Button>
         </div>
       }
     >
-      <div className="space-y-8 pt-4">
-        <div className="flex gap-4 p-6 bg-slate-950 rounded-[2.5rem] border border-white/5 shadow-inner group">
+      <div className="space-y-6">
+        <div className="flex gap-4 p-4 bg-zinc-50 rounded-xl border border-zinc-100">
           <input 
             type="text" 
-            placeholder="NEW STATUS KEY (E.G. WAITING_PARTS)..." 
+            placeholder="ΝΕΟ ΚΛΕΙΔΙ (Π.Χ. WAITING_PARTS)..." 
             value={newStatusKey}
             onChange={e => setNewStatusKey(e.target.value)}
-            className="flex-1 px-6 py-4 bg-slate-900 border border-white/5 rounded-2xl font-black text-sm text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-800"
+            className="flex-1 px-4 py-2 bg-white border border-zinc-200 rounded-xl font-bold outline-none text-sm"
           />
-          <button 
-            onClick={handleAddStatus}
-            className="px-8 bg-blue-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center gap-2 shadow-2xl shadow-blue-900/40 italic"
-          >
-            <Plus size={18} />
-            REGISTER
-          </button>
+          <Button onClick={handleAddStatus} icon={Plus} size="sm">ΠΡΟΣΘΗΚΗ</Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {localStatusOrder.map((key, idx, arr) => {
             const config = localStatuses[key];
             if (!config) return null;
             return (
-              <div key={key} className="flex items-center gap-6 p-6 glass-dark border border-white/5 rounded-[2.5rem] hover:border-blue-500/30 transition-all group/status relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-full blur-3xl pointer-events-none group-hover/status:bg-blue-600/10 transition-all"></div>
-                
-                <div className="flex flex-col gap-2 relative z-10">
-                  <button onClick={() => onMoveStatus(key, 'up')} disabled={idx === 0} className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-lg text-slate-600 hover:text-white disabled:opacity-10 transition-all"><ArrowUp size={16} /></button>
-                  <button onClick={() => onMoveStatus(key, 'down')} disabled={idx === arr.length - 1} className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-lg text-slate-600 hover:text-white disabled:opacity-10 transition-all"><ArrowDown size={16} /></button>
+              <div key={key} className="flex items-center gap-4 p-4 bg-white border border-zinc-100 rounded-xl hover:border-zinc-200 transition-all group">
+                <div className="flex flex-col gap-1">
+                  <button onClick={() => onMoveStatus(key, 'up')} disabled={idx === 0} className="text-zinc-400 hover:text-zinc-900 disabled:opacity-20"><ArrowUp size={14} /></button>
+                  <button onClick={() => onMoveStatus(key, 'down')} disabled={idx === arr.length - 1} className="text-zinc-400 hover:text-zinc-900 disabled:opacity-20"><ArrowDown size={14} /></button>
                 </div>
-
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-                  <div className="space-y-2">
-                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-3">ID: {key}</div>
-                    <input type="text" value={config.label} onChange={(e) => onUpdateStatus(key, 'label', e.target.value)} className="w-full bg-slate-950 border border-white/5 px-5 py-3 rounded-xl text-sm font-black text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all" />
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <div className="text-[10px] font-bold text-zinc-400 uppercase mb-1">ΚΛΕΙΔΙ: {key}</div>
+                    <input type="text" value={config.label} onChange={(e) => onUpdateStatus(key, 'label', e.target.value)} className="w-full bg-zinc-50 border border-zinc-100 px-3 py-1.5 rounded-lg text-sm font-bold outline-none focus:bg-white" />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-3">COLOR HEX</div>
-                    <div className="flex items-center gap-4 bg-slate-950 border border-white/5 p-2 rounded-xl">
-                      <div className="relative">
-                        <input type="color" value={config.color} onChange={(e) => onUpdateStatus(key, 'color', e.target.value)} className="w-10 h-10 rounded-lg border-0 cursor-pointer overflow-hidden p-0 bg-transparent block" />
-                      </div>
-                      <span className="text-[11px] font-black font-mono text-blue-400 tracking-widest">{config.color.toUpperCase()}</span>
+                  <div>
+                    <div className="text-[10px] font-bold text-zinc-400 uppercase mb-1">ΧΡΩΜΑ</div>
+                    <div className="flex items-center gap-2">
+                      <input type="color" value={config.color} onChange={(e) => onUpdateStatus(key, 'color', e.target.value)} className="w-8 h-8 rounded-lg border-0 cursor-pointer" />
+                      <span className="text-xs font-mono text-zinc-500">{config.color}</span>
                     </div>
                   </div>
-
-                  <div className="space-y-2">
-                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-3">SECURITY CLEARANCE</div>
-                    <div className="flex flex-wrap gap-2">
+                  <div>
+                    <div className="text-[10px] font-bold text-zinc-400 uppercase mb-1">ΠΡΟΣΒΑΣΗ ΡΟΛΩΝ</div>
+                    <div className="flex flex-wrap gap-1">
                       {availableRoles.map(role => (
                         <button 
                           key={role} 
                           onClick={() => onToggleStatusRole(key, role)} 
-                          className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${config.allowedRoles?.includes(role) ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]' : 'bg-slate-900 border-white/5 text-slate-600 hover:text-slate-400'}`}
+                          className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${config.allowedRoles?.includes(role) ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-400 hover:bg-zinc-200'}`}
                         >
                           {role}
                         </button>
@@ -177,13 +146,14 @@ export const StatusSettings: React.FC<StatusSettingsProps> = memo(({
                     </div>
                   </div>
                 </div>
-
-                <button 
+                <Button 
+                  variant="danger" 
+                  size="sm" 
+                  icon={Trash2}
                   onClick={() => handleDeleteStatus(key)}
-                  className={`w-12 h-12 flex items-center justify-center rounded-xl transition-all relative z-10 border ${confirmingDeleteKey === key ? 'bg-red-600 border-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)]' : 'bg-white/5 border-white/5 text-slate-700 hover:text-red-500 hover:bg-red-500/10'}`}
                 >
-                  <Trash2 size={20} />
-                </button>
+                  {confirmingDeleteKey === key ? 'ΕΠΙΒΕΒΑΙΩΣΗ' : ''}
+                </Button>
               </div>
             );
           })}

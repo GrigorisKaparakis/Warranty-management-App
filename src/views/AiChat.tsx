@@ -142,78 +142,76 @@ export const AiAssistantView: React.FC = () => {
   };
 
   return (
-    <div className="p-8 md:p-12 max-w-5xl mx-auto h-[calc(100vh-120px)] flex flex-col space-y-10 animate-fade-in">
+    <div className="p-8 md:p-12 max-w-5xl mx-auto h-[calc(100vh-120px)] flex flex-col space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <div className="w-20 h-20 bg-slate-900 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-blue-900/20 relative overflow-hidden group border border-white/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 to-transparent opacity-100 transition-opacity" />
-            <BrainCircuit size={40} className="text-white relative z-10" />
-            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-600 rounded-full blur-xl opacity-50"></div>
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 bg-zinc-900 rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-zinc-200 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <BrainCircuit size={32} className="text-white relative z-10" />
           </div>
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Sparkles size={14} className="text-blue-400 animate-pulse" />
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">AI CO-PILOT</span>
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles size={12} className="text-blue-600" />
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">AI ASSISTANT</span>
             </div>
-            <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-none">H&K INTELLIGENCE</h1>
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tighter uppercase italic">H&K INTELLIGENCE</h1>
           </div>
         </div>
         
         <Button 
-          variant="secondary" 
+          variant="neutral" 
           size="icon"
           onClick={() => setChatHistory([{
             role: 'assistant',
             text: 'Η συνομιλία καθαρίστηκε. Πώς μπορώ να σας βοηθήσω;',
             timestamp: Date.now()
           }])}
-          className="w-14 h-14 rounded-2xl border-white/10 bg-white/5 text-slate-500 hover:text-red-400 hover:bg-red-600/10 transition-all shadow-xl"
+          className="w-12 h-12 rounded-2xl border-zinc-100 bg-white text-zinc-400 hover:text-rose-500 hover:border-rose-100 transition-all"
         >
-          <Trash2 size={22} />
+          <Trash2 size={18} />
         </Button>
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col rounded-[3rem] border border-white/5 shadow-2xl shadow-black/40 overflow-hidden glass-dark relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-600/[0.02] to-transparent pointer-events-none"></div>
-        <div className="flex-1 overflow-y-auto p-10 space-y-10 relative z-10 scrollbar-hide">
+      <div className="flex-1 flex flex-col rounded-[3rem] border border-zinc-100 shadow-2xl shadow-zinc-100 overflow-hidden bg-zinc-50/30">
+        <div className="flex-1 overflow-y-auto p-10 space-y-8">
           {chatHistory.map((message, idx) => (
             <div 
               key={idx} 
-              className={`flex items-start gap-8 ${message.role === 'user' ? 'flex-row-reverse' : ''} animate-fade-in`}
+              className={`flex items-start gap-6 ${message.role === 'user' ? 'flex-row-reverse' : ''} animate-fade-in`}
             >
-              <div className={`w-14 h-14 rounded-[1.2rem] flex items-center justify-center flex-shrink-0 shadow-2xl ${
-                message.role === 'assistant' ? 'bg-blue-600 text-white shadow-blue-600/20' : 'bg-slate-800 text-slate-400 border border-white/5'
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm ${
+                message.role === 'assistant' ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-100 text-zinc-400'
               }`}>
-                {message.role === 'assistant' ? <Bot size={24} /> : <User size={24} />}
+                {message.role === 'assistant' ? <Bot size={20} /> : <User size={20} />}
               </div>
               
-              <div className={`max-w-[75%] space-y-3 ${message.role === 'user' ? 'text-right' : ''}`}>
-                <div className={`inline-block p-8 rounded-[2.5rem] text-[13px] font-medium leading-relaxed tracking-wide shadow-2xl ${
+              <div className={`max-w-[80%] space-y-2 ${message.role === 'user' ? 'text-right' : ''}`}>
+                <div className={`inline-block p-6 rounded-[2rem] text-sm leading-relaxed shadow-sm ${
                   message.role === 'assistant' 
-                    ? 'bg-slate-900 text-slate-100 border border-white/5 rounded-tl-none' 
-                    : 'bg-blue-600 text-white rounded-tr-none shadow-blue-600/10'
+                    ? 'bg-white text-zinc-800 border border-zinc-100 rounded-tl-none' 
+                    : 'bg-zinc-900 text-white rounded-tr-none'
                 }`}>
-                  <div className="markdown-body prose prose-invert max-w-none">
+                  <div className="markdown-body">
                     <Markdown>{message.text}</Markdown>
                   </div>
                 </div>
-                <div className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] px-4">
+                <div className="text-[9px] font-black text-zinc-300 uppercase tracking-widest px-2">
                   {new Date(message.timestamp).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
             </div>
           ))}
           {isLoading && (
-            <div className="flex items-start gap-8 animate-pulse">
-              <div className="w-14 h-14 rounded-[1.2rem] bg-blue-600 flex items-center justify-center flex-shrink-0">
-                <Bot size={24} className="text-white" />
+            <div className="flex items-start gap-6 animate-pulse">
+              <div className="w-12 h-12 rounded-2xl bg-zinc-900 flex items-center justify-center flex-shrink-0">
+                <Bot size={20} className="text-white" />
               </div>
-              <div className="bg-slate-900 p-8 rounded-[2.5rem] rounded-tl-none border border-white/5 flex gap-2 shadow-2xl">
-                <div className="w-2.5 h-2.5 bg-blue-500/40 rounded-full animate-bounce shadow-[0_0_8px_rgba(59,130,246,0.3)]" />
-                <div className="w-2.5 h-2.5 bg-blue-500/40 rounded-full animate-bounce [animation-delay:0.2s] shadow-[0_0_8px_rgba(59,130,246,0.3)]" />
-                <div className="w-2.5 h-2.5 bg-blue-500/40 rounded-full animate-bounce [animation-delay:0.4s] shadow-[0_0_8px_rgba(59,130,246,0.3)]" />
+              <div className="bg-white p-6 rounded-[2rem] rounded-tl-none border border-zinc-100 flex gap-2">
+                <div className="w-2 h-2 bg-zinc-200 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-zinc-200 rounded-full animate-bounce [animation-delay:0.2s]" />
+                <div className="w-2 h-2 bg-zinc-200 rounded-full animate-bounce [animation-delay:0.4s]" />
               </div>
             </div>
           )}
@@ -221,33 +219,33 @@ export const AiAssistantView: React.FC = () => {
         </div>
 
         {/* Input Area */}
-        <div className="p-10 bg-black/40 border-t border-white/5 backdrop-blur-3xl relative z-10">
-          <div className="relative flex items-center gap-6">
+        <div className="p-8 bg-white border-t border-zinc-100">
+          <div className="relative flex items-center gap-4">
             <input 
               type="text" 
               placeholder="Ρωτήστε οτιδήποτε για τις εγγυήσεις..." 
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyPress={e => e.key === 'Enter' && handleSend()}
-              className="flex-1 pl-10 pr-24 py-6 bg-slate-950 border border-white/10 rounded-[2.5rem] text-[14px] font-bold text-white outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 transition-all placeholder:text-slate-700 shadow-2xl uppercase tracking-tighter"
+              className="flex-1 pl-8 pr-20 py-6 bg-zinc-50 border border-zinc-100 rounded-[2rem] text-sm font-medium outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-zinc-300"
             />
             <Button 
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="absolute right-3 w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:bg-blue-500 active:scale-95 transition-all disabled:opacity-10 border-none"
+              className="absolute right-2 w-14 h-14 rounded-full bg-zinc-900 text-white flex items-center justify-center shadow-xl hover:shadow-zinc-200 active:scale-90 transition-all disabled:opacity-20"
             >
-              <Send size={24} />
+              <Send size={20} />
             </Button>
           </div>
           
-          <div className="mt-8 flex items-center justify-center gap-10">
-            <div className="flex items-center gap-3">
-              <Zap size={14} className="text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">REAL-TIME OS DATA</span>
+          <div className="mt-6 flex items-center justify-center gap-8">
+            <div className="flex items-center gap-2">
+              <Zap size={10} className="text-amber-500" />
+              <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">REAL-TIME DATA</span>
             </div>
-            <div className="flex items-center gap-3">
-              <ShieldCheck size={14} className="text-emerald-500 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">SECURE SYSTEM ANALYTICS</span>
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={10} className="text-emerald-500" />
+              <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">SECURE ANALYTICS</span>
             </div>
           </div>
         </div>
