@@ -27,31 +27,91 @@
 
 ### 📁 / (Root)
 *   **`App.tsx`**: Κεντρικό component, διαχείριση Routing και Auth State.
+*   **`index.tsx`**: Το entry point της εφαρμογής React.
+*   **`index.css`**: Κεντρικό αρχείο στυλ (Tailwind CSS).
 *   **`firebase-blueprint.json`**: Ορισμός δομής Firestore (Entities & Collections).
 *   **`firestore.rules`**: Κανόνες ασφαλείας για τη βάση δεδομένων.
 *   **`metadata.json`**: Ρυθμίσεις πλατφόρμας (Permissions, App Name).
 *   **`CHANGELOG.md`**: Ιστορικό εκδόσεων και αλλαγών.
+*   **`MEMO.md`**: Το παρόν έγγραφο τεκμηρίωσης.
+*   **`package.json`**: Διαχείριση εξαρτήσεων και scripts.
+*   **`vite.config.ts`**: Ρυθμίσεις του Vite build tool.
 
 ### 📁 /src/core
-*   **`config.ts`**: Σταθερές, μενού, εικονίδια, AI Prompts και το αντικείμενο `UI_MESSAGES` για κεντρική διαχείριση κειμένων.
+*   **`config/`**: Κεντρική παραμετροποίηση χωρισμένη σε 6 αρχεία:
+    *   `defaults.ts`: Προεπιλεγμένες τιμές εφαρμογής.
+    *   `icons.ts`: Κεντρική διαχείριση εικονιδίων (Lucide).
+    *   `messages.ts`: Κείμενα και μηνύματα συστήματος (UI_MESSAGES).
+    *   `services.ts`: Ρυθμίσεις εξωτερικών υπηρεσιών.
+    *   `ui.ts`: Ρυθμίσεις εμφάνισης και layout.
+    *   `index.ts`: Export όλων των παραπάνω.
 *   **`types.ts`**: TypeScript Interfaces για όλη την εφαρμογή (Entry, User, Settings κλπ).
 
 ### 📁 /src/services (Εργαλεία & Υπηρεσίες)
 *   **`gemini.ts`**: Η "καρδιά" του AI. OCR ανάλυση PDF/Εικόνων και AI Assistant.
-*   **`firebase/`**: 
-    *   `auth.ts`: Login/Logout με Firebase Auth.
-    *   `db.ts`: CRUD λειτουργίες Firestore.
-    *   `admin/MaintenanceService.ts`: Εργαλεία διαχείρισης και migrations.
 *   **`pdf.ts`**: Δημιουργία επαγγελματικών PDF εγγράφων.
-*   **`analytics.ts`**: Υπολογισμός στατιστικών για το Dashboard.
+*   **`firebase/`**: (11 αρχεία)
+    *   `core.ts`: Αρχικοποίηση Firebase SDK.
+    *   `auth.ts`: Login/Logout και διαχείριση χρήστη.
+    *   `db.ts`: Βασικές CRUD λειτουργίες Firestore.
+    *   `entries.ts`: Εξειδικευμένες λειτουργίες για τις εγγυήσεις.
+    *   `registry.ts`: Διαχείριση μητρώων (Οχήματα, Πελάτες, Ανταλλακτικά).
+    *   `notes.ts`: Λειτουργίες για το Note Board.
+    *   `aiFeedback.ts`: Αποθήκευση feedback για τις απαντήσεις του AI.
+    *   `monitor.ts`: **Κρίσιμο εργαλείο** παρακολούθησης reads και real-time updates.
+    *   `admin/`:
+        *   `BaseAdminService.ts`: Βασική κλάση για admin λειτουργίες.
+        *   `MaintenanceService.ts`: Εργαλεία διαχείρισης, καθαρισμού και migrations.
+        *   `index.ts`: Export των admin services.
 
-### 📁 /src/views (Σελίδες)
+### 📁 /src/views (Σελίδες - 9 αρχεία)
 *   **`Dashboard.tsx`**: Στατιστικά, γραφήματα και πρόσφατη δραστηριότητα.
 *   **`Inventory.tsx`**: Η κεντρική λίστα εγγυήσεων.
-*   **`AiChat.tsx`**: AI Assistant για ερωτήσεις πάνω στα δεδομένα του συνεργείου.
+*   **`WarrantyDetailView.tsx`**: Αναλυτική προβολή μιας συγκεκριμένης εγγύησης.
+*   **`AiChat.tsx`**: AI Assistant για ερωτήσεις πάνω στα δεδομένα.
 *   **`AuditLogView.tsx`**: Ιστορικό αλλαγών (ποιος, πότε, τι άλλαξε).
 *   **`ExpiryTrackerView.tsx`**: Παρακολούθηση εγγυήσεων που λήγουν.
-*   **`Onboarding.tsx`**: Οδηγός αρχικής παραμετροποίησης για νέους Admins.
+*   **`VehicleHistoryView.tsx`**: Ιστορικό εγγυήσεων ανά αριθμό πλαισίου (VIN).
+*   **`CustomerHistoryView.tsx`**: Ιστορικό εγγυήσεων ανά πελάτη.
+*   **`Onboarding.tsx`**: Οδηγός αρχικής παραμετροποίησης.
+
+### 📁 /src/utils (Βοηθητικά Εργαλεία)
+*   **`dateUtils.ts`**: Διαχείριση ημερομηνιών και format.
+*   **`auditUtils.ts`**: Logic για τη δημιουργία audit logs και smart diffs.
+*   **`errorUtils.ts`**: Κεντρική διαχείριση και μορφοποίηση σφαλμάτων.
+*   **`toast.ts`**: Wrapper για το σύστημα ειδοποιήσεων (Sonner).
+*   **`warrantyLogic.ts`**: Υπολογισμοί και κανόνες για τις εγγυήσεις.
+
+### 📁 /src/store (Global State - Zustand)
+*   **`useStore.ts`**: Ο κεντρικός store που ενώνει όλα τα slices.
+*   **`slices/`**: Διαχωρισμός state ανά θεματική:
+    *   `authSlice.ts`: State χρήστη και δικαιωμάτων.
+    *   `warrantySlice.ts`: State εγγυήσεων και φίλτρων.
+    *   `settingsSlice.ts`: Ρυθμίσεις εφαρμογής και branding.
+    *   `uiSlice.ts`: State για modals, sidebar και overlays.
+    *   `aiSlice.ts`: Ιστορικό chat και AI states.
+
+### 📁 /src/hooks (Custom Logic)
+*   **`useAppState.ts`**: Πρόσβαση στο global state και υπολογισμένες τιμές.
+*   **`useInventory.ts`**: Logic για τη λίστα (φίλτρα, pagination, bulk actions).
+*   **`useWarrantyForm.ts`**: Διαχείριση φόρμας, OCR και validation.
+*   **`useWarrantyCard.ts`**: Ενέργειες ανά εγγραφή.
+*   **`useAppNavigation.ts`**: Διαχείριση πλοήγησης και μενού.
+*   **`useAppPermissions.ts`**: Έλεγχος δικαιωμάτων (RBAC).
+*   **`useAppStats.ts`**: Υπολογισμός στατιστικών για το dashboard.
+*   **`useFilteredEntries.ts`**: Εξειδικευμένο φιλτράρισμα δεδομένων.
+*   **`useInventoryFilters.ts`**: Logic για τα UI φίλτρα.
+*   **`useInventorySelection.ts`**: Διαχείριση επιλογής πολλαπλών εγγραφών.
+*   **`useSettingsActions.ts`**: Ενέργειες για τις ρυθμίσεις admin.
+*   **`useDebounce.ts`**: Utility hook για καθυστέρηση εκτέλεσης (search).
+*   **`useAppFileDrop.ts`**: Διαχείριση drag & drop αρχείων σε όλη την εφαρμογή.
+
+### 📁 /src/components (UI Components)
+*   **`core/`**: Κεντρικά components συστήματος (ErrorBoundary, StateManager).
+*   **`layout/`**: Στοιχεία layout (Sidebar, NoticeTicker, Header).
+*   **`ui/`**: Επαναχρησιμοποιήσιμα UI στοιχεία (Modals, Tables, Buttons, Inputs).
+*   **`warranty/`**: Components ειδικά για τις εγγυήσεις (WarrantyCard, WarrantyForm, NoteBoard).
+*   **`maintenance/`**: Components για το Admin Panel (Settings, Tools, Security).
 
 ---
 
@@ -82,4 +142,4 @@
 3.  **Excel/CSV Export**: Εξαγωγή φιλτραρισμένων λιστών για λογιστική χρήση.
 
 ---
-*Τελευταία ενημέρωση: 29 Μαρτίου 2026*
+*Τελευταία ενημέρωση: 2 Απριλίου 2026*

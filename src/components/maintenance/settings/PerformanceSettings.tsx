@@ -23,7 +23,8 @@ export const PerformanceSettings: React.FC<PerformanceSettingsProps> = memo(({
   const limitsConfig: { label: string; key: keyof SystemLimits; icon: any; desc: string }[] = [
     { label: 'FETCH LIMIT', key: 'fetchLimit', icon: Settings2, desc: 'ΜΕΓΙΣΤΟΣ ΑΡΙΘΜΟΣ ΕΓΓΥΗΣΕΩΝ' },
     { label: 'INVENTORY PAGE SIZE', key: 'inventoryPageSize', icon: Layout, desc: 'ΕΓΓΡΑΦΕΣ ΑΝΑ ΣΕΛΙΔΑ' },
-    { label: 'AI CHAT HISTORY', key: 'aiChatHistoryLimit', icon: Info, desc: 'ΜΗΝΥΜΑΤΑ ΣΤΟ ΙΣΤΟΡΙΚΟ' },
+    { label: 'INVENTORY SEARCH DELAY', key: 'inventorySearchDelay', icon: Info, desc: 'ΚΑΘΥΣΤΕΡΗΣΗ ΑΝΑΖΗΤΗΣΗΣ (ms)' },
+    { label: 'PART SUGGESTIONS DELAY', key: 'partSuggestionsDelay', icon: Info, desc: 'ΚΑΘΥΣΤΕΡΗΣΗ ΠΡΟΤΑΣΕΩΝ (ms)' },
     { label: 'DASHBOARD LOGS', key: 'dashboardAuditLogs', icon: Shield, desc: 'ΠΡΟΣΦΑΤΕΣ ΕΝΕΡΓΕΙΕΣ' },
     { label: 'AUDIT LOG FETCH', key: 'auditLogFetchLimit', icon: Shield, desc: 'ΣΥΝΟΛΙΚΑ LOGS' },
   ];

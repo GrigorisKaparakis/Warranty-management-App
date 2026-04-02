@@ -163,7 +163,8 @@ export interface DashboardConfig {
 export interface SystemLimits {
   fetchLimit: number;
   inventoryPageSize: number;
-  aiChatHistoryLimit: number;
+  inventorySearchDelay: number;
+  partSuggestionsDelay: number;
   dashboardAuditLogs: number;
   auditLogFetchLimit: number;
 }

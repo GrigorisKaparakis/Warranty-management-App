@@ -2,6 +2,16 @@
 
 Όλες οι σημαντικές αλλαγές σε αυτό το έργο θα καταγράφονται σε αυτό το αρχείο.
 
+## [1.1.2] - 2026-04-02
+### UI/UX & Maintenance Optimization
+- **Dynamic Performance Settings**: Οι καθυστερήσεις (debounce delays) για την αναζήτηση στο Inventory και τις προτάσεις ανταλλακτικών είναι πλέον δυναμικές. Προστέθηκαν τα πεδία `INVENTORY SEARCH DELAY` και `PART_SUGGESTIONS_DELAY` στο Maintenance Panel.
+- **Official Branding Integration**: Ενημέρωση του favicon της εφαρμογής με το επίσημο λογότυπο της **H&K AEBE**, διασφαλίζοντας οπτική ταυτότητα σύμφωνη με το κεντρικό site.
+- **Code Cleanup & Maintenance**:
+    - Αφαίρεση του αχρησιμοποίητου `AnalyticsService` και του αρχείου `analytics.ts`.
+    - Καθαρισμός των αχρησιμοποίητων σταθερών `AI_CHAT_HISTORY` από το `ui.ts` και το `PerformanceSettings.tsx`.
+    - Πλήρης επικαιροποίηση του `MEMO.md` με την τρέχουσα δομή των 9 views, 11 firebase services, 13 hooks και του global state (Zustand slices).
+- **Documentation Update**: Αναλυτική καταγραφή της αρχιτεκτονικής των 6 νέων αρχείων ρυθμίσεων (config) και των βοηθητικών εργαλείων (utils).
+
 ## [1.1.1] - 2026-03-30
 ### Performance & Architecture Optimization
 - **Code Splitting (Lazy Loading)**: Υλοποίηση `React.lazy` και `Suspense` για όλα τα κύρια views της εφαρμογής. Το αρχικό bundle είναι πλέον σημαντικά ελαφρύτερο, καθώς οι σελίδες φορτώνονται μόνο όταν χρειάζεται.

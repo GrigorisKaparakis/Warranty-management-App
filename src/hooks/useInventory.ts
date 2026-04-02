@@ -58,7 +58,8 @@ export const useInventory = () => {
     handleSort
   } = useInventoryFilters(listFilters);
 
-  const debouncedSearchQuery = useDebounce(searchQuery, PERFORMANCE_CONFIG.DEBOUNCE.INVENTORY_SEARCH);
+  const searchDelay = settings.limits?.inventorySearchDelay || PERFORMANCE_CONFIG.DEBOUNCE.INVENTORY_SEARCH;
+  const debouncedSearchQuery = useDebounce(searchQuery, searchDelay);
 
   useEffect(() => {
     setVisibleLimit(pageSize);

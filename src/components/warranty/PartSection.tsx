@@ -7,6 +7,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Part, PartRegistryEntry } from '../../core/types';
 import { UI_MESSAGES, PERFORMANCE_CONFIG } from '../../core/config';
 
+import { useStore } from '../../store/useStore';
+
 interface PartSectionProps {
   parts: Omit<Part, 'id'>[];
   setParts: (parts: Omit<Part, 'id'>[]) => void;
@@ -15,17 +17,19 @@ interface PartSectionProps {
 }
 
 export const PartSection: React.FC<PartSectionProps> = ({ parts, setParts, partsRegistry, brand }) => {
+  const settings = useStore(s => s?.settings);
   const [tempPart, setTempPart] = useState({ code: '', description: '', quantity: 1, isReady: false });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   useEffect(() => {
+    const delay = settings.limits?.partSuggestionsDelay || PERFORMANCE_CONFIG.DEBOUNCE.PART_SUGGESTIONS;
     const timer = setTimeout(() => {
       setDebouncedSearch(tempPart.code);
-    }, PERFORMANCE_CONFIG.DEBOUNCE.PART_SUGGESTIONS);
+    }, delay);
     return () => clearTimeout(timer);
-  }, [tempPart.code]);
+  }, [tempPart.code, settings.limits?.partSuggestionsDelay]);
 
   const knownParts = useMemo(() => {
     const map = new Map<string, string>();
