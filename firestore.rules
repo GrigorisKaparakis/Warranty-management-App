@@ -95,7 +95,11 @@ service cloud.firestore {
     // Κανόνες για Εγγυήσεις
     match /entries/{entryId} {
       allow read: if isAuthenticated() && isNotDisabled();
-      allow create, update, delete: if isAuthenticated() && isNotDisabled() && hasPermission('entry');
+      allow create, delete: if isAuthenticated() && isNotDisabled() && hasPermission('entry');
+      allow update: if isAuthenticated() && isNotDisabled() && (
+        hasPermission('entry') || 
+        (hasPermission('warrantyPayments') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paymentAmount']))
+      );
     }
 
     // Κανόνες για Σημειώσεις

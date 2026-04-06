@@ -24,13 +24,23 @@ export const generateAuditDetails = (oldData: Partial<Entry> | null, newData: Pa
     { key: 'brand', label: 'ΜΑΡΚΑ' },
     { key: 'company', label: 'ΕΤΑΙΡΕΙΑ' },
     { key: 'warrantyId', label: 'WARRANTY ID' },
-    { key: 'isPaid', label: 'ΠΛΗΡΩΜΗ' }
+    { key: 'isPaid', label: 'ΠΛΗΡΩΜΗ' },
+    { key: 'expiryAt', label: 'ΛΗΞΗ' }
   ];
 
   fieldsToTrack.forEach(({ key, label }) => {
     if (newData[key] !== undefined && oldData[key] !== newData[key]) {
-      const oldVal = key === 'isPaid' ? (oldData[key] ? 'ΝΑΙ' : 'ΟΧΙ') : oldData[key];
-      const newVal = key === 'isPaid' ? (newData[key] ? 'ΝΑΙ' : 'ΟΧΙ') : newData[key];
+      let oldVal = oldData[key];
+      let newVal = newData[key];
+
+      if (key === 'isPaid') {
+        oldVal = oldData[key] ? 'ΝΑΙ' : 'ΟΧΙ';
+        newVal = newData[key] ? 'ΝΑΙ' : 'ΟΧΙ';
+      } else if (key === 'expiryAt') {
+        oldVal = oldData[key] ? new Date(oldData[key] as number).toLocaleDateString('el-GR') : 'ΚΑΝΕΝΑ';
+        newVal = newData[key] ? new Date(newData[key] as number).toLocaleDateString('el-GR') : 'ΚΑΝΕΝΑ';
+      }
+
       changes.push(`${label}: ${oldVal} ➔ ${newVal}`);
     }
   });

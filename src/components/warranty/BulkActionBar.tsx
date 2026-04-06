@@ -12,7 +12,6 @@ interface BulkActionBarProps {
   allStatusKeys: string[];
   getStatusLabel: (status: string) => string;
   onStatusChange: (status: string) => void;
-  onPaymentChange: (isPaid: boolean) => void;
   onDelete: () => void;
   onClose: () => void;
 }
@@ -22,7 +21,6 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
   allStatusKeys,
   getStatusLabel,
   onStatusChange,
-  onPaymentChange,
   onDelete,
   onClose
 }) => {
@@ -49,23 +47,6 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
               <option value="" disabled>{UI_MESSAGES.LABELS.CHOOSE}</option>
               {allStatusKeys.map(s => <option key={s} value={s}>{getStatusLabel(s)}</option>)}
             </select>
-          </div>
-
-          <div className="w-px h-8 bg-white/10" />
-
-          <div className="flex gap-2">
-            <button 
-              onClick={() => onPaymentChange(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-emerald-500 hover:text-white transition-all"
-            >
-              <CheckCircle size={14} /> {UI_MESSAGES.LABELS.PAID}
-            </button>
-            <button 
-              onClick={() => onPaymentChange(false)}
-              className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-rose-500 hover:text-white transition-all"
-            >
-              <XCircle size={14} /> {UI_MESSAGES.LABELS.UNPAID}
-            </button>
           </div>
 
           <div className="w-px h-8 bg-white/10" />

@@ -40,17 +40,6 @@ export const useInventorySelection = (filteredEntries: Entry[], visibleLimit: nu
     }
   };
 
-  const handleBulkPaymentChange = async (isPaid: boolean) => {
-    if (selectedIds.size === 0) return;
-    try {
-      await FirestoreService.updateEntriesBatch(Array.from(selectedIds), { isPaid });
-      toast.success(UI_MESSAGES.SUCCESS.BATCH_UPDATED(selectedIds.size));
-      setIsSelectionMode(false);
-    } catch (e) {
-      toast.error(formatError(e));
-    }
-  };
-
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
     if (!window.confirm(UI_MESSAGES.CONFIRMATIONS.DELETE_BATCH(selectedIds.size))) return;
@@ -72,7 +61,6 @@ export const useInventorySelection = (filteredEntries: Entry[], visibleLimit: nu
     selectAll,
     deselectAll,
     handleBulkStatusChange,
-    handleBulkPaymentChange,
     handleBulkDelete
   };
 };

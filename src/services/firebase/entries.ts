@@ -244,5 +244,30 @@ export const EntryService = {
       });
       handleFirestoreError(error, OperationType.WRITE, `entries/${log.targetId}`);
     }
+  },
+
+  async updatePaymentAmount(id: string, amount: number): Promise<void> {
+    const docId = id.trim();
+    const docRef = doc(db, "entries", docId);
+    try {
+      const snap = await monitoredGetDoc(docRef);
+      const oldData = snap.exists() ? sanitizeEntry(snap.data(), snap.id) : null;
+      
+      await updateDoc(docRef, { paymentAmount: amount });
+
+      await AdminService.addAuditLog({
+        timestamp: Date.now(),
+        userId: auth.currentUser?.uid || 'system',
+        userEmail: auth.currentUser?.email || 'system',
+        action: 'UPDATE',
+        targetId: docId,
+        targetWarrantyId: oldData?.warrantyId || 'N/A',
+        details: `ΕΝΗΜΕΡΩΣΗ ΠΟΣΟΥ ΠΛΗΡΩΜΗΣ: ${oldData?.paymentAmount || 0}€ -> ${amount}€`,
+        oldData: oldData,
+        newData: { ...oldData, paymentAmount: amount }
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `entries/${docId}`);
+    }
   }
 };

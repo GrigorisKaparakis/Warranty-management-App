@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAppState } from '../hooks/useAppState';
 import { useStore } from '../store/useStore';
@@ -8,6 +8,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { PageHeader } from '../components/ui/PageHeader';
+import { FirestoreService } from '../services/firebase/db';
 import { 
   ArrowLeft, 
   Edit3, 
@@ -18,7 +19,8 @@ import {
   History,
   CheckCircle2,
   XCircle,
-  Calendar
+  Calendar,
+  AlertTriangle
 } from 'lucide-react';
 
 /**
@@ -42,7 +44,35 @@ export const WarrantyDetailView: React.FC = () => {
     navigateToVinHistory
   } = useAppState();
 
+  const [isExpiryModalOpen, setIsExpiryModalOpen] = useState(false);
+  const [newExpiryDate, setNewExpiryDate] = useState('');
+  const [isUpdatingExpiry, setIsUpdatingExpiry] = useState(false);
+
   const entry = useMemo(() => entries.find(e => e.id === id), [entries, id]);
+
+  useEffect(() => {
+    if (entry?.expiryAt) {
+      setNewExpiryDate(new Date(entry.expiryAt).toISOString().split('T')[0]);
+    }
+  }, [entry]);
+
+  const handleUpdateExpiry = async (overrideDate?: string) => {
+    if (!entry) return;
+    
+    const dateToUse = overrideDate !== undefined ? overrideDate : newExpiryDate;
+    setIsUpdatingExpiry(true);
+    try {
+      const expiryTimestamp = dateToUse ? new Date(dateToUse).getTime() : null;
+      await FirestoreService.updateEntry(entry.id, { expiryAt: expiryTimestamp }, entry);
+      toast.success(expiryTimestamp ? "Η ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ ΕΝΗΜΕΡΩΘΗΚΕ ΕΠΙΤΥΧΩΣ." : "Η ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ ΑΦΑΙΡΕΘΗΚΕ.");
+      setIsExpiryModalOpen(false);
+    } catch (error) {
+      console.error("Failed to update expiry:", error);
+      toast.error("ΣΦΑΛΜΑ ΚΑΤΑ ΤΗΝ ΕΝΗΜΕΡΩΣΗ ΤΗΣ ΛΗΞΗΣ.");
+    } finally {
+      setIsUpdatingExpiry(false);
+    }
+  };
 
   const entryLogs = useMemo(() => 
     auditLogs.filter(log => log.targetId === id).sort((a, b) => b.timestamp - a.timestamp),
@@ -132,6 +162,31 @@ export const WarrantyDetailView: React.FC = () => {
                   {entry.vin}
                 </button>
               </div>
+              <div className="space-y-1">
+                <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ ΕΓΓΥΗΣΗΣ</div>
+                <div className="flex items-center gap-3">
+                  <div className={`text-lg font-black uppercase ${
+                    entry.expiryAt && entry.expiryAt < Date.now() ? 'text-rose-600' : 'text-zinc-900'
+                  }`}>
+                    {entry.expiryAt ? new Date(entry.expiryAt).toLocaleDateString('el-GR') : 'ΔΕΝ ΕΧΕΙ ΟΡΙΣΤΕΙ'}
+                  </div>
+                  {canEdit && (
+                    <button 
+                      onClick={() => setIsExpiryModalOpen(true)}
+                      className="p-2 bg-zinc-100 text-zinc-500 rounded-lg hover:bg-zinc-900 hover:text-white transition-all"
+                      title="Χειροκίνητη Αλλαγή Λήξης"
+                    >
+                      <Calendar size={14} />
+                    </button>
+                  )}
+                </div>
+                {entry.expiryAt && entry.expiryAt < Date.now() && (
+                  <div className="flex items-center gap-1.5 text-[10px] font-black text-rose-500 uppercase tracking-tight">
+                    <AlertTriangle size={10} />
+                    Η ΕΓΓΥΗΣΗ ΕΧΕΙ ΛΗΞΕΙ
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
 
@@ -217,6 +272,68 @@ export const WarrantyDetailView: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* Expiry Override Modal */}
+      {isExpiryModalOpen && (
+        <div className="fixed inset-0 z-[900] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl border border-zinc-100 scale-100 animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
+              <Calendar className="text-blue-600" size={24} />
+            </div>
+            <h3 className="text-xl font-black text-zinc-900 uppercase tracking-tight mb-2 italic">ΧΕΙΡΟΚΙΝΗΤΗ ΑΛΛΑΓΗ ΛΗΞΗΣ</h3>
+            <p className="text-xs font-bold text-zinc-500 mb-8 leading-relaxed italic uppercase tracking-tight">
+              Χρησιμοποιήστε αυτή την επιλογή μόνο για εξαιρέσεις. Η αλλαγή θα καταγραφεί στο ιστορικό.
+            </p>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">ΝΕΑ ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ</label>
+                <input 
+                  type="date" 
+                  className="w-full px-6 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl font-black text-zinc-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  value={newExpiryDate}
+                  onChange={(e) => setNewExpiryDate(e.target.value)}
+                  disabled={isUpdatingExpiry}
+                />
+              </div>
+
+              <div className="flex gap-4 pt-2">
+                <Button 
+                  onClick={() => {
+                    setNewExpiryDate('');
+                    handleUpdateExpiry('');
+                  }}
+                  variant="secondary"
+                  className="flex-1 text-rose-600 hover:bg-rose-50"
+                  disabled={isUpdatingExpiry}
+                >
+                  ΚΑΘΑΡΙΣΜΟΣ
+                </Button>
+                <Button 
+                  onClick={() => setIsExpiryModalOpen(false)}
+                  variant="secondary"
+                  className="flex-1"
+                  disabled={isUpdatingExpiry}
+                >
+                  ΑΚΥΡΩΣΗ
+                </Button>
+                <Button 
+                  onClick={() => handleUpdateExpiry()}
+                  variant="primary"
+                  className="flex-1 shadow-lg shadow-blue-100"
+                  disabled={isUpdatingExpiry}
+                >
+                  {isUpdatingExpiry ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    'ΕΝΗΜΕΡΩΣΗ'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
