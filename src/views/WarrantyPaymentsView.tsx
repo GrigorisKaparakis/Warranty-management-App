@@ -82,8 +82,8 @@ export const WarrantyPaymentsView: React.FC<{ label: string }> = ({ label }) => 
       const company = e.company || 'ΑΛΛΟ';
       byCompany[company] = (byCompany[company] || 0) + amount;
 
-      // By Month
-      const date = new Date(e.createdAt);
+      // By Month (Using paidAt if available, otherwise createdAt)
+      const date = new Date(e.paidAt || e.createdAt);
       const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
       byMonth[monthKey] = (byMonth[monthKey] || 0) + amount;
     });
@@ -106,7 +106,8 @@ export const WarrantyPaymentsView: React.FC<{ label: string }> = ({ label }) => 
     if (filteredEntries.length === 0) return;
 
     const data = filteredEntries.map(e => ({
-      'ΗΜΕΡΟΜΗΝΙΑ': new Date(e.createdAt).toLocaleDateString('el-GR'),
+      'ΗΜ. ΚΑΤΑΧΩΡΗΣΗΣ': new Date(e.createdAt).toLocaleDateString('el-GR'),
+      'ΗΜ. ΠΛΗΡΩΜΗΣ': e.paidAt ? new Date(e.paidAt).toLocaleDateString('el-GR') : '-',
       'ΚΩΔΙΚΟΣ ΕΓΓΥΗΣΗΣ': e.warrantyId,
       'VIN': e.vin,
       'ΠΕΛΑΤΗΣ': e.fullName,

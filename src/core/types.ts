@@ -105,6 +105,7 @@ export interface Entry {
   notes: string;        // Παρατηρήσεις και αυτόματο ιστορικό αλλαγών
   isPaid: boolean;      // Κατάσταση πληρωμής από διανομέα
   paymentAmount?: number; // Ποσό πληρωμής από διανομέα (€)
+  paidAt?: number;      // Timestamp ημερομηνίας πληρωμής
   createdAt: number;
   updatedAt?: number;   // Timestamp τελευταίας ενημέρωσης
   readyAt?: number;     // Timestamp όταν ολοκληρώθηκε/έγινε ready

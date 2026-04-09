@@ -98,7 +98,9 @@ service cloud.firestore {
       allow create, delete: if isAuthenticated() && isNotDisabled() && hasPermission('entry');
       allow update: if isAuthenticated() && isNotDisabled() && (
         hasPermission('entry') || 
-        (hasPermission('warrantyPayments') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paymentAmount']))
+        (hasPermission('warrantyPayments') && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paymentAmount', 'paidAt']) &&
+         resource.data.isPaid == true)
       );
     }
 
