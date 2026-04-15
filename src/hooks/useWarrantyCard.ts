@@ -26,8 +26,6 @@ export const useWarrantyCard = (entry: Entry, readOnly: boolean) => {
   const onDelete = useStore(s => s.setDeletingEntry);
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
 
   const getStatusConfig = (status: string): StatusConfig => {
     return settings.statusConfigs?.[status] || 

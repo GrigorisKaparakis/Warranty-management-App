@@ -31,7 +31,6 @@ const UserTable = lazy(() => import('./src/components/ui/UserTable').then(m => (
 const MaintenancePanel = lazy(() => import('./src/components/maintenance/MaintenancePanel').then(m => ({ default: m.MaintenancePanel })));
 const ExpiryTrackerView = lazy(() => import('./src/views/ExpiryTrackerView').then(m => ({ default: m.ExpiryTrackerView })));
 const AuditLogView = lazy(() => import('./src/views/AuditLogView').then(m => ({ default: m.AuditLogView })));
-const WarrantyPaymentsView = lazy(() => import('./src/views/WarrantyPaymentsView').then(m => ({ default: m.WarrantyPaymentsView })));
 const OnboardingView = lazy(() => import('./src/views/Onboarding').then(m => ({ default: m.OnboardingView })));
 
 /**
@@ -232,7 +231,6 @@ const App: React.FC = () => {
                             <Route path="/users" element={hasAccess('users') ? <UserTable /> : <Navigate to="/dashboard" replace />} />
                             <Route path="/maintenance/*" element={hasAccess('maintenance') ? <MaintenancePanel /> : <Navigate to="/dashboard" replace />} />
                             <Route path="/expiry-tracker" element={hasAccess('expiryTracker') ? <ExpiryTrackerView /> : <Navigate to="/dashboard" replace />} />
-                            <Route path="/warranty-payments" element={hasAccess('warrantyPayments') ? <WarrantyPaymentsView label="ΠΛΗΡΩΜΕΣ ΕΓΓΥΗΣΕΩΝ" /> : <Navigate to="/dashboard" replace />} />
                             <Route path="/auditLog" element={hasAccess('auditLog') ? <AuditLogView /> : <Navigate to="/dashboard" replace />} />
                             
                             {/* Fallback for unknown paths */}

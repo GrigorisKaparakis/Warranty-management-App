@@ -57,7 +57,6 @@ export const Sidebar: React.FC = () => {
       case 'users': return '/users';
       case 'maintenance': return '/maintenance';
       case 'expiryTracker': return '/expiry-tracker';
-      case 'warrantyPayments': return '/warranty-payments';
       case 'all': return '/warranty/inventory';
       case 'paid': return '/paid';
       case 'rejected': return '/rejected';

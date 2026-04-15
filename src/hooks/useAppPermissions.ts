@@ -63,12 +63,6 @@ export const useAppPermissions = () => {
     return allowed.includes(currentRole);
   }, [settings.rolePermissions, currentRole, isAdmin]);
 
-  const canManagePayments = useMemo(() => {
-    if (isAdmin) return true;
-    const allowed = settings.rolePermissions?.['warrantyPayments'] || ['ADMIN'];
-    return allowed.includes(currentRole);
-  }, [settings.rolePermissions, currentRole, isAdmin]);
-
   return {
     profile,
     currentRole,
@@ -79,7 +73,6 @@ export const useAppPermissions = () => {
     canManageUsers,
     canDelete,
     canBroadcast,
-    canSeeAudit,
-    canManagePayments
+    canSeeAudit
   };
 };

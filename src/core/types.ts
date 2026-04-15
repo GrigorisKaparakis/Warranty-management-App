@@ -11,7 +11,7 @@ export type SortOrder = 'asc' | 'desc';
 /**
  * Διαθέσιμα Views (σελίδες) στην εφαρμογή.
  */
-export type ViewType = 'dashboard' | 'entry' | 'all' | 'paid' | 'rejected' | 'notes' | 'maintenance' | 'users' | 'vinSearch' | 'aiAssistant' | 'expiryTracker' | 'auditLog' | 'warrantyPayments';
+export type ViewType = 'dashboard' | 'entry' | 'all' | 'paid' | 'rejected' | 'notes' | 'maintenance' | 'users' | 'vinSearch' | 'aiAssistant' | 'expiryTracker' | 'auditLog';
 
 export interface UserProfile {
   uid: string;
@@ -104,8 +104,6 @@ export interface Entry {
   parts: Part[];
   notes: string;        // Παρατηρήσεις και αυτόματο ιστορικό αλλαγών
   isPaid: boolean;      // Κατάσταση πληρωμής από διανομέα
-  paymentAmount?: number; // Ποσό πληρωμής από διανομέα (€)
-  paidAt?: number;      // Timestamp ημερομηνίας πληρωμής
   createdAt: number;
   updatedAt?: number;   // Timestamp τελευταίας ενημέρωσης
   readyAt?: number;     // Timestamp όταν ολοκληρώθηκε/έγινε ready

@@ -50,6 +50,7 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
     selectAll,
     deselectAll,
     handleBulkStatusChange,
+    handleBulkPaymentChange,
     handleBulkDelete,
     clearFilters,
     isFiltered,
@@ -248,6 +249,7 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
         allStatusKeys={allStatusKeys}
         getStatusLabel={getStatusLabel}
         onStatusChange={handleBulkStatusChange}
+        onPaymentChange={handleBulkPaymentChange}
         onDelete={handleBulkDelete}
         onClose={() => setIsSelectionMode(false)}
       />

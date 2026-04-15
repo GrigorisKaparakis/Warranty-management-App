@@ -244,33 +244,5 @@ export const EntryService = {
       });
       handleFirestoreError(error, OperationType.WRITE, `entries/${log.targetId}`);
     }
-  },
-
-  async updatePaymentDetails(id: string, amount: number, paidAt?: number): Promise<void> {
-    const docId = id.trim();
-    const docRef = doc(db, "entries", docId);
-    try {
-      const snap = await monitoredGetDoc(docRef);
-      const oldData = snap.exists() ? sanitizeEntry(snap.data(), snap.id) : null;
-      
-      const updates: any = { paymentAmount: amount };
-      if (paidAt !== undefined) updates.paidAt = paidAt;
-
-      await updateDoc(docRef, updates);
-
-      await AdminService.addAuditLog({
-        timestamp: Date.now(),
-        userId: auth.currentUser?.uid || 'system',
-        userEmail: auth.currentUser?.email || 'system',
-        action: 'UPDATE',
-        targetId: docId,
-        targetWarrantyId: oldData?.warrantyId || 'N/A',
-        details: `ΕΝΗΜΕΡΩΣΗ ΠΛΗΡΩΜΗΣ: ${oldData?.paymentAmount || 0}€ -> ${amount}€${paidAt ? `, ΗΜ/ΝΙΑ: ${new Date(paidAt).toLocaleDateString('el-GR')}` : ''}`,
-        oldData: oldData,
-        newData: { ...oldData, ...updates }
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `entries/${docId}`);
-    }
   }
 };

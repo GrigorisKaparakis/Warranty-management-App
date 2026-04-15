@@ -27,20 +27,12 @@ export const useFilteredEntries = (entries: Entry[], config: FilterConfig) => {
     const normQuery = normalizeGreek(searchQuery);
 
     let result = entries.filter(e => {
-      if (currentView === 'warrantyPayments') return e.status === EntryStatus.COMPLETED;
       if (currentView === 'paid') return e.isPaid;
       if (currentView === 'rejected') return e.status === EntryStatus.REJECTED;
       if (currentView === 'inventory' || currentView === 'all') return !e.isPaid && e.status !== EntryStatus.REJECTED;
       if (currentView && currentView.toUpperCase() !== 'ALL') return e.status === currentView.toUpperCase();
       return true;
-    });
-
-    // Special case for warrantyPayments: Default empty if no filters
-    if (currentView === 'warrantyPayments' && companyFilter === 'ALL' && !startDate && !endDate) {
-      return [];
-    }
-
-    result = result.filter(e => {
+    }).filter(e => {
       if (statusFilter !== 'ALL' && e.status !== statusFilter) return false;
       if (companyFilter !== 'ALL' && e.company !== companyFilter) return false;
       if (startDate && e.createdAt < new Date(startDate).getTime()) return false;

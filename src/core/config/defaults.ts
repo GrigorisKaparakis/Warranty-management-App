@@ -41,7 +41,6 @@ export const FULL_GARAGE_DEFAULTS: GarageSettings = {
     { id: 'paid', label: 'ΠΛΗΡΩΜΕΝΕΣ', icon: 'paid', roles: ['ADMIN'], category: 'views' },
     { id: 'rejected', label: 'ΑΠΟΡΡΙΦΘΕΙΣΕΣ', icon: 'rejected', roles: ['ADMIN'], category: 'views' },
     { id: 'expiryTracker', label: 'ΛΗΞΕΙΣ ΕΓΓΥΗΣΕΩΝ', icon: 'maintenance', roles: ['ADMIN'], category: 'views' },
-    { id: 'warrantyPayments', label: 'ΠΛΗΡΩΜΕΣ ΕΓΓΥΗΣΕΩΝ', icon: 'payments', roles: ['ADMIN'], category: 'views' },
     { id: 'notes', label: 'ΣΗΜΕΙΩΣΕΙΣ', icon: 'notes', roles: ['ADMIN'], category: 'views' },
     { id: 'vinSearch', label: 'ΑΝΑΖΗΤΗΣΗ VIN', icon: 'search', roles: ['ADMIN'], category: 'views' },
     { id: 'aiAssistant', label: 'AI ASSISTANT', icon: 'ai', roles: ['ADMIN'], category: 'views' },
@@ -81,8 +80,7 @@ export const FULL_GARAGE_DEFAULTS: GarageSettings = {
   rolePermissions: {
     'delete_entry': ['ADMIN'],
     'broadcast_notice': ['ADMIN'],
-    'auditLog': ['ADMIN'],
-    'warrantyPayments': ['ADMIN']
+    'auditLog': ['ADMIN']
   }
 };
 
