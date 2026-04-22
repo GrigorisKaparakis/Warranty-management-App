@@ -9,6 +9,7 @@ import { Entry, ViewType } from './src/core/types';
 // Static imports for layout and critical components
 import { Sidebar } from './src/components/layout/Sidebar';
 import { NoticeTicker } from './src/components/layout/NoticeTicker';
+import { ChatBox } from './src/components/ChatBox';
 import { Toaster } from 'sonner';
 import { ChangePasswordModal } from './src/components/ui/ChangePasswordModal';
 import { APP_DEFAULTS } from './src/core/config';
@@ -264,6 +265,7 @@ const App: React.FC = () => {
                     isOpen={isChangePasswordModalOpen} 
                     onClose={() => setIsChangePasswordModalOpen(false)} 
                   />
+                  <ChatBox />
                 </div>
               )
             }

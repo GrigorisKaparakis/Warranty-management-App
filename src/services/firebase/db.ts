@@ -9,6 +9,7 @@ import { AdminService, MaintenanceService } from "./admin";
 import { EntryService } from "./entries";
 import { RegistryService } from "./registry";
 import { NoteService } from "./notes";
+import { ChatService } from "./chat";
 
 export { db, auth };
 
@@ -24,5 +25,8 @@ export const FirestoreService = {
   ...RegistryService,
   
   // Notes
-  ...NoteService
+  ...NoteService,
+
+  // Chat
+  ...ChatService
 };

@@ -212,3 +212,25 @@ export interface AIFeedback {
   correctedData: any;   // Τι έγραψε ο χρήστης
   discrepancies: string[]; // Λίστα με τα πεδία που διέφεραν
 }
+
+/**
+ * Μήνυμα στο Chat.
+ */
+export interface ChatMessage {
+  id: string;
+  text: string;
+  senderId: string;
+  senderName: string;
+  timestamp: any; // Firestore Timestamp
+  readBy: string[]; // Λίστα με τα IDs των χρηστών που είδαν το μήνυμα
+}
+
+/**
+ * Παρουσία χρήστη στο Chat.
+ */
+export interface ChatPresence {
+  uid: string;
+  name: string;
+  lastActive: any; // Firestore Timestamp
+  chatOpen: boolean;
+}
