@@ -9,6 +9,7 @@ import { CompanySettings } from './settings/CompanySettings';
 import { BrandingSettings } from './settings/BrandingSettings';
 import { PerformanceSettings } from './settings/PerformanceSettings';
 import { ThresholdSettings } from './settings/ThresholdSettings';
+import { FeatureSettings } from './settings/FeatureSettings';
 
 interface AppSettingsProps {
   activeTab: string;
@@ -31,6 +32,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
   const [localMenu, setLocalMenu] = useState(settings.menuConfig);
   const [localCompanyMap, setLocalCompanyMap] = useState(settings.companyBrandMap);
   const [localExpiryRules, setLocalExpiryRules] = useState(settings.companyExpiryRules);
+  const [localChatEnabled, setLocalChatEnabled] = useState(settings.chatEnabled ?? true);
   
   const [isDirty, setIsDirty] = useState<Record<string, boolean>>({});
 
@@ -65,7 +67,11 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
     }
   }, [settings.companyBrandMap, settings.companyExpiryRules, isDirty.companies]);
 
-  if (!['companies', 'status', 'menu', 'app_label', 'dashboard', 'app_limits', 'expiry_thresholds'].includes(activeTab)) return null;
+  React.useEffect(() => {
+    if (!isDirty.features) setLocalChatEnabled(settings.chatEnabled ?? true);
+  }, [settings.chatEnabled, isDirty.features]);
+
+  if (!['companies', 'status', 'menu', 'app_label', 'dashboard', 'app_limits', 'expiry_thresholds', 'feature_toggles'].includes(activeTab)) return null;
 
   const availableRoles = settings?.availableRoles || ONBOARDING_DEFAULTS.DEFAULT_ROLES;
 
@@ -79,6 +85,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
     if (section === 'status') updates = { statusConfigs: localStatuses, statusOrder: localStatusOrder };
     if (section === 'menu') updates = { menuConfig: localMenu };
     if (section === 'companies') updates = { companyBrandMap: localCompanyMap, companyExpiryRules: localExpiryRules };
+    if (section === 'features') updates = { chatEnabled: localChatEnabled };
 
     const success = await updateGarageSettings(updates);
     if (success) {
@@ -99,6 +106,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
       setLocalCompanyMap(settings.companyBrandMap);
       setLocalExpiryRules(settings.companyExpiryRules);
     }
+    if (section === 'features') setLocalChatEnabled(settings.chatEnabled ?? true);
     setIsDirty(prev => ({ ...prev, [section]: false }));
   }, [settings]);
 
@@ -244,6 +252,11 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
     setIsDirty(prev => ({ ...prev, expiry_thresholds: true }));
   }, []);
 
+  const handleUpdateChatStatus = useCallback((enabled: boolean) => {
+    setLocalChatEnabled(enabled);
+    setIsDirty(prev => ({ ...prev, features: true }));
+  }, []);
+
   return (
     <div className="animate-slide-up space-y-6">
       {activeTab === 'status' && (
@@ -319,6 +332,16 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
           onUpdateThresholds={handleUpdateThresholds}
           onSave={() => saveSection('expiry_thresholds')}
           onCancel={() => cancelSection('expiry_thresholds')}
+        />
+      )}
+
+      {activeTab === 'feature_toggles' && (
+        <FeatureSettings 
+          localChatEnabled={localChatEnabled}
+          isDirty={!!isDirty.features}
+          onUpdateChatStatus={handleUpdateChatStatus}
+          onSave={() => saveSection('features')}
+          onCancel={() => cancelSection('features')}
         />
       )}
     </div>

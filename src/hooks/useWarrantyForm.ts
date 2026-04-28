@@ -24,6 +24,7 @@ export const useWarrantyForm = () => {
   const user = useStore(s => s.user);
   const entries = useStore(s => s.entries);
   const settings = useStore(s => s.settings);
+  const triggerRefetch = useStore(s => s.triggerRefetch);
   const vehiclesRegistry = useStore(s => s.vehicles);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -252,6 +253,7 @@ export const useWarrantyForm = () => {
         FirestoreService.upsertCustomer(formData.fullName, formData.vin)
       ].map(p => p.catch(e => console.error("Registry update failed:", e))));
 
+      triggerRefetch(); // Trigger refetch since data changed
       toast.success(UI_MESSAGES.SUCCESS.SAVED);
       const savedId = editingEntry?.id;
       setAiExtractedData(null);

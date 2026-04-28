@@ -23,6 +23,7 @@ export const useWarrantyCard = (entry: Entry, readOnly: boolean) => {
   const user = useStore(s => s.user);
   const profile = useStore(s => s.profile);
   const settings = useStore(s => s.settings);
+  const triggerRefetch = useStore(s => s.triggerRefetch);
   const onDelete = useStore(s => s.setDeletingEntry);
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -69,6 +70,7 @@ export const useWarrantyCard = (entry: Entry, readOnly: boolean) => {
 
     try {
       await FirestoreService.updateEntry(entry.id, updates, entry);
+      triggerRefetch();
     } catch (err) {
       toast.error(formatError(err));
     }
@@ -81,6 +83,7 @@ export const useWarrantyCard = (entry: Entry, readOnly: boolean) => {
     );
     try {
       await FirestoreService.updateEntry(entry.id, { parts: updatedParts, warrantyId: entry.warrantyId }, entry);
+      triggerRefetch();
     } catch (err) {
       toast.error(formatError(err));
     }
@@ -98,6 +101,7 @@ export const useWarrantyCard = (entry: Entry, readOnly: boolean) => {
     };
     try {
       await FirestoreService.updateEntry(entry.id, updates, entry);
+      triggerRefetch();
     } catch (err) {
       toast.error(formatError(err));
     }

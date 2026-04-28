@@ -4,7 +4,7 @@
  */
 
 import { doc, query, orderBy, limit, addDoc, updateDoc, deleteDoc, writeBatch, setDoc, where } from "firebase/firestore";
-import { monitoredOnSnapshot, monitoredGetDocs, monitoredGetDoc } from "./monitor";
+import { monitoredOnSnapshot, monitoredGetDocs, monitoredGetDoc, visibilityAwareOnSnapshot } from "./monitor";
 import { db, entriesCollection, deepSanitize, sanitizeEntry, auth, handleFirestoreError, OperationType } from "./core";
 import { Entry, AuditEntry } from "../../core/types";
 import { AdminService } from "./admin";
@@ -16,10 +16,24 @@ export const EntryService = {
     if (limitCount) {
       q = query(q, limit(limitCount));
     }
-    return monitoredOnSnapshot(q, (snapshot) => {
+    return visibilityAwareOnSnapshot(q, (snapshot) => {
       const entries = snapshot.docs.map((snap: any) => sanitizeEntry(snap.data(), snap.id));
       callback(entries);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "entries"));
+  },
+
+  async getEntries(limitCount: number | undefined): Promise<Entry[]> {
+    try {
+      let q = query(entriesCollection, orderBy("createdAt", "desc"));
+      if (limitCount) {
+        q = query(q, limit(limitCount));
+      }
+      const snapshot = await monitoredGetDocs(q);
+      return snapshot.docs.map((snap) => sanitizeEntry(snap.data(), snap.id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, "entries");
+      return [];
+    }
   },
 
   async addEntry(entry: Omit<Entry, 'id'>): Promise<string> {

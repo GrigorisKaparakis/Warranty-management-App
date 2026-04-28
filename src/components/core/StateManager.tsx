@@ -81,28 +81,31 @@ export const StateManager: React.FC = () => {
 
   // --- GLOBAL FIRESTORE SUBSCRIPTIONS ---
   useEffect(() => {
-    if (!store.user) return;
+    const { user, settings, setEntries, setIsLive, refetchSignal } = store;
+    if (!user) return;
 
     // Αυτά τα δεδομένα είναι απαραίτητα σχεδόν παντού ή είναι μικρά
     const unsubNotes = FirestoreService.subscribeToNotes((data) => store.setNotes(data));
     const unsubSettings = FirestoreService.subscribeToSettings((data) => store.setSettings(data));
     const unsubNotices = FirestoreService.subscribeToNotices((data) => store.setNotices(data));
     
-    // Τα entries τα θέλουμε live αλλά με limit αν δεν είμαστε σε σελίδα που τα δείχνει όλα
+    // Τα entries ΠΛΕΟΝ δεν τα θέλουμε live για εξοικονόμηση πόρων (getDocs migration)
     const isDashboard = currentPath === '/dashboard';
     const isWarrantyView = currentPath.startsWith('/warranty/') || currentPath === '/paid' || currentPath === '/rejected';
-    const limit = (isDashboard || isWarrantyView) ? undefined : (store.settings.limits?.fetchLimit || FETCH_LIMIT);
+    const limit = (isDashboard || isWarrantyView) ? undefined : (settings.limits?.fetchLimit || FETCH_LIMIT);
     
-    const unsubEntries = FirestoreService.subscribeToEntries(limit, (data) => { 
-      store.setEntries(data); 
-      store.setIsLive(true); 
-    });
+    const loadEntries = async () => {
+      const data = await FirestoreService.getEntries(limit);
+      setEntries(data);
+      setIsLive(false); // Πλέον δεν είναι live connection
+    };
+
+    loadEntries();
 
     return () => { 
-      unsubEntries(); unsubNotes(); unsubSettings(); unsubNotices();
-      store.setIsLive(false); 
+      unsubNotes(); unsubSettings(); unsubNotices();
     };
-  }, [store.user, store.settings.limits?.fetchLimit, currentPath]); // Το currentPath παραμένει εδώ για το limit των entries
+  }, [store.user, store.settings.limits?.fetchLimit, currentPath, store.refetchSignal]); // Φορτώνει ξανά αν αλλάξει το path, ο χρήστης ή το refetchSignal
 
   // --- PERSISTENT REGISTRIES ---
   // Τα registries (parts, vehicles, customers) τα κρατάμε ενεργά όσο ο χρήστης είναι συνδεδεμένος

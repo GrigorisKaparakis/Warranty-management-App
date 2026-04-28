@@ -19,11 +19,13 @@ export const useAppFileDrop = () => {
   const setOriginalAiData = useStore(s => s?.setOriginalAiData);
   const setDragActive = useStore(s => s?.setDragActive);
   const setDragCounter = useStore(s => s?.setDragCounter);
+  const triggerRefetch = useStore(s => s?.triggerRefetch);
 
   const handleFinalDelete = async (deletingEntry: {id: string, warrantyId: string} | null) => {
     if (!deletingEntry) return;
     try {
       await FirestoreService.deleteEntry(deletingEntry.id, deletingEntry.warrantyId);
+      triggerRefetch();
       toast.success(UI_MESSAGES.SUCCESS.DELETED(deletingEntry.warrantyId));
       setDeletingEntry(null);
     } catch (e) {

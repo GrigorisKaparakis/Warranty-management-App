@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./core";
 import { ChatMessage, ChatPresence } from "../../core/types";
+import { visibilityAwareOnSnapshot } from "./monitor";
 
 /**
  * ChatService: Διαχειρίζεται την επικοινωνία σε πραγματικό χρόνο (public chat).
@@ -45,7 +46,7 @@ export const ChatService = {
     const messagesRef = collection(db, "messages");
     const q = query(messagesRef, orderBy("timestamp", "desc"), limit(messageLimit));
 
-    return onSnapshot(q, (snapshot) => {
+    return visibilityAwareOnSnapshot(q, (snapshot) => {
       const messages: ChatMessage[] = [];
       snapshot.forEach((doc) => {
         messages.push({ id: doc.id, ...doc.data() } as ChatMessage);
@@ -107,7 +108,7 @@ export const ChatService = {
    */
   subscribeToPresence: (callback: (presence: ChatPresence[]) => void) => {
     const presenceRef = collection(db, "presence");
-    return onSnapshot(presenceRef, (snapshot) => {
+    return visibilityAwareOnSnapshot(presenceRef, (snapshot) => {
       const presence: ChatPresence[] = [];
       snapshot.forEach((docSnap) => {
         presence.push({ ...docSnap.data() } as ChatPresence);

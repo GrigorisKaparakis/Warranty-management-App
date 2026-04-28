@@ -17,6 +17,8 @@ export interface UISlice {
   setDragCounter: (count: number | ((prev: number) => number)) => void;
   isChangePasswordModalOpen: boolean;
   setIsChangePasswordModalOpen: (open: boolean) => void;
+  refetchSignal: number;
+  triggerRefetch: () => void;
 }
 
 export const createUISlice: StateCreator<UISlice> = (set) => ({
@@ -32,4 +34,6 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   })),
   isChangePasswordModalOpen: false,
   setIsChangePasswordModalOpen: (isChangePasswordModalOpen) => set({ isChangePasswordModalOpen }),
+  refetchSignal: 0,
+  triggerRefetch: () => set((state) => ({ refetchSignal: state.refetchSignal + 1 })),
 });
