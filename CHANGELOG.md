@@ -2,6 +2,13 @@
 
 Όλες οι σημαντικές αλλαγές σε αυτό το έργο θα καταγράφονται σε αυτό το αρχείο.
 
+## [1.3.0] - 2026-04-28
+### Performance & Reliability (The "Refetch" Update)
+- **Refetch on Success (Solution 1)**: Υλοποίηση συστήματος `refetchSignal` για αυτόματη ανανέωση των δεδομένων μετά από κάθε επιτυχημένη ενέργεια (Δημιουργία, Ενημέρωση, Διαγραφή).
+- **Firestore "Kill-switch"**: Πλήρης κατάργηση των live listeners (`onSnapshot`) από την κύρια συλλογή εγγυήσεων (`entries`) για δραστική μείωση της κατανάλωσης Reads.
+- **getDocs Migration**: Μετάβαση σε pull-based αρχιτεκτονική φόρτωσης δεδομένων, βελτιώνοντας την απόδοση και την προβλεψιμότητα του κόστους της βάσης δεδομένων.
+- **Improved State Sync**: Ενσωμάτωση του μηχανισμού trigger σε όλα τα hooks διαχείρισης εγγυήσεων (`useWarrantyForm`, `useWarrantyCard`, `useAppFileDrop`).
+
 ## [1.2.1] - 2026-04-21
 ### Chat Presence & UI Refinements
 - **Real-time Presence Tracking**: Υλοποίηση συστήματος παρεμφερών χρηστών (Online Status) που δείχνει ποιοι συνάδελφοι έχουν ανοιχτό το Chat.

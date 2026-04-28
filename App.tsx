@@ -15,6 +15,8 @@ import { ChangePasswordModal } from './src/components/ui/ChangePasswordModal';
 import { APP_DEFAULTS } from './src/core/config';
 import { StateManager } from './src/components/core/StateManager';
 import { ErrorBoundary } from './src/components/core/ErrorBoundary';
+import { KillSwitchOverlay } from './src/components/maintenance/KillSwitchOverlay';
+import { initKillSwitch } from './src/services/firebase/monitor';
 import { formatError } from './src/utils/errorUtils';
 import { toast } from './src/utils/toast';
 import { Upload, FileText, Loader2 } from 'lucide-react';
@@ -100,11 +102,14 @@ const App: React.FC = () => {
   // Ενημέρωση του τίτλου της σελίδας δυναμικά
   useEffect(() => {
     document.title = companyName;
+    const unsubscribeKillSwitch = initKillSwitch();
+    return () => unsubscribeKillSwitch();
   }, [companyName]);
 
   // Κεντρικό Rendering
   return (
     <>
+      <KillSwitchOverlay />
       <StateManager />
       <Toaster position="bottom-right" expand={true} richColors />
       
@@ -265,7 +270,7 @@ const App: React.FC = () => {
                     isOpen={isChangePasswordModalOpen} 
                     onClose={() => setIsChangePasswordModalOpen(false)} 
                   />
-                  <ChatBox />
+                  {settings.chatEnabled !== false && <ChatBox />}
                 </div>
               )
             }
