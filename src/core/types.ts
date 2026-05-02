@@ -235,3 +235,16 @@ export interface ChatPresence {
   lastActive: any; // Firestore Timestamp
   chatOpen: boolean;
 }
+
+/**
+ * Συγκεντρωτικά στατιστικά για το Dashboard (Aggregated Data Pattern).
+ */
+export interface GlobalStats {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+  paid: number;
+  unpaid: number;
+  lastUpdated?: number;
+}

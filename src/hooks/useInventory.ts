@@ -29,6 +29,7 @@ export const useInventory = () => {
   const user = useStore(s => s?.user);
   const profile = useStore(s => s?.profile);
   const entries = useStore(s => s?.entries);
+  const isLoading = useStore(s => s?.isLoading);
   const settings = useStore(s => s?.settings);
   const listFilters = useStore(s => s?.listFilters);
 
@@ -69,6 +70,32 @@ export const useInventory = () => {
     currentView, searchQuery: debouncedSearchQuery, statusFilter, companyFilter, startDate, endDate, sortConfig
   });
 
+  const lastDoc = useStore(s => s?.lastDoc);
+  const setLastDoc = useStore(s => s?.setLastDoc);
+  const setEntries = useStore(s => s?.setEntries);
+  const setIsLoading = useStore(s => s?.setIsLoading);
+
+  const loadMoreFromNetwork = async () => {
+    if (!lastDoc || isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const { entries: newEntries, lastDoc: newLast } = await FirestoreService.getEntries(pageSize, lastDoc);
+      if (newEntries.length > 0) {
+        // Αποφυγή διπλότυπων (αν και το startAfter θα έπρεπε να το χειρίζεται)
+        const currentIds = new Set(entries.map(e => e.id));
+        const uniqueNew = newEntries.filter(e => !currentIds.has(e.id));
+        setEntries([...entries, ...uniqueNew]);
+      }
+      setLastDoc(newLast);
+    } catch (e) {
+      console.error("Load more error:", e);
+      toast.error("ΣΦΑΛΜΑ ΚΑΤΑ ΤΗ ΦΟΡΤΩΣΗ ΠΕΡΙΣΣΟΤΕΡΩΝ ΔΕΔΟΜΕΝΩΝ");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const selection = useInventorySelection(filteredAndSortedEntries, visibleLimit, currentView);
 
   const allStatusKeys = useMemo(() => {
@@ -87,9 +114,12 @@ export const useInventory = () => {
   return {
     currentView,
     entries: filteredAndSortedEntries,
+    isLoading,
     visibleLimit,
     pageSize,
     setVisibleLimit,
+    loadMore: loadMoreFromNetwork,
+    hasMore: !!lastDoc,
     searchQuery,
     setSearchQuery,
     statusFilter,

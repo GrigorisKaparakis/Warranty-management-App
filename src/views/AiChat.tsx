@@ -94,7 +94,7 @@ export const AiAssistantView: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined) || (typeof process !== 'undefined' ? process.env.API_KEY : undefined);
       
       if (!apiKey) {
         throw new Error('Gemini API Key is missing. Please check your environment variables.');

@@ -1,7 +1,11 @@
-import { 
-  onSnapshot as firestoreOnSnapshot, 
-  getDocs as firestoreGetDocs, 
+import {
+  onSnapshot as firestoreOnSnapshot,
+  getDocs as firestoreGetDocs,
   getDoc as firestoreGetDoc,
+  getDocsFromCache,
+  getDocsFromServer,
+  getDocFromCache,
+  getDocFromServer,
   DocumentReference,
   Query,
   DocumentSnapshot,
@@ -9,6 +13,7 @@ import {
   SnapshotListenOptions,
   doc
 } from "firebase/firestore";
+import { useStore } from "../../store/useStore";
 import { visibilityManager } from "../../utils/visibilityManager";
 import { db, auth } from "./core";
 
@@ -40,8 +45,14 @@ export const initKillSwitch = () => {
   return firestoreOnSnapshot(settingsRef, (snapshot) => {
     if (snapshot.exists()) {
       const data = snapshot.data();
-      isKillSwitchActive = !!data.killSwitchEnabled;
-      killSwitchListeners.forEach(l => l(isKillSwitchActive));
+      const isActive = !!data.killSwitchEnabled;
+      isKillSwitchActive = isActive;
+
+      // Update store for UI reactivity
+      const setMaintenanceMode = useStore.getState().setMaintenanceMode;
+      if (setMaintenanceMode) setMaintenanceMode(isActive);
+
+      killSwitchListeners.forEach(l => l(isActive));
     }
   });
 };
@@ -57,15 +68,19 @@ interface ReadLog {
 }
 
 const logRead = (log: ReadLog) => {
-  // Console logs removed for production V1.0.9
+  const isServer = log.source === 'SERVER';
+  const sourceLabel = isServer ? 'firebase' : 'cache';
+  const color = isServer ? 'color: #ef4444; font-weight: bold;' : 'color: #10b981; font-weight: bold;';
+
+  console.log(
+    `%cfrom ${sourceLabel} ${log.docCount} docs from ${log.path}`,
+    color
+  );
 };
 
 async function isCurrentUserAdmin(): Promise<boolean> {
   const user = auth.currentUser;
   if (!user) return false;
-  
-  const ADMIN_EMAILS = ["grigoriskaparakishk@gmail.com"];
-  if (ADMIN_EMAILS.includes(user.email || '')) return true;
 
   try {
     const userDoc = await firestoreGetDoc(doc(db, "users", user.uid));
@@ -85,23 +100,19 @@ export function monitoredOnSnapshot<T>(
   options?: SnapshotListenOptions
 ) {
   const path = (reference as any).path || (reference as any)._query?.path?.segments?.join('/') || 'unknown/path';
-  
-  // Το monitoredOnSnapshot καλείται εσωτερικά από το visibilityAwareOnSnapshot 
-  // ή απευθείας. Αν το KillSwitch είναι ενεργό, ελέγχουμε αν υπάρχει bypass.
-  // Σημείωση: Το bypass ελέγχεται στον start() του visibilityAwareOnSnapshot για ασύγχρονη υποστήριξη.
-  
+
   let isInitialFetch = true;
-  
+
   const handleSnapshot = (snapshot: any) => {
     const isQuery = 'docs' in snapshot;
     const totalDocs = isQuery ? snapshot.docs.length : (snapshot.exists() ? 1 : 0);
     const source = snapshot.metadata.fromCache ? 'CACHE' : 'SERVER';
-    
+
     // Calculate changes
     let added = 0;
     let modified = 0;
     let removed = 0;
-    
+
     if (isQuery) {
       snapshot.docChanges().forEach((change: any) => {
         if (change.type === 'added') added++;
@@ -111,8 +122,8 @@ export function monitoredOnSnapshot<T>(
     }
 
     const operation = isInitialFetch ? 'INITIAL_FETCH' : 'LIVE_UPDATE';
-    const docCountText = isInitialFetch 
-      ? `${totalDocs} docs` 
+    const docCountText = isInitialFetch
+      ? `${totalDocs} docs`
       : `+${added} ~${modified} -${removed} (Total: ${totalDocs})`;
 
     logRead({
@@ -136,7 +147,6 @@ export function monitoredOnSnapshot<T>(
 
 /**
  * Visibility-Aware version of onSnapshot
- * Σταματάει τη συνδρομή όταν το tab δεν είναι ορατό και την ξεκινάει πάλι όταν εμφανίζεται.
  */
 export function visibilityAwareOnSnapshot<T>(
   reference: Query<T> | DocumentReference<T>,
@@ -151,11 +161,12 @@ export function visibilityAwareOnSnapshot<T>(
     if (isStoppedManually) return;
     if (unsubscribe) return;
 
-    // Αν είναι ενεργό το Kill-Switch, ελέγχουμε αν είμαστε admin για να το παρακάμψουμε
     if (isKillSwitchActive) {
       const path = (reference as any).path || (reference as any)._query?.path?.segments?.join('/') || 'unknown';
       if (!path.includes('app_settings/global')) {
         const isAdmin = await isCurrentUserAdmin();
+        if (isStoppedManually || unsubscribe) return;
+
         if (!isAdmin) {
           console.warn("Kill-Switch active: Subscription blocked for non-admin");
           return;
@@ -173,7 +184,6 @@ export function visibilityAwareOnSnapshot<T>(
     }
   };
 
-  // Παρακολούθηση ορατότητας
   const cleanupVisibility = visibilityManager.subscribe((visible) => {
     if (visible) {
       start();
@@ -182,7 +192,6 @@ export function visibilityAwareOnSnapshot<T>(
     }
   });
 
-  // Επιστρέφει συνάρτηση για οριστικό σταμάτημα
   return () => {
     isStoppedManually = true;
     stop();
@@ -195,16 +204,16 @@ export function visibilityAwareOnSnapshot<T>(
  */
 export async function monitoredGetDocs<T>(query: Query<T>): Promise<QuerySnapshot<T>> {
   const path = (query as any).path || (query as any)._query?.path?.segments?.join('/') || 'unknown/path';
-  
+
   if (isKillSwitchActive && !path.includes('app_settings/global')) {
     const isAdmin = await isCurrentUserAdmin();
     if (!isAdmin) {
       throw new Error("Application is temporarily disabled (Kill-Switch Active)");
     }
   }
-  
+
   const snapshot = await firestoreGetDocs(query);
-  
+
   logRead({
     path,
     docCount: snapshot.docs.length,
@@ -221,14 +230,14 @@ export async function monitoredGetDocs<T>(query: Query<T>): Promise<QuerySnapsho
  */
 export async function monitoredGetDoc<T>(reference: DocumentReference<T>): Promise<DocumentSnapshot<T>> {
   const path = (reference as any).path || 'unknown/path';
-  
+
   if (isKillSwitchActive && !path.includes('app_settings/global')) {
     const isAdmin = await isCurrentUserAdmin();
     if (!isAdmin) {
       throw new Error("Application is temporarily disabled (Kill-Switch Active)");
     }
   }
-  
+
   const snapshot = await firestoreGetDoc(reference);
 
   logRead({

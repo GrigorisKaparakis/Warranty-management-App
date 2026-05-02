@@ -15,9 +15,10 @@ const NOTO_SANS_URL = PDF_CONFIG.FONTS.NOTO_SANS_URL;
 /**
  * Φορτώνει τη γραμματοσειρά NotoSans και την κάνει register στο jsPDF.
  */
-const loadGreekFont = async (doc: jsPDF): Promise<void> => {
+const loadGreekFont = async (doc: jsPDF): Promise<boolean> => {
   try {
     const response = await fetch(NOTO_SANS_URL);
+    if (!response.ok) throw new Error("Font fetch failed");
     const buffer = await response.arrayBuffer();
     const binary = new Uint8Array(buffer);
     let base64 = "";
@@ -29,8 +30,10 @@ const loadGreekFont = async (doc: jsPDF): Promise<void> => {
     doc.addFileToVFS("NotoSans-Regular.ttf", fontBase64);
     doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
     doc.setFont("NotoSans");
+    return true;
   } catch (error) {
     console.error("Failed to load Greek font:", error);
+    return false;
   }
 };
 
@@ -44,8 +47,18 @@ export const PDFService = {
    * Εξαγωγή ολόκληρης της λίστας εγγυήσεων σε μορφή πίνακα.
    */
   exportEntryList: async (entries: Entry[], settings?: GarageSettings) => {
+    // BUG-012: Limit records to prevent browser freeze
+    const MAX_RECORDS = 1500;
+    const isTruncated = entries.length > MAX_RECORDS;
+    const dataToExport = entries.slice(0, MAX_RECORDS);
+
     const doc = new jsPDF();
-    await loadGreekFont(doc);
+    const fontLoaded = await loadGreekFont(doc);
+    
+    if (!fontLoaded) {
+      const proceed = window.confirm("Προειδοποίηση: Η Ελληνική γραμματοσειρά δεν φορτώθηκε. Τα Ελληνικά μπορεί να μην εμφανίζονται σωστά. Θέλετε να συνεχίσετε;");
+      if (!proceed) return;
+    }
     
     const companyName = settings?.branding?.appName || PDF_CONFIG.DEFAULTS.COMPANY_NAME;
 
@@ -57,8 +70,13 @@ export const PDFService = {
     doc.setFontSize(PDF_CONFIG.FONT_SIZES.SMALL);
     doc.setTextColor(PDF_CONFIG.COLORS.SECONDARY[0]);
     doc.text(`Ημερομηνία Εξαγωγής: ${new Date().toLocaleDateString('el-GR')}`, 14, 30);
+    
+    if (isTruncated) {
+      doc.setTextColor(153, 27, 27); // Red color
+      doc.text(`ΠΡΟΣΟΧΗ: Εμφανίζονται μόνο οι πρώτες ${MAX_RECORDS} εγγραφές από τις ${entries.length}.`, 14, 36);
+    }
 
-    const tableData = entries.map(e => [
+    const tableData = dataToExport.map(e => [
       e.status,
       e.warrantyId,
       e.vin,
@@ -70,7 +88,7 @@ export const PDFService = {
 
     // Δημιουργία Πίνακα με autoTable
     (doc as any).autoTable({
-      startY: 40,
+      startY: isTruncated ? 45 : 40,
       head: [['Κατάσταση', 'Αρ. Εγγύησης', 'VIN', 'Εταιρεία/Μάρκα', 'Ημ/νία', 'Πελάτης', 'Πληρ.']],
       body: tableData,
       styles: { font: "NotoSans", fontSize: PDF_CONFIG.FONT_SIZES.TINY }, 

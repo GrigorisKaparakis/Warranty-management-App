@@ -106,13 +106,17 @@ export const RegistryService = {
     const docId = cleanName.replace(/\//g, '-');
     try {
       const docRef = doc(db, "customers", docId);
-      // Χρήση arrayUnion και increment για αποφυγή του getDoc
-      await setDoc(docRef, {
+      const data: any = {
         fullName: cleanName,
-        vins: vin ? arrayUnion(vin.toUpperCase()) : arrayUnion(),
         lastUsed: Date.now(),
         useCount: increment(1)
-      }, { merge: true });
+      };
+
+      if (vin && vin.trim()) {
+        data.vins = arrayUnion(vin.trim().toUpperCase());
+      }
+
+      await setDoc(docRef, data, { merge: true });
     } catch (e) { 
       handleFirestoreError(e, OperationType.WRITE, `customers/${docId}`);
     }

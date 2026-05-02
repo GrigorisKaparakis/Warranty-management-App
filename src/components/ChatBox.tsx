@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageCircle, X, Minimize2, Maximize2, Send, ChevronDown, Users } from 'lucide-react';
 import { useStore } from '../store/useStore';
@@ -16,7 +16,26 @@ export const ChatBox: React.FC = () => {
   const [displayLimit, setDisplayLimit] = useState(20);
   const [inputText, setInputText] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [prevScrollHeight, setPrevScrollHeight] = useState(0);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // BUG-014: Διαχείριση Scroll θέσης κατά τη φόρτωση παλιών μηνυμάτων
+  useLayoutEffect(() => {
+    if (messagesContainerRef.current && prevScrollHeight > 0) {
+      const scrollDiff = messagesContainerRef.current.scrollHeight - prevScrollHeight;
+      if (scrollDiff > 0) {
+        messagesContainerRef.current.scrollTop = scrollDiff;
+      }
+      setPrevScrollHeight(0);
+    }
+  }, [messages]);
+
+  const handleLoadMore = () => {
+    if (messagesContainerRef.current) {
+      setPrevScrollHeight(messagesContainerRef.current.scrollHeight);
+    }
+    setDisplayLimit(prev => prev + 20);
+  };
   const [firstUnreadIdAtOpening, setFirstUnreadIdAtOpening] = useState<string | null>(null);
   const [activeUsers, setActiveUsers] = useState<ChatPresence[]>([]);
   const [showPresenceTooltip, setShowPresenceTooltip] = useState(false);
@@ -259,7 +278,7 @@ export const ChatBox: React.FC = () => {
                       {/* Load More Button */}
                       {messages.length >= displayLimit && (
                         <button 
-                          onClick={() => setDisplayLimit(prev => prev + 20)}
+                          onClick={handleLoadMore}
                           className="text-[10px] text-blue-600 font-bold uppercase tracking-widest py-2 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center gap-1 border border-blue-100 mb-2"
                         >
                           Φόρτωση παλαιότερων (+20)

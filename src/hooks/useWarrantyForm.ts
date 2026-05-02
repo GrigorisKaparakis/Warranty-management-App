@@ -66,7 +66,11 @@ export const useWarrantyForm = () => {
         company: (aiExtractedData.company || prev.company).trim().toUpperCase()
       }));
       if (aiExtractedData.parts) {
-        setFormParts(aiExtractedData.parts.map((p: any) => ({
+        const partsArray = Array.isArray(aiExtractedData.parts) 
+          ? aiExtractedData.parts 
+          : Object.values(aiExtractedData.parts);
+          
+        setFormParts(partsArray.map((p: any) => ({
           ...p,
           code: (p.code || '').trim().toUpperCase(),
           description: (p.description || '').trim(),
@@ -78,7 +82,7 @@ export const useWarrantyForm = () => {
     }
   }, [aiExtractedData, editingEntry, setAiExtractedData]);
 
-  // Edit entry fill
+  // Edit entry fill or clear
   useEffect(() => {
     if (editingEntry) {
       setFormData({
@@ -93,6 +97,20 @@ export const useWarrantyForm = () => {
         createdAt: new Date(editingEntry.createdAt).toISOString().split('T')[0]
       });
       setFormParts(editingEntry.parts);
+    } else {
+      // Clear form when editingEntry is null (New Entry mode)
+      setFormData({
+        warrantyId: '', 
+        vin: '', 
+        company: '', 
+        brand: '', 
+        fullName: '', 
+        notes: '', 
+        isPaid: false, 
+        status: 'WAITING' as EntryStatus, 
+        createdAt: getTodayStr()
+      });
+      setFormParts([]);
     }
   }, [editingEntry]);
 

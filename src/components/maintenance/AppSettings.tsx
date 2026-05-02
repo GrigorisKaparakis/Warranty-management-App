@@ -22,7 +22,7 @@ interface AppSettingsProps {
 export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
   const settings = useStore(s => s?.settings);
   const { updateGarageSettings } = useSettingsActions();
-  
+
   // --- LOCAL STATE FOR BUFFERED UPDATES ---
   const [localBranding, setLocalBranding] = useState(settings.branding);
   const [localLimits, setLocalLimits] = useState(settings.limits);
@@ -33,7 +33,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
   const [localCompanyMap, setLocalCompanyMap] = useState(settings.companyBrandMap);
   const [localExpiryRules, setLocalExpiryRules] = useState(settings.companyExpiryRules);
   const [localChatEnabled, setLocalChatEnabled] = useState(settings.chatEnabled ?? true);
-  
+
   const [isDirty, setIsDirty] = useState<Record<string, boolean>>({});
 
   // Sync local state when global settings change (if not dirty)
@@ -78,7 +78,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
   // --- SAVE HANDLERS ---
   const saveSection = async (section: string) => {
     let updates: Partial<GarageSettings> = {};
-    
+
     if (section === 'app_label') updates = { branding: localBranding };
     if (section === 'app_limits') updates = { limits: localLimits };
     if (section === 'expiry_thresholds') updates = { expiryThresholds: localThresholds };
@@ -113,7 +113,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
   // --- HANDLERS (Memoized for sub-components) ---
 
   const handleUpdateMenuItem = useCallback((itemId: string, field: string, value: any) => {
-    setLocalMenu(prev => (prev || []).map(item => 
+    setLocalMenu(prev => (prev || []).map(item =>
       item.id === itemId ? { ...item, [field]: value } : item
     ));
     setIsDirty(prev => ({ ...prev, menu: true }));
@@ -245,9 +245,9 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
   }, []);
 
   const handleUpdateThresholds = useCallback((key: string, value: number) => {
-    setLocalThresholds(prev => ({ 
-      ...(prev || { warningDays: 10, criticalDays: 7, soonDays: 30 }), 
-      [key]: value 
+    setLocalThresholds(prev => ({
+      ...(prev || { warningDays: 10, criticalDays: 7, soonDays: 30 }),
+      [key]: value
     }));
     setIsDirty(prev => ({ ...prev, expiry_thresholds: true }));
   }, []);
@@ -260,7 +260,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
   return (
     <div className="animate-slide-up space-y-6">
       {activeTab === 'status' && (
-        <StatusSettings 
+        <StatusSettings
           localStatuses={localStatuses}
           localStatusOrder={localStatusOrder}
           availableRoles={availableRoles}
@@ -277,7 +277,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
       )}
 
       {activeTab === 'menu' && (
-        <MenuSettings 
+        <MenuSettings
           localMenu={localMenu}
           localStatuses={localStatuses}
           isDirty={!!isDirty.menu}
@@ -292,7 +292,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
       )}
 
       {activeTab === 'companies' && (
-        <CompanySettings 
+        <CompanySettings
           localCompanyMap={localCompanyMap}
           localExpiryRules={localExpiryRules}
           isDirty={!!isDirty.companies}
@@ -306,7 +306,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
       )}
 
       {activeTab === 'app_label' && (
-        <BrandingSettings 
+        <BrandingSettings
           localBranding={localBranding}
           isDirty={!!isDirty.app_label}
           onUpdateBranding={handleUpdateBranding}
@@ -316,7 +316,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
       )}
 
       {activeTab === 'app_limits' && (
-        <PerformanceSettings 
+        <PerformanceSettings
           localLimits={localLimits}
           isDirty={!!isDirty.app_limits}
           onUpdateLimits={handleUpdateLimits}
@@ -326,7 +326,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
       )}
 
       {activeTab === 'expiry_thresholds' && (
-        <ThresholdSettings 
+        <ThresholdSettings
           localThresholds={localThresholds}
           isDirty={!!isDirty.expiry_thresholds}
           onUpdateThresholds={handleUpdateThresholds}
@@ -336,7 +336,7 @@ export const AppSettings: React.FC<AppSettingsProps> = ({ activeTab }) => {
       )}
 
       {activeTab === 'feature_toggles' && (
-        <FeatureSettings 
+        <FeatureSettings
           localChatEnabled={localChatEnabled}
           isDirty={!!isDirty.features}
           onUpdateChatStatus={handleUpdateChatStatus}

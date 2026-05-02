@@ -56,7 +56,7 @@ export const FULL_GARAGE_DEFAULTS: GarageSettings = {
     'ALERT': { label: 'ALERT', color: '#f43f5e', allowedRoles: ['ADMIN'] },
     'REJECTED': { label: 'ΑΠΟΡΡΙΦΘΗΚΕ', color: '#ef4444', allowedRoles: ['ADMIN'] }
   },
-  statusOrder: ['WAITING', 'COMPLETED', 'WORKSHOP' , 'RETURNED', 'ALERT', 'REJECTED'],
+  statusOrder: ['WAITING', 'COMPLETED', 'WORKSHOP', 'RETURNED', 'ALERT', 'REJECTED'],
   dashboardConfig: {
     globalStats: ['TOTAL', 'PAID', 'PENDING', 'REJECTED'],
     featuredStatuses: ['WAITING', 'WORKSHOP'],

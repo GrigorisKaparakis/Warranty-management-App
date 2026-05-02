@@ -30,8 +30,8 @@ export const PerformanceSettings: React.FC<PerformanceSettingsProps> = memo(({
   ];
 
   return (
-    <Card 
-      title="APP PERFORMANCE LIMITS" 
+    <Card
+      title="APP PERFORMANCE LIMITS"
       subtitle="ΔΙΑΧΕΙΡΙΣΗ ΟΡΙΩΝ ΑΠΟΔΟΣΗΣ"
       actions={
         isDirty && (
@@ -49,9 +49,9 @@ export const PerformanceSettings: React.FC<PerformanceSettingsProps> = memo(({
               <limit.icon size={14} />
               <label className="text-[10px] font-bold uppercase tracking-wider">{limit.label}</label>
             </div>
-            <input 
-              type="number" 
-              value={(localLimits as any)?.[limit.key] || 0} 
+            <input
+              type="number"
+              value={(localLimits as any)?.[limit.key] || 0}
               onChange={e => onUpdateLimits(limit.key, parseInt(e.target.value) || 0)}
               className="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg font-bold text-sm outline-none"
             />

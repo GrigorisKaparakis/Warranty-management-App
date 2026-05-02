@@ -10,7 +10,8 @@ import {
   updateDoc, 
   doc, 
   arrayUnion,
-  setDoc
+  setDoc,
+  writeBatch
 } from "firebase/firestore";
 import { db } from "./core";
 import { ChatMessage, ChatPresence } from "../../core/types";
@@ -73,14 +74,16 @@ export const ChatService = {
    * Σήμανση πολλαπλών μηνυμάτων ως διαβασμένα.
    */
   markMultipleAsRead: async (messageIds: string[], userId: string) => {
+    if (messageIds.length === 0) return;
     try {
-      const promises = messageIds.map(id => {
+      const batch = writeBatch(db);
+      messageIds.forEach(id => {
         const messageRef = doc(db, "messages", id);
-        return updateDoc(messageRef, {
+        batch.update(messageRef, {
           readBy: arrayUnion(userId)
         });
       });
-      await Promise.all(promises);
+      await batch.commit();
     } catch (error) {
       console.error("Error marking multiple messages as read:", error);
     }

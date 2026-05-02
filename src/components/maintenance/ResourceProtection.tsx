@@ -172,7 +172,7 @@ export const ResourceProtection: React.FC<ResourceProtectionProps> = ({ activeTa
           <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest leading-loose">
             Η ΔΥΝΑΤΟΤΗΤΑ ΠΡΟΒΟΛΗΣ LIVE ΣΤΑΤΙΣΤΙΚΩΝ ΚΑΤΑΝΑΛΩΣΗΣ (USAGE LOGS) 
             <br />
-            ΘΑ ΕΝΕΡΓΟΠΟΙΗΘΕΙ ΣΕ ΕΠΟΜΕΝΗ ΕΚΔΟΣΗ ΤΗΣ ΕΦΑΡΜΟΓΗΣ V1.3.1.
+            ΘΑ ΕΝΕΡΓΟΠΟΙΗΘΕΙ ΣΕ ΕΠΟΜΕΝΗ ΕΚΔΟΣΗ ΤΗΣ ΕΦΑΡΜΟΓΗΣ V1.3.2.
           </p>
         </div>
       </Card>

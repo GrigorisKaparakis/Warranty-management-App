@@ -2,54 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { onKillSwitchChange } from '../../services/firebase/monitor';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShieldAlert, AlertTriangle } from 'lucide-react';
-import { auth, db } from '../../services/firebase/core';
-import { doc, getDoc } from 'firebase/firestore';
+
+import { useStore } from '../../store/useStore';
 
 export const KillSwitchOverlay: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  const ADMIN_EMAILS = ["grigoriskaparakishk@gmail.com"];
+  
+  const user = useStore(s => s?.user);
+  const profile = useStore(s => s?.profile);
+  const authLoading = useStore(s => s?.authLoading);
+  const isAdmin = profile?.role === 'ADMIN';
 
   useEffect(() => {
-    const checkAdminStatus = async (user: any) => {
-      if (!user) {
-        setIsAdmin(false);
-        setChecking(false);
-        return;
-      }
-
-      // Check hardcoded email first
-      if (ADMIN_EMAILS.includes(user.email)) {
-        setIsAdmin(true);
-        setChecking(false);
-        return;
-      }
-
-      // Check firestore roles (fallback)
-      try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists() && userDoc.data().role === 'ADMIN') {
-          setIsAdmin(true);
-        }
-      } catch (e) {
-        console.error("Admin check error:", e);
-      } finally {
-        setChecking(false);
-      }
-    };
-
-    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
-      checkAdminStatus(user);
-    });
-
     const unsubscribeKill = onKillSwitchChange((active) => {
       setIsActive(active);
     });
 
     return () => {
-      unsubscribeAuth();
       unsubscribeKill();
     };
   }, []);
@@ -69,7 +38,7 @@ export const KillSwitchOverlay: React.FC = () => {
 
   return (
     <AnimatePresence>
-      {isActive && !checking && (
+      {isActive && !authLoading && (
         <motion.div
           id="kill-switch-overlay"
           initial={{ opacity: 0 }}

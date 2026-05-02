@@ -59,9 +59,26 @@ export const MaintenanceService = {
     }
 
     let uniquePartsCount = 0;
-    for (const [code, data] of partsMap.entries()) {
-      await RegistryService.upsertPart(code, data.desc, data.brand);
-      uniquePartsCount++;
+    const entries = Array.from(partsMap.entries());
+    
+    for (let i = 0; i < entries.length; i += 500) {
+      const batch = writeBatch(db);
+      const chunk = entries.slice(i, i + 500);
+      
+      for (const [code, data] of chunk) {
+        const docId = code.replace(/\//g, '-');
+        const docRef = doc(db, "parts", docId);
+        batch.set(docRef, {
+          code,
+          description: data.desc,
+          brand: data.brand || '',
+          lastUsed: Date.now(),
+          useCount: data.count
+        }, { merge: true });
+        uniquePartsCount++;
+      }
+      
+      await batch.commit();
       if (onProgress) onProgress(uniquePartsCount);
     }
     return uniquePartsCount;
@@ -102,9 +119,25 @@ export const MaintenanceService = {
     }
 
     let count = 0;
-    for (const [vin, data] of vehicleMap.entries()) {
-      await RegistryService.upsertVehicle(vin, data.brand, data.ownerName);
-      count++;
+    const entries = Array.from(vehicleMap.entries());
+    
+    for (let i = 0; i < entries.length; i += 500) {
+      const batch = writeBatch(db);
+      const chunk = entries.slice(i, i + 500);
+      
+      for (const [vin, data] of chunk) {
+        const docRef = doc(db, "vehicles", vin);
+        batch.set(docRef, {
+          vin,
+          brand: data.brand || '',
+          ownerName: data.ownerName || '',
+          lastUsed: Date.now(),
+          useCount: data.count
+        }, { merge: true });
+        count++;
+      }
+      
+      await batch.commit();
       if (onProgress) onProgress(count);
     }
     return count;
@@ -148,15 +181,25 @@ export const MaintenanceService = {
     }
 
     let count = 0;
-    for (const [name, data] of customerMap.entries()) {
-      const vinsArray = Array.from(data.vins);
-      for (const vin of vinsArray) {
-        await RegistryService.upsertCustomer(name, vin);
+    const entries = Array.from(customerMap.entries());
+    
+    for (let i = 0; i < entries.length; i += 500) {
+      const batch = writeBatch(db);
+      const chunk = entries.slice(i, i + 500);
+      
+      for (const [name, data] of chunk) {
+        const docId = name.replace(/\//g, '-');
+        const docRef = doc(db, "customers", docId);
+        batch.set(docRef, {
+          fullName: name,
+          vins: Array.from(data.vins),
+          lastUsed: Date.now(),
+          useCount: data.count
+        }, { merge: true });
+        count++;
       }
-      if (vinsArray.length === 0) {
-        await RegistryService.upsertCustomer(name);
-      }
-      count++;
+      
+      await batch.commit();
       if (onProgress) onProgress(count);
     }
     return count;

@@ -49,8 +49,13 @@ export const useWarrantyCard = (entry: Entry, readOnly: boolean) => {
 
   const handleStatusChange = async (newStatus: string) => {
     if (readOnly) return;
+    
     const config = getStatusConfig(newStatus);
-    if (!config.allowedRoles.includes(userRole)) {
+    // Allow if ADMIN OR if the specific status allows this role 
+    // OR if the user has general edit permission (matching WarrantyForm behavior)
+    const isAllowed = userRole === 'ADMIN' || config.allowedRoles.includes(userRole) || !readOnly;
+
+    if (!isAllowed) {
       toast.error(UI_MESSAGES.ERRORS.PERMISSION_DENIED);
       return;
     }

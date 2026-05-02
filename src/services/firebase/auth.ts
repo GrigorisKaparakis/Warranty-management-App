@@ -5,7 +5,9 @@ import {
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  updatePassword
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -86,6 +88,7 @@ export const AuthService = {
       }
     }, (error) => {
       console.error("Profile listener error:", error);
+      callback(null); // Αποτροπή "κολλήματος" της εφαρμογής αν αποτύχει η ανάκτηση προφίλ
     });
   },
 
@@ -106,18 +109,24 @@ export const AuthService = {
 
   /**
    * Αλλαγή κωδικού πρόσβασης για τον τρέχοντα χρήστη.
+   * Απαιτεί re-authentication αν έχει περάσει ώρα από το login.
    */
-  changePassword: async (newPassword: string) => {
+  changePassword: async (currentPassword: string, newPassword: string) => {
     const user = auth.currentUser;
-    if (user) {
+    if (user && user.email) {
       try {
+        // Re-authenticate user first
+        const credential = EmailAuthProvider.credential(user.email, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+        
+        // Then update password
         await updatePassword(user, newPassword);
       } catch (error) {
         console.error("Password change failed:", error);
         throw error;
       }
     } else {
-      throw new Error("No user is currently logged in.");
+      throw new Error("No user is currently logged in or user has no email.");
     }
   }
 };

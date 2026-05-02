@@ -20,6 +20,8 @@ import {
   Square
 } from 'lucide-react';
 
+import { Virtuoso } from 'react-virtuoso';
+
 /**
  * ListView: Εμφανίζει μια λίστα εγγυήσεων με δυνατότητα φιλτραρίσματος,
  * αναζήτησης και μαζικών ενεργειών.
@@ -31,6 +33,8 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
     visibleLimit,
     pageSize,
     setVisibleLimit,
+    loadMore,
+    hasMore,
     searchQuery,
     setSearchQuery,
     statusFilter,
@@ -59,14 +63,45 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
     allStatusKeys,
     getStatusLabel,
     canEdit,
-    settings
+    settings,
+    isLoading
   } = useInventory();
+
+  // Helper for rendering empty state
+  const renderEmptyState = () => (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="py-40 flex flex-col items-center justify-center text-zinc-300"
+    >
+      <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mb-6">
+        <Search size={32} strokeWidth={1} className="opacity-20" />
+      </div>
+      <div className="font-black uppercase tracking-[0.2em] text-xs italic">ΔΕΝ ΒΡΕΘΗΚΑΝ ΑΠΟΤΕΛΕΣΜΑΤΑ</div>
+    </motion.div>
+  );
+
+  // Helper for rendering skeleton
+  const renderSkeleton = () => (
+    <div className="divide-y divide-zinc-50">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-6 px-6 py-8 animate-pulse">
+          {isSelectionMode && <div className="w-10 h-6 bg-zinc-100 rounded" />}
+          <div className="w-[140px] h-6 bg-zinc-100 rounded-full" />
+          <div className="w-[180px] h-6 bg-zinc-100 rounded" />
+          <div className="w-[140px] h-6 bg-zinc-100 rounded" />
+          <div className="w-[160px] h-6 bg-zinc-100 rounded" />
+          <div className="flex-1 h-6 bg-zinc-100 rounded" />
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="p-4 md:p-8 max-w-[98%] mx-auto space-y-10 pb-32">
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8">
         <div className="flex-1 space-y-8 w-full">
-          <PageHeader title={label} subtitle={`${entries.length} ΕΓΓΡΑΦΕΣ ΒΡΕΘΗΚΑΝ`} />
+          <PageHeader title={label} subtitle={isLoading ? 'ΑΝΑΚΤΗΣΗ ΔΕΔΟΜΕΝΩΝ...' : `${entries.length} ΕΓΓΡΑΦΕΣ ΒΡΕΘΗΚΑΝ`} />
           
           <div className="flex flex-wrap gap-4">
             {/* Search */}
@@ -159,7 +194,7 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
         <div className="overflow-x-auto">
           <div className="min-w-[1400px]">
             {/* Table Header */}
-            <div className="flex items-center gap-6 px-6 py-6 border-b border-zinc-100 bg-zinc-50/50 sticky top-0 z-10">
+            <div className="flex items-start gap-6 px-6 py-6 border-b border-zinc-100 bg-zinc-50/50 sticky top-0 z-10">
               {isSelectionMode && (
                 <div className="w-10 flex justify-center flex-shrink-0">
                   <button 
@@ -170,7 +205,7 @@ export const ListView: React.FC<{ label: string }> = ({ label }) => {
                   </button>
                 </div>
               )}
-              <div className="w-[140px] text-[10px] font-black text-zinc-400 uppercase tracking-widest">ΚΑΤΑΣΤΑΣΗ</div>
+              <div className="w-[140px] text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">ΚΑΤΑΣΤΑΣΗ</div>
               <button 
                 className="w-[180px] text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2 hover:text-zinc-900 transition-colors"
                 onClick={() => handleSort('warrantyId')}

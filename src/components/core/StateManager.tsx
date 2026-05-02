@@ -1,8 +1,8 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FirestoreService } from '../../services/firebase/db';
 import { AuthService } from '../../services/firebase/auth';
+import { initKillSwitch } from '../../services/firebase/monitor';
 import { useStore } from '../../store/useStore';
 import { toast } from '../../utils/toast';
 import { UI_LIMITS, ONBOARDING_DEFAULTS } from '../../core/config';
@@ -19,6 +19,7 @@ export const StateManager: React.FC = () => {
   const store = useStore();
   const location = useLocation();
   const currentPath = location.pathname;
+  const hasShownWelcome = useRef(false);
 
   // --- AUTH WATCHER ---
   useEffect(() => {
@@ -26,24 +27,21 @@ export const StateManager: React.FC = () => {
 
     const unsubscribeAuth = AuthService.subscribe(async (currentUser) => {
       if (currentUser) {
+        // Καθαρισμός προηγούμενου profile listener αν υπάρχει
+        if (unsubscribeProfile) unsubscribeProfile();
+
         unsubscribeProfile = AuthService.subscribeToProfile(currentUser.uid, async (userProfile) => {
           if (!userProfile) {
-            // Αν δεν υπάρχει προφίλ, το δημιουργούμε.
-            // Ο ιδιοκτήτης (kaparakisgrigoris@gmail.com) ή ο admin@hk.gr γίνονται αυτόματα ADMIN.
-            const isOwner = currentUser.email === 'kaparakisgrigoris@gmail.com';
-            
             const newProfile: UserProfile = {
               uid: currentUser.uid,
               email: currentUser.email || '',
-              role: isOwner ? 'ADMIN' : ONBOARDING_DEFAULTS.DEFAULT_USER_ROLE,
+              role: ONBOARDING_DEFAULTS.DEFAULT_USER_ROLE,
               disabled: false
             };
-            
-            // Ενημερώνουμε το store προσωρινά για να ξεκολλήσει το loading
+
             store.setAuth(currentUser, newProfile);
             store.setAccountDisabled(false);
-            
-            // Και το αποθηκεύουμε στη βάση
+
             await FirestoreService.updateUserProfile(currentUser.uid, newProfile);
             return;
           }
@@ -52,64 +50,72 @@ export const StateManager: React.FC = () => {
             store.setAccountDisabled(true);
             store.setAuth(currentUser, userProfile);
           } else {
-            // Διασφάλιση ότι οι bootstrap admins έχουν πάντα το σωστό ρόλο
-            const isBootstrapAdmin = currentUser.email === 'kaparakisgrigoris@gmail.com';
-            if (isBootstrapAdmin && userProfile.role !== 'ADMIN') {
-              const updatedProfile = { ...userProfile, role: 'ADMIN' as const };
-              store.setAuth(currentUser, updatedProfile);
-              FirestoreService.updateUserProfile(currentUser.uid, { role: 'ADMIN' });
-            } else {
-              store.setAuth(currentUser, userProfile);
-            }
+            store.setAuth(currentUser, userProfile);
             store.setAccountDisabled(false);
           }
         });
-        // Εμφάνιση toast μόνο στην πραγματική είσοδο, όχι σε κάθε re-render
-        toast.info(`Σύνδεση ως ${currentUser.email?.split('@')[0]}`);
+
+        if (!hasShownWelcome.current) {
+          const name = currentUser.email?.split('@')[0] || 'Χρήστης';
+          toast.info(`Σύνδεση ως ${name}`);
+          hasShownWelcome.current = true;
+        }
       } else {
-        if (unsubscribeProfile) unsubscribeProfile();
+        if (unsubscribeProfile) {
+          unsubscribeProfile();
+          unsubscribeProfile = null;
+        }
         store.setAuth(null, null);
         store.setAccountDisabled(false);
+        hasShownWelcome.current = false;
       }
     });
 
+    const unsubscribeKillSwitch = initKillSwitch();
+
     return () => {
       unsubscribeAuth();
+      unsubscribeKillSwitch();
       if (unsubscribeProfile) unsubscribeProfile();
     };
-  }, []); // Τρέχει ΜΟΝΟ μία φορά στο mount της εφαρμογής
+  }, []);
 
   // --- GLOBAL FIRESTORE SUBSCRIPTIONS ---
   useEffect(() => {
-    const { user, settings, setEntries, setIsLive, refetchSignal } = store;
+    const { user, settings, setEntries, setIsLive, setIsLoading } = store;
     if (!user) return;
 
-    // Αυτά τα δεδομένα είναι απαραίτητα σχεδόν παντού ή είναι μικρά
+    let isCancelled = false;
+
+    // Subscriptions
     const unsubNotes = FirestoreService.subscribeToNotes((data) => store.setNotes(data));
     const unsubSettings = FirestoreService.subscribeToSettings((data) => store.setSettings(data));
     const unsubNotices = FirestoreService.subscribeToNotices((data) => store.setNotices(data));
-    
-    // Τα entries ΠΛΕΟΝ δεν τα θέλουμε live για εξοικονόμηση πόρων (getDocs migration)
-    const isDashboard = currentPath === '/dashboard';
-    const isWarrantyView = currentPath.startsWith('/warranty/') || currentPath === '/paid' || currentPath === '/rejected';
-    const limit = (isDashboard || isWarrantyView) ? undefined : (settings.limits?.fetchLimit || FETCH_LIMIT);
-    
-    const loadEntries = async () => {
-      const data = await FirestoreService.getEntries(limit);
+
+    const limit = settings?.limits?.fetchLimit || FETCH_LIMIT;
+
+    setIsLoading(true);
+    const unsubEntries = FirestoreService.subscribeToEntries(limit, (data) => {
+      if (isCancelled) return;
       setEntries(data);
-      setIsLive(false); // Πλέον δεν είναι live connection
-    };
+      setIsLoading(false);
+      setIsLive(true);
+    });
 
-    loadEntries();
+    FirestoreService.getGlobalStats().then(statsData => {
+      if (!isCancelled && statsData) store.setGlobalStats(statsData);
+    }).catch(e => console.error("Stats Error:", e));
 
-    return () => { 
-      unsubNotes(); unsubSettings(); unsubNotices();
+    return () => {
+      isCancelled = true;
+      unsubNotes();
+      unsubSettings();
+      unsubNotices();
+      unsubEntries();
     };
-  }, [store.user, store.settings.limits?.fetchLimit, currentPath, store.refetchSignal]); // Φορτώνει ξανά αν αλλάξει το path, ο χρήστης ή το refetchSignal
+  }, [store.user, store.settings?.limits?.fetchLimit]);
 
   // --- PERSISTENT REGISTRIES ---
-  // Τα registries (parts, vehicles, customers) τα κρατάμε ενεργά όσο ο χρήστης είναι συνδεδεμένος
-  // για να αποφύγουμε το "Initial Fetch" (reads) σε κάθε πλοήγηση.
   useEffect(() => {
     if (!store.user) return;
 
@@ -120,20 +126,20 @@ export const StateManager: React.FC = () => {
     return () => {
       unsubParts(); unsubVehicles(); unsubCustomers();
     };
-  }, [store.user]); // Τρέχει μόνο όταν αλλάζει ο χρήστης
+  }, [store.user]);
 
   // --- LAZY ADMIN DATA ---
   useEffect(() => {
     if (!store.user) return;
-    
+
     const currentRole = store?.profile?.role || ONBOARDING_DEFAULTS.DEFAULT_USER_ROLE;
     const isAdmin = currentRole === 'ADMIN';
-    
+
     const canSeeAudit = isAdmin || (store?.settings?.rolePermissions?.['auditLog'] || []).includes(currentRole);
     const canManageUsers = isAdmin || (store?.settings?.rolePermissions?.['users'] || []).includes(currentRole);
 
-    let unsubUsers = () => {};
-    let unsubAudit = () => {};
+    let unsubUsers = () => { };
+    let unsubAudit = () => { };
 
     if (canManageUsers && currentPath === '/users') {
       unsubUsers = FirestoreService.subscribeToUsers((data) => store.setUsers(data));
@@ -144,14 +150,14 @@ export const StateManager: React.FC = () => {
     const isAuditLog = currentPath === '/auditLog';
 
     if (canSeeAudit && (isMaintenance || isDashboard || isAuditLog)) {
-      const auditLimit = store.settings.limits?.auditLogFetchLimit || UI_LIMITS.AUDIT_LOG_FETCH_LIMIT;
+      const auditLimit = store.settings?.limits?.auditLogFetchLimit || UI_LIMITS.AUDIT_LOG_FETCH_LIMIT;
       unsubAudit = FirestoreService.subscribeToAuditLogs(auditLimit, (data) => store.setAuditLogs(data));
     }
 
     return () => {
       unsubUsers(); unsubAudit();
     };
-  }, [store.user, currentPath, store.profile?.role, store.settings.rolePermissions, store.settings.limits?.auditLogFetchLimit]);
+  }, [store.user, currentPath, store.profile?.role, store.settings?.rolePermissions, store.settings?.limits?.auditLogFetchLimit]);
 
-  return null; // Δεν σχεδιάζει τίποτα, απλά διαχειρίζεται το state
+  return null;
 };
