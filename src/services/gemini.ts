@@ -22,8 +22,8 @@ export const extractWarrantyFromPDF = async (
   customPrompt?: string,
   companyHint?: string
 ) => {
-  // Use GEMINI_API_KEY with fallback to API_KEY for maximum compatibility
-  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+  // Use import.meta.env for Vite, with fallback to process.env
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined) || (typeof process !== 'undefined' ? process.env.API_KEY : undefined);
   
   if (!apiKey) {
     throw new Error("Gemini API Key is missing. Please check your environment variables or select a key.");
@@ -99,19 +99,20 @@ export const extractWarrantyFromPDF = async (
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            warrantyId: { type: Type.STRING, description: "The unique ID of the document" },
-            vin: { type: Type.STRING, description: "Exactly 17 characters VIN" },
+            warrantyId: { type: Type.STRING, description: "The unique ID or Claim Number of the document" },
+            vin: { type: Type.STRING, description: "The 17-character Vehicle Identification Number. MUST BE EXACTLY 17 CHARACTERS." },
             fullName: { type: Type.STRING, description: "Customer's full name" },
-            brand: { type: Type.STRING, description: "Vehicle brand (e.g. HONDA)" },
-            company: { type: Type.STRING, description: "Distributor company (e.g. ΣΑΡΑΚΑΚΗΣ)" },
+            brand: { type: Type.STRING, description: "Vehicle brand (e.g. HONDA, DUCATI, KAWASAKI). Use the provided rules." },
+            company: { type: Type.STRING, description: "Distributor company (e.g. ΣΑΡΑΚΑΚΗΣ, KOSMOCAR). Use the provided rules." },
+            createdAt: { type: Type.STRING, description: "The date the document was issued in ISO format (YYYY-MM-DD) or empty string if not found." },
             parts: {
               type: Type.ARRAY,
               items: {
                 type: Type.OBJECT,
                 properties: {
-                  code: { type: Type.STRING },
-                  description: { type: Type.STRING },
-                  quantity: { type: Type.NUMBER }
+                  code: { type: Type.STRING, description: "The part number or reference code" },
+                  description: { type: Type.STRING, description: "Short description of the part" },
+                  quantity: { type: Type.NUMBER, description: "Number of units" }
                 },
                 required: ["code", "description", "quantity"]
               }
@@ -126,10 +127,24 @@ export const extractWarrantyFromPDF = async (
       throw new Error("Empty response from AI");
     }
 
-    const result = JSON.parse(response.text.trim());
+    let result;
+    try {
+      const text = response.text;
+      const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/```([\s\S]*?)```/);
+      const jsonString = jsonMatch ? jsonMatch[1] : text;
+      result = JSON.parse(jsonString.trim());
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", response.text);
+      throw new Error("Το AI επέστρεψε μη έγκυρο format δεδομένων. Παρακαλώ δοκιμάστε ξανά.");
+    }
+    
+    // Cleanup and Normalization
     if (result.fullName) result.fullName = result.fullName.replace(/\n/g, ' ').trim().toUpperCase();
-    if (result.warrantyId) result.warrantyId = result.warrantyId.replace(/\n/g, '').trim().toUpperCase();
-    if (result.vin) result.vin = result.vin.replace(/\n/g, '').trim().toUpperCase();
+    if (result.warrantyId) result.warrantyId = result.warrantyId.replace(/\n/g, '').replace(/[^A-Z0-9-]/g, '').trim().toUpperCase();
+    if (result.vin) {
+      result.vin = result.vin.replace(/\s/g, '').replace(/[^A-Z0-9]/g, '').trim().toUpperCase();
+      if (result.vin.length > 17) result.vin = result.vin.slice(-17);
+    }
     if (result.brand) result.brand = result.brand.trim().toUpperCase();
     if (result.company) result.company = result.company.trim().toUpperCase();
     return result;
@@ -143,7 +158,7 @@ export const extractWarrantyFromPDF = async (
  * analyzeNote: Αναλύει μια σημείωση για να βρει Sentiment και Κατηγορία.
  */
 export const analyzeNote = async (content: string, categories: string[] = []) => {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined) || (typeof process !== 'undefined' ? process.env.API_KEY : undefined);
   
   if (!apiKey) {
     console.warn("Gemini API Key is missing for note analysis.");

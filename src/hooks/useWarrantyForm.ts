@@ -24,6 +24,7 @@ export const useWarrantyForm = () => {
   const user = useStore(s => s.user);
   const entries = useStore(s => s.entries);
   const settings = useStore(s => s.settings);
+  const triggerRefetch = useStore(s => s.triggerRefetch);
   const vehiclesRegistry = useStore(s => s.vehicles);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +66,11 @@ export const useWarrantyForm = () => {
         company: (aiExtractedData.company || prev.company).trim().toUpperCase()
       }));
       if (aiExtractedData.parts) {
-        setFormParts(aiExtractedData.parts.map((p: any) => ({
+        const partsArray = Array.isArray(aiExtractedData.parts) 
+          ? aiExtractedData.parts 
+          : Object.values(aiExtractedData.parts);
+          
+        setFormParts(partsArray.map((p: any) => ({
           ...p,
           code: (p.code || '').trim().toUpperCase(),
           description: (p.description || '').trim(),
@@ -77,7 +82,7 @@ export const useWarrantyForm = () => {
     }
   }, [aiExtractedData, editingEntry, setAiExtractedData]);
 
-  // Edit entry fill
+  // Edit entry fill or clear
   useEffect(() => {
     if (editingEntry) {
       setFormData({
@@ -92,6 +97,20 @@ export const useWarrantyForm = () => {
         createdAt: new Date(editingEntry.createdAt).toISOString().split('T')[0]
       });
       setFormParts(editingEntry.parts);
+    } else {
+      // Clear form when editingEntry is null (New Entry mode)
+      setFormData({
+        warrantyId: '', 
+        vin: '', 
+        company: '', 
+        brand: '', 
+        fullName: '', 
+        notes: '', 
+        isPaid: false, 
+        status: 'WAITING' as EntryStatus, 
+        createdAt: getTodayStr()
+      });
+      setFormParts([]);
     }
   }, [editingEntry]);
 
@@ -252,6 +271,7 @@ export const useWarrantyForm = () => {
         FirestoreService.upsertCustomer(formData.fullName, formData.vin)
       ].map(p => p.catch(e => console.error("Registry update failed:", e))));
 
+      triggerRefetch(); // Trigger refetch since data changed
       toast.success(UI_MESSAGES.SUCCESS.SAVED);
       const savedId = editingEntry?.id;
       setAiExtractedData(null);

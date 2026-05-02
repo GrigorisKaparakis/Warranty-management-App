@@ -173,85 +173,112 @@ export const DashboardView: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-10"
+        className="grid grid-cols-1 lg:grid-cols-12 gap-10"
       >
-         {/* Distribution Chart */}
-         <Card title="ΚΑΤΑΝΟΜΗ ΚΑΤΑΣΤΑΣΗΣ" icon={PieChart}>
-          <div className="space-y-5">
-            {(settings.dashboardConfig?.distributionStatuses || settings.statusOrder || Object.keys(settings.statusConfigs || {})).map(s => {
-              if (!settings.statusConfigs?.[s]) return null;
-              const count = stats.counts[s] || 0;
-              const p = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
-              return (
-                <button 
-                  key={s} 
-                  onClick={() => onNavigate(s === EntryStatus.REJECTED ? 'rejected' : 'all', s)}
-                  className="w-full text-left space-y-2 group"
-                >
-                  <div className="flex justify-between text-[10px] font-black uppercase tracking-wider text-zinc-500 group-hover:text-zinc-900 transition-colors">
-                    <span>{getStatusLabel(s)}</span>
-                    <span>{count}</span>
-                  </div>
-                  <div className="h-2 bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
-                    <div 
-                      className="h-full transition-all duration-1000 ease-out" 
-                      style={{ 
-                        width: `${p}%`,
-                        backgroundColor: getStatusColor(s)
-                      }} 
-                    />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </Card>
-
-        {/* Top Companies */}
-        <Card title="TOP ΕΤΑΙΡΕΙΕΣ" icon={BarChart3}>
-          <div className="space-y-5">
-            {(() => {
-              const visibleCompanies = settings.dashboardConfig?.visibleCompanies || [];
-              let companiesToDisplay: [string, number][] = [];
-              
-              if (visibleCompanies.length > 0) {
-                companiesToDisplay = visibleCompanies.map(name => {
-                  const stat = stats.companyStats.find(([n]) => n === name);
-                  return [name, stat ? stat[1] : 0] as [string, number];
-                });
-              } else {
-                companiesToDisplay = stats.companyStats.slice(0, UI_LIMITS.DASHBOARD_TOP_COMPANIES);
-              }
-
-              return companiesToDisplay.map(([name, count]: [string, number]) => {
+         {/* Distribution Chart (Left) */}
+         <div className="lg:col-span-4">
+           <Card title="ΚΑΤΑΝΟΜΗ ΚΑΤΑΣΤΑΣΗΣ" icon={PieChart}>
+            <div className="space-y-5">
+              {(settings.dashboardConfig?.distributionStatuses || settings.statusOrder || Object.keys(settings.statusConfigs || {})).map(s => {
+                if (!settings.statusConfigs?.[s]) return null;
+                const count = stats.counts[s] || 0;
                 const p = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
                 return (
                   <button 
-                    key={name} 
-                    onClick={() => onNavigate('all', 'ALL', name)}
+                    key={s} 
+                    onClick={() => onNavigate(s === EntryStatus.REJECTED ? 'rejected' : 'all', s)}
                     className="w-full text-left space-y-2 group"
                   >
                     <div className="flex justify-between text-[10px] font-black uppercase tracking-wider text-zinc-500 group-hover:text-zinc-900 transition-colors">
-                      <span>{name}</span>
+                      <span>{getStatusLabel(s)}</span>
                       <span>{count}</span>
                     </div>
                     <div className="h-2 bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
-                      <div 
-                        className="h-full bg-zinc-900 transition-all duration-1000 ease-out" 
-                        style={{ width: `${p}%` }} 
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${p}%` }}
+                        className="h-full transition-all duration-1000 ease-out" 
+                        style={{ backgroundColor: getStatusColor(s) }} 
                       />
                     </div>
                   </button>
                 );
-              });
-            })()}
-            {stats.companyStats.length === 0 && (
-              <div className="p-10 text-center border-2 border-dashed border-zinc-100 rounded-2xl">
-                <p className="text-[10px] font-black text-zinc-300 uppercase italic tracking-widest">ΔΕΝ ΥΠΑΡΧΟΥΝ ΔΕΔΟΜΕΝΑ</p>
+              })}
+            </div>
+          </Card>
+        </div>
+
+        {/* Brand & Volume Analytics (Middle) */}
+        <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-10">
+          <Card title="BRAND & ΕΤΑΙΡΕΙΕΣ" icon={BarChart3}>
+            <div className="space-y-6">
+              <div className="text-[9px] font-black text-zinc-300 uppercase tracking-[0.2em] mb-4">Top Brands</div>
+              {stats.brandStats.slice(0, 4).map(([name, count]) => {
+                const p = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
+                return (
+                  <div key={name} className="space-y-2">
+                    <div className="flex justify-between text-[10px] font-black text-zinc-600 uppercase">
+                      <span>{name}</span>
+                      <span>{count}</span>
+                    </div>
+                    <div className="h-1.5 bg-zinc-50 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${p}%` }}
+                        className="h-full bg-blue-600"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+              
+              <div className="pt-4 border-t border-zinc-50">
+                <div className="text-[9px] font-black text-zinc-300 uppercase tracking-[0.2em] mb-4">Top Companies</div>
+                {stats.companyStats.slice(0, 3).map(([name, count]) => (
+                  <div key={name} className="flex justify-between items-center py-2 border-b border-zinc-50 last:border-0">
+                    <span className="text-[10px] font-black text-zinc-500 uppercase">{name}</span>
+                    <span className="px-2 py-0.5 rounded-lg bg-zinc-100 text-[10px] font-black text-zinc-900">{count}</span>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
-        </Card>
+            </div>
+          </Card>
+
+          <Card title="ΤΑΣΕΙΣ ΟΓΚΟΥ" icon={TrendingUp}>
+            <div className="h-full flex flex-col justify-between">
+              <div className="flex items-end justify-between h-48 gap-2 pt-6">
+                {stats.trendData.map((d, i) => {
+                  const maxVal = Math.max(...stats.trendData.map(t => t.value), 1);
+                  const h = (d.value / maxVal) * 100;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-3 group h-full justify-end">
+                      <div className="relative w-full flex justify-center h-full items-end">
+                        <motion.div 
+                          initial={{ height: 0 }}
+                          animate={{ height: `${h}%` }}
+                          className="w-full max-w-[32px] bg-zinc-900 rounded-t-xl group-hover:bg-blue-600 transition-colors cursor-help relative"
+                        >
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-[9px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            {d.value} ΕΓΓΥΗΣΕΙΣ
+                          </div>
+                        </motion.div>
+                      </div>
+                      <div className="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">
+                        {d.label.split('/')[0]}/{d.label.split('/')[1].slice(-2)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-8 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
+                <div className="text-[9px] font-black text-blue-800 uppercase tracking-widest mb-1">Status Summary</div>
+                <div className="text-[10px] font-bold text-blue-600/70 uppercase">
+                  Μέσος όρος {Math.round(stats.total / (stats.trendData.length || 1))} εγγυήσεων ανά μήνα
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
       </motion.div>
 
       {/* Recent Activity - Full Width */}

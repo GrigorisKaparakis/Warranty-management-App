@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { 
+import {
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
@@ -66,6 +66,9 @@ export function handleFirestoreError(error: any, operationType: OperationType, p
   throw error;
 }
 
+import { getApps } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+
 // Ρυθμίσεις σύνδεσης με το Firebase Project
 const firebaseConfig = {
   apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY,
@@ -76,12 +79,17 @@ const firebaseConfig = {
   appId: (import.meta as any).env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
+const apps = getApps();
+const app = apps.length === 0 ? initializeApp(firebaseConfig) : apps[0];
+
+export const db = apps.length === 0
+  ? initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
   })
-});
+  : getFirestore(app);
+
 export const auth = getAuth(app);
 
 // Ορισμός των Collections
@@ -101,9 +109,9 @@ export const deepSanitize = (obj: any): any => {
   if (obj === null || typeof obj !== 'object') return obj;
   if (typeof obj.toMillis === 'function') return obj.toMillis();
   if (obj instanceof Date) return obj.getTime();
-  
+
   if (Array.isArray(obj)) return obj.map(item => deepSanitize(item));
-  
+
   const newObj: any = {};
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {

@@ -2,8 +2,8 @@
  * APP_DEFAULTS: Κεντρικό αρχείο ρυθμίσεων και προεπιλεγμένων δεδομένων.
  */
 export const APP_DEFAULTS = {
-  NAME: "MYCOMPANY",
-  LOGO: "LOGO",
+  NAME: "Warranty App",
+  LOGO: "H&K",
   SPLASH_TEXT: "ΦΟΡΤΩΣΗ...",
   DESCRIPTION: "PROFESSIONAL WARRANTY MANAGEMENT AND REGISTRY SYSTEM WITH SMART ANALYSIS AND PDF EXPORT CAPABILITIES.",
   TOAST_DURATION: 4000,

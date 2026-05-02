@@ -5,6 +5,9 @@ import { useStore } from '../../store/useStore';
 import { useSettingsActions } from '../../hooks/useSettingsActions';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
+import { FirestoreService } from '../../services/firebase/db';
+import { RefreshCcw } from 'lucide-react';
+import { toast } from '../../utils/toast';
 
 interface DashboardSettingsProps {
   activeTab: string;
@@ -22,7 +25,24 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({ activeTab 
   const settings = useStore(s => s?.settings);
   const { updateGarageSettings } = useSettingsActions();
   
+  const [isRecalculating, setIsRecalculating] = React.useState(false);
+  
   if (activeTab !== 'dashboard') return null;
+
+  const handleRecalculate = async () => {
+    setIsRecalculating(true);
+    try {
+      const newStats = await FirestoreService.recalculateStats();
+      if (newStats) {
+        useStore.getState().setGlobalStats(newStats);
+        toast.success('ΟΙ ΜΕΤΡΗΤΕΣ ΕΝΗΜΕΡΩΘΗΚΑΝ ΕΠΙΤΥΧΩΣ');
+      }
+    } catch (e) {
+      toast.error('ΑΠΟΤΥΧΙΑ ΕΝΗΜΕΡΩΣΗΣ ΜΕΤΡΗΤΩΝ');
+    } finally {
+      setIsRecalculating(false);
+    }
+  };
 
   const config = settings?.dashboardConfig || {
     globalStats: ['TOTAL', 'PAID'],
@@ -155,6 +175,26 @@ export const DashboardSettings: React.FC<DashboardSettingsProps> = ({ activeTab 
             className={`w-14 h-8 rounded-full transition-all relative ${config.showAuditLog ? 'bg-zinc-900' : 'bg-zinc-300'}`}
           >
             <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-sm transition-all ${config.showAuditLog ? 'right-1' : 'left-1'}`}></div>
+          </button>
+        </div>
+      </Card>
+
+      {/* Recalculate Stats */}
+      <Card title="ΔΙΑΧΕΙΡΙΣΗ ΔΕΔΟΜΕΝΩΝ DASHBOARD" subtitle="ΧΕΙΡΟΚΙΝΗΤΟΣ ΣΥΓΧΡΟΝΙΣΜΟΣ ΜΕΤΡΗΤΩΝ Firestore">
+        <div className="flex flex-col md:flex-row items-center justify-between p-6 bg-zinc-900 rounded-2xl gap-4">
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold text-white uppercase">ΕΠΑΝΥΠΟΛΟΓΙΣΜΟΣ ΜΕΤΡΗΤΩΝ</div>
+            <div className="text-[9px] font-bold text-zinc-400 uppercase italic">
+              ΧΡΗΣΙΜΟΠΟΙΗΣΤΕ ΤΟ ΑΝ ΟΙ ΑΡΙΘΜΟΙ ΣΤΟ DASHBOARD ΦΑΙΝΟΝΤΑΙ ΛΑΘΟΣ (ΣΥΓΧΡΟΝΙΖΕΙ ΤΟ METADATA/STATS ΜΕ ΤΗΝ ΠΡΑΓΜΑΤΙΚΟΤΗΤΑ)
+            </div>
+          </div>
+          <button 
+            disabled={isRecalculating}
+            onClick={handleRecalculate}
+            className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[11px] uppercase transition-all ${isRecalculating ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-white text-black hover:bg-zinc-100'}`}
+          >
+            <RefreshCcw className={`w-3 h-3 ${isRecalculating ? 'animate-spin' : ''}`} />
+            {isRecalculating ? 'ΥΠΟΛΟΓΙΣΜΟΣ...' : 'ΕΚΤΕΛΕΣΗ ΣΥΓΧΡΟΝΙΣΜΟΥ'}
           </button>
         </div>
       </Card>

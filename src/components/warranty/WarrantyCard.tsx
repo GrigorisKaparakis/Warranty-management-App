@@ -65,15 +65,30 @@ export const WarrantyCard: React.FC<{
   }[displayDensity]), [displayDensity]);
 
   const colWidths = {
-    status: isExpiryView ? 'w-[110px]' : 'w-[140px]',
-    ids: isExpiryView ? 'w-[150px]' : 'w-[180px]',
-    brand: isExpiryView ? 'w-[110px]' : 'w-[140px]',
-    customer: isExpiryView ? 'w-[130px]' : 'w-[160px]',
-    parts: isExpiryView ? 'w-[160px]' : 'w-[220px]'
+    status: isExpiryView ? 'w-[100px]' : 'w-[140px]',
+    ids: isExpiryView ? 'w-[140px]' : 'w-[180px]',
+    brand: isExpiryView ? 'w-[90px]' : 'w-[140px]',
+    customer: isExpiryView ? 'w-[110px]' : 'w-[160px]',
+    parts: isExpiryView ? 'w-[150px]' : 'w-[220px]'
   };
   
   const currentConfig = getStatusConfig(entry.status);
-  const formattedDate = new Date(entry.createdAt).toLocaleDateString('el-GR');
+  const formattedDate = (() => {
+    try {
+      if (!entry.createdAt) return '—';
+      let date: Date;
+      // Έλεγχος αν είναι Firestore Timestamp (έχει toMillis μέθοδο)
+      if (entry.createdAt && (entry.createdAt as any).toMillis) {
+        date = new Date((entry.createdAt as any).toMillis());
+      } else {
+        // Υποθέτουμε ότι είναι number ή ISO string
+        date = new Date(entry.createdAt);
+      }
+      return isNaN(date.getTime()) ? '—' : date.toLocaleDateString('el-GR');
+    } catch (e) {
+      return '—';
+    }
+  })();
   const expiryInfo = useMemo(() => calculateExpiryInfo(entry, settings), [entry, settings]);
 
   return (
@@ -115,7 +130,7 @@ export const WarrantyCard: React.FC<{
                 color: currentConfig.color,
                 borderColor: `${currentConfig.color}20`
               }}
-              className={`w-full ${density.fontSize} font-black px-4 py-2.5 rounded-xl border cursor-pointer outline-none transition-all appearance-none text-center shadow-sm hover:shadow-md`}
+              className={`w-full ${density.fontSize} font-black px-2 py-2 rounded-xl border cursor-pointer outline-none transition-all appearance-none text-center shadow-sm hover:shadow-md`}
             >
               {(settings.statusOrder || Object.keys(settings.statusConfigs || {})).map(s => {
                 const conf = getStatusConfig(s);
@@ -128,7 +143,7 @@ export const WarrantyCard: React.FC<{
           <Badge 
             variant="neutral"
             style={{ backgroundColor: `${currentConfig.color}15`, color: currentConfig.color }}
-            className="w-full justify-center py-2.5 border-none"
+            className="w-full justify-center py-2 border-none"
           >
             {currentConfig.label}
           </Badge>
@@ -136,14 +151,14 @@ export const WarrantyCard: React.FC<{
       </div>
 
       {/* IDs Column */}
-      <div className={`${colWidths.ids} flex-shrink-0 space-y-2`}>
+      <div className={`${colWidths.ids} flex-shrink-0 space-y-1`}>
         <div className="flex items-center gap-2 group/id">
           <span className={`${density.titleSize} font-black text-zinc-900 tracking-tighter uppercase leading-none`}>
             {entry.warrantyId}
           </span>
           <button 
             onClick={(e) => { e.stopPropagation(); copyToClipboard(entry.warrantyId, 'wid'); }} 
-            className="opacity-0 group-hover/id:opacity-100 transition-all p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-400"
+            className="opacity-0 group-hover/id:opacity-100 transition-all p-1 hover:bg-zinc-100 rounded-lg text-zinc-400"
           >
             {copiedField === 'wid' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
           </button>
@@ -151,13 +166,13 @@ export const WarrantyCard: React.FC<{
         <div className="flex items-center gap-2 group/vin">
           <button 
             onClick={(e) => { e.stopPropagation(); onVinClick?.(entry.vin); }}
-            className={`inline-block bg-zinc-100 text-zinc-500 font-mono ${density.fontSize} px-2.5 py-1 rounded-lg leading-none uppercase font-black border border-zinc-200 shadow-sm hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all`}
+            className={`inline-block bg-zinc-100 text-zinc-500 font-mono ${density.fontSize} px-2 py-0.5 rounded-lg leading-none uppercase font-black border border-zinc-200 shadow-sm hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all`}
           >
             {entry.vin}
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); copyToClipboard(entry.vin, 'vin'); }} 
-            className="opacity-0 group-hover/vin:opacity-100 transition-all p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-400"
+            className="opacity-0 group-hover/vin:opacity-100 transition-all p-1 hover:bg-zinc-100 rounded-lg text-zinc-400"
           >
             {copiedField === 'vin' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
           </button>
@@ -165,13 +180,13 @@ export const WarrantyCard: React.FC<{
       </div>
 
       {/* Brand Column */}
-      <div className={`${colWidths.brand} flex-shrink-0`}>
-        <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{entry.company || '-'}</div>
-        <div className={`${density.fontSize} font-black text-zinc-900 uppercase tracking-tight`}>{entry.brand}</div>
+      <div className={`${colWidths.brand} flex-shrink-0 flex flex-col`}>
+        <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest truncate leading-tight mb-1">{entry.company || '-'}</div>
+        <div className={`${density.fontSize} font-black text-zinc-900 uppercase tracking-tight truncate leading-tight`}>{entry.brand}</div>
       </div>
 
       {/* Date/Customer Column */}
-      <div className={`${colWidths.customer} flex-shrink-0 space-y-2 relative`}>
+      <div className={`${colWidths.customer} flex-shrink-0 space-y-1 relative`}>
         <div className="flex items-center gap-2 text-zinc-400">
           <Calendar size={12} />
           <span className={`${density.fontSize} font-bold`}>{formattedDate}</span>
@@ -187,8 +202,8 @@ export const WarrantyCard: React.FC<{
           </Link>
         </div>
         {expiryInfo && entry.status !== 'REJECTED' && !entry.isPaid && (
-          <div className="mt-2">
-            <Badge variant={expiryInfo.variant} className="text-[9px] px-2 py-0.5 border-none shadow-sm">
+          <div className="mt-1">
+            <Badge variant={expiryInfo.variant} className="text-[8px] px-1.5 py-0 border-none shadow-sm capitalize">
               {expiryInfo.text}
             </Badge>
           </div>
@@ -196,29 +211,30 @@ export const WarrantyCard: React.FC<{
       </div>
 
       {/* Parts Column */}
-      <div className={`${colWidths.parts} flex-shrink-0`}>
-        <div className="flex flex-wrap gap-2">
+      <div className={`${colWidths.parts} flex-shrink-0 overflow-visible`}>
+        <div className="flex flex-col gap-1.5">
           {entry.parts.length > 0 ? entry.parts.map((part, index) => (
             <button
               key={part.id || `part-${index}`}
               disabled={readOnly}
               onClick={(e) => { e.stopPropagation(); handleTogglePart(part.id); }}
-              className={`px-3 py-1.5 rounded-xl ${density.fontSize} font-black shadow-sm border transition-all active:scale-95 flex flex-col items-start ${
+              className={`w-full text-left px-3 py-1.5 rounded-xl border transition-all active:scale-[0.98] flex flex-col gap-0.5 ${
                 part.isReady 
-                  ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
-                  : 'bg-amber-50 border-amber-100 text-amber-700'
-              }`}
-              title={`${part.description || UI_MESSAGES.LABELS.NO_DESCRIPTION} (X${part.quantity})`}
+                  ? 'bg-emerald-50 border-emerald-100 text-emerald-800' 
+                  : 'bg-amber-50 border-amber-100 text-amber-800'
+              } hover:shadow-md group/part`}
             >
-              <div className="flex items-center gap-1.5">
-                <span>{part.code}</span>
-                <span className="opacity-40 text-[9px]">x{part.quantity}</span>
-                {part.isReady && <CheckCircle2 size={10} />}
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-1.5">
+                  <span className={`${density.fontSize} font-black tracking-tight`}>{part.code}</span>
+                  <span className="opacity-40 text-[9px] font-black">x{part.quantity}</span>
+                </div>
+                {part.isReady && <CheckCircle2 size={12} className="text-emerald-500" />}
               </div>
               {part.description && (
-                <span className="text-[8px] opacity-50 mt-0.5 truncate max-w-[100px] font-bold uppercase">
+                <div className="text-[9px] font-bold uppercase opacity-60 leading-tight">
                   {part.description}
-                </span>
+                </div>
               )}
             </button>
           )) : (
@@ -228,37 +244,37 @@ export const WarrantyCard: React.FC<{
       </div>
 
       {/* Notes Column */}
-      <div className="flex-1 min-w-0 px-4">
-        <div className={`${density.fontSize} font-medium text-zinc-600 whitespace-pre-line leading-relaxed transition-all`}>
+      <div className="flex-1 min-w-0 pr-12 pl-6">
+        <div className={`${density.fontSize} font-medium text-zinc-500 whitespace-pre-line leading-relaxed transition-all italic`}>
           {entry.notes || '-'}
         </div>
       </div>
 
       {/* Actions Column */}
       {currentView !== 'expiryTracker' && (
-        <div className="w-[160px] flex-shrink-0 flex items-start justify-end gap-3 pl-4 border-l border-zinc-50 pt-1">
+        <div className="w-[160px] flex-shrink-0 flex items-start justify-end gap-2 pr-6">
           <button
             type="button"
             disabled={readOnly}
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); togglePayment(); }}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border shadow-sm ${
+            className={`min-w-[65px] px-2 py-2 rounded-lg text-[9px] font-black transition-all border shadow-sm ${
               entry.isPaid 
                 ? 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100' 
-                : 'bg-rose-50 text-rose-500 border-rose-100'
-            }`}
+                : 'bg-rose-50 text-rose-500 border-rose-200'
+            } hover:scale-105 active:scale-95`}
           >
             {entry.isPaid ? UI_MESSAGES.LABELS.PAID : UI_MESSAGES.LABELS.UNPAID}
           </button>
           
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+          <div className="flex items-center gap-1 opacity-20 md:opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
             <Button 
               variant="neutral" 
               size="icon" 
               onClick={(e) => { e.stopPropagation(); PDFService.exportSingleEntry(entry, settings); }}
-              className="w-9 h-9 rounded-xl border-zinc-100"
+              className="w-7 h-7 rounded-md border-zinc-100 bg-zinc-50/80 hover:bg-zinc-100"
               title="PDF"
             >
-              <FileText size={14} />
+              <FileText size={12} />
             </Button>
 
             {!readOnly && (
@@ -266,9 +282,9 @@ export const WarrantyCard: React.FC<{
                 variant="neutral" 
                 size="icon" 
                 onClick={(e) => { e.stopPropagation(); navigate(`/warranty/edit/${entry.id}`); }}
-                className="w-9 h-9 rounded-xl border-zinc-100"
+                className="w-7 h-7 rounded-md border-zinc-100 bg-zinc-50/80 hover:bg-zinc-100"
               >
-                <Edit3 size={14} />
+                <Edit3 size={12} />
               </Button>
             )}
 
@@ -277,14 +293,15 @@ export const WarrantyCard: React.FC<{
                 variant="danger" 
                 size="icon" 
                 onClick={(e) => { e.stopPropagation(); onDelete({ id: entry.id, warrantyId: entry.warrantyId }); }}
-                className="w-9 h-9 rounded-xl"
+                className="w-7 h-7 rounded-md shadow-sm"
               >
-                <Trash2 size={14} />
+                <Trash2 size={12} />
               </Button>
             )}
           </div>
         </div>
       )}
     </motion.div>
+
   );
 });

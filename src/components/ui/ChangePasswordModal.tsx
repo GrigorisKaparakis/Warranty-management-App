@@ -7,6 +7,7 @@ interface ChangePasswordModalProps {
 }
 
 export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose }) => {
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [passwordChangeFeedback, setPasswordChangeFeedback] = useState<{msg: string, type: 'success' | 'error'} | null>(null);
@@ -22,6 +23,10 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
   if (!isOpen) return null;
 
   const handleChangePassword = async () => {
+    if (!currentPassword) {
+      setPasswordChangeFeedback({ msg: "Απαιτείται ο τρέχων κωδικός!", type: 'error' });
+      return;
+    }
     if (newPassword !== confirmNewPassword) {
       setPasswordChangeFeedback({ msg: "Οι κωδικοί δεν ταιριάζουν!", type: 'error' });
       return;
@@ -33,13 +38,17 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
 
     setIsLoading(true);
     try {
-      await AuthService.changePassword(newPassword);
+      await AuthService.changePassword(currentPassword, newPassword);
       setPasswordChangeFeedback({ msg: "Ο κωδικός άλλαξε επιτυχώς!", type: 'success' });
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
       // onClose(); // Κλείσιμο του modal μετά την επιτυχή αλλαγή
     } catch (e: any) {
-      setPasswordChangeFeedback({ msg: "Σφάλμα αλλαγής κωδικού: " + e.message, type: 'error' });
+      const msg = e.code === 'auth/wrong-password' 
+        ? "Ο τρέχων κωδικός είναι λανθασμένος!" 
+        : "Σφάλμα αλλαγής κωδικού: " + e.message;
+      setPasswordChangeFeedback({ msg, type: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -49,9 +58,17 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
     <div className="fixed inset-0 z-[900] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl border border-slate-100 scale-100 animate-in zoom-in-95 duration-200">
         <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-2">ΑΛΛΑΓΗ ΚΩΔΙΚΟΥ ΠΡΟΣΒΑΣΗΣ</h3>
-        <p className="text-sm font-medium text-slate-500 mb-8 leading-relaxed italic">Εισάγετε τον νέο κωδικό πρόσβασης για τον λογαριασμό σας.</p>
+        <p className="text-sm font-medium text-slate-500 mb-8 leading-relaxed italic">Εισάγετε τον τρέχοντα και τον νέο κωδικό πρόσβασης.</p>
         
         <div className="space-y-4">
+          <input 
+            type="password" 
+            placeholder="Τρέχων Κωδικός" 
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            disabled={isLoading}
+          />
           <input 
             type="password" 
             placeholder="Νέος Κωδικός" 

@@ -24,24 +24,20 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public async componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo);
     
-    // Καταγραφή στο Audit Log απευθείας
-    try {
-      const isPermissionError = error.message.includes('permission-denied') || error.message.includes('insufficient permissions');
-      await FirestoreService.addAuditLog({
-        timestamp: Date.now(),
-        userId: 'SYSTEM',
-        userEmail: 'system@error-boundary',
-        action: 'ERROR',
-        targetId: 'SYSTEM',
-        targetWarrantyId: 'SYSTEM',
-        details: `${isPermissionError ? 'ΣΦΑΛΜΑ ΔΙΚΑΙΩΜΑΤΩΝ' : 'ΚΡΙΣΙΜΟ ΣΦΑΛΜΑ UI'}: ${error.message || String(error)}`
-      });
-    } catch (err) {
-      console.error('Failed to log error to audit:', err);
-    }
+    // Καταγραφή στο Audit Log απευθείας (fire and forget)
+    const isPermissionError = error.message.includes('permission-denied') || error.message.includes('insufficient permissions');
+    FirestoreService.addAuditLog({
+      timestamp: Date.now(),
+      userId: 'SYSTEM',
+      userEmail: 'system@error-boundary',
+      action: 'ERROR',
+      targetId: 'SYSTEM',
+      targetWarrantyId: 'SYSTEM',
+      details: `${isPermissionError ? 'ΣΦΑΛΜΑ ΔΙΚΑΙΩΜΑΤΩΝ' : 'ΚΡΙΣΙΜΟ ΣΦΑΛΜΑ UI'}: ${error.message || String(error)}`
+    }).catch(err => console.error('Failed to log error to audit:', err));
   }
 
   public render() {

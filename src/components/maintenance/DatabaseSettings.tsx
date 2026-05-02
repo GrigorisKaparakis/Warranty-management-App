@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FirestoreService } from '../../services/firebase/db';
 import { useStore } from '../../store/useStore';
@@ -25,6 +25,11 @@ export const DatabaseSettings: React.FC<DatabaseSettingsProps> = ({ activeTab })
   const [isMigratingVehicles, setIsMigratingVehicles] = useState(false);
   const [isMigratingCustomers, setIsMigratingCustomers] = useState(false);
   const [migrationCount, setMigrationCount] = useState(0);
+
+  // BUG-018: Reset count when tab changes to avoid seeing old progress
+  useEffect(() => {
+    setMigrationCount(0);
+  }, [activeTab]);
   
   const [partSearch, setPartSearch] = useState('');
   const [vehicleSearch, setVehicleSearch] = useState('');
@@ -129,8 +134,8 @@ export const DatabaseSettings: React.FC<DatabaseSettingsProps> = ({ activeTab })
                       </td>
                       <td className="py-4">
                         <div className="flex flex-wrap gap-1">
-                          {customer.vins?.map(vin => (
-                            <Badge key={vin} variant="neutral" className="text-[9px]">{vin}</Badge>
+                          {customer.vins?.map((vin, vIdx) => (
+                            <Badge key={`${vin}-${vIdx}`} variant="neutral" className="text-[9px]">{vin}</Badge>
                           ))}
                         </div>
                       </td>

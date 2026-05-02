@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { AuthSlice, createAuthSlice } from './slices/authSlice';
@@ -21,13 +20,15 @@ export const useStore = create<AppStore>()(
     {
       name: 'warranty-app-storage',
       storage: createJSONStorage(() => localStorage),
-      // Επιλέγουμε να αποθηκεύσουμε μόνο τα registries και τις ρυθμίσεις για ταχύτητα
       partialize: (state) => ({
-        parts: state.parts,
-        vehicles: state.vehicles,
-        customers: state.customers,
-        settings: state.settings,
-        entries: state.entries, // Προσθήκη και των εγγυήσεων για ακαριαίο "πρώτο φόρτωμα"
+        // Αποθηκεύουμε τα registries και τις ρυθμίσεις για ταχύτητα
+        parts: (state as any).parts,
+        vehicles: (state as any).vehicles,
+        customers: (state as any).customers,
+        settings: (state as any).settings,
+        entries: (state as any).entries,
+        user: state.user,
+        profile: state.profile
       }),
     }
   )

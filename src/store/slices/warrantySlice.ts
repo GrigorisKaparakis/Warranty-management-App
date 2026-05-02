@@ -4,12 +4,16 @@
  */
 
 import { StateCreator } from 'zustand';
-import { Entry, AuditEntry, Note, Notice, PartRegistryEntry, VehicleRegistryEntry, CustomerRegistryEntry } from '../../core/types';
+import { Entry, AuditEntry, Note, Notice, PartRegistryEntry, VehicleRegistryEntry, CustomerRegistryEntry, GlobalStats } from '../../core/types';
 
 export interface WarrantySlice {
   // Data Collections
   entries: Entry[];
   setEntries: (entries: Entry[]) => void;
+  lastDoc: any | null; // Using any for QueryDocumentSnapshot to avoid circular deps/complex imports if needed
+  setLastDoc: (doc: any | null) => void;
+  globalStats: GlobalStats | null;
+  setGlobalStats: (stats: GlobalStats | null) => void;
   auditLogs: AuditEntry[];
   setAuditLogs: (logs: AuditEntry[]) => void;
   notes: Note[];
@@ -41,6 +45,10 @@ export interface WarrantySlice {
 export const createWarrantySlice: StateCreator<WarrantySlice> = (set) => ({
   entries: [],
   setEntries: (entries) => set({ entries }),
+  lastDoc: null,
+  setLastDoc: (lastDoc) => set({ lastDoc }),
+  globalStats: null,
+  setGlobalStats: (globalStats) => set({ globalStats }),
   auditLogs: [],
   setAuditLogs: (auditLogs) => set({ auditLogs }),
   notes: [],

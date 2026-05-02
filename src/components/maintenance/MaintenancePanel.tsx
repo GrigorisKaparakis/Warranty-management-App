@@ -12,6 +12,7 @@ const AiEngineSettings = React.lazy(() => import('./AiEngineSettings').then(m =>
 const SecuritySettings = React.lazy(() => import('./SecuritySettings').then(m => ({ default: m.SecuritySettings })));
 const RolesSettings = React.lazy(() => import('./RolesSettings').then(m => ({ default: m.RolesSettings })));
 const DataToolsSettings = React.lazy(() => import('./DataToolsSettings').then(m => ({ default: m.DataToolsSettings })));
+const ResourceProtection = React.lazy(() => import('./ResourceProtection').then(m => ({ default: m.ResourceProtection })));
 
 /**
  * MaintenancePanel: Το κεντρικό πάνελ διαχείρισης του συστήματος (Admin Panel).
@@ -34,13 +35,15 @@ export const MaintenancePanel: React.FC = () => {
     'dashboard': 'dashboard',
     'limits': 'app_limits',
     'expirelimits': 'expiry_thresholds',
+    'features': 'feature_toggles',
     'parts': 'database',
     'vehicles': 'vehicles',
     'customers': 'customers',
     'expirationupdate': 'dataTools',
     'ai': 'ai_control',
     'rolepermissions': 'permissions',
-    'roles': 'roles'
+    'roles': 'roles',
+    'protection': 'resource_protection'
   };
 
   const tabToUrlMap: Record<string, { cat: string, sec: string }> = {
@@ -51,13 +54,15 @@ export const MaintenancePanel: React.FC = () => {
     'dashboard': { cat: 'settings', sec: 'dashboard' },
     'app_limits': { cat: 'settings', sec: 'limits' },
     'expiry_thresholds': { cat: 'settings', sec: 'expirelimits' },
+    'feature_toggles': { cat: 'settings', sec: 'features' },
     'database': { cat: 'databases', sec: 'parts' },
     'vehicles': { cat: 'databases', sec: 'vehicles' },
     'customers': { cat: 'databases', sec: 'customers' },
     'dataTools': { cat: 'tools', sec: 'expirationupdate' },
     'ai_control': { cat: 'ai', sec: 'ai' },
     'permissions': { cat: 'security', sec: 'rolepermissions' },
-    'roles': { cat: 'security', sec: 'roles' }
+    'roles': { cat: 'security', sec: 'roles' },
+    'resource_protection': { cat: 'security', sec: 'protection' }
   };
 
   const activeTab = useMemo(() => {
@@ -85,6 +90,7 @@ export const MaintenancePanel: React.FC = () => {
         { id: 'dashboard', label: 'Dashboard' },
         { id: 'app_limits', label: 'App Limits' },
         { id: 'expiry_thresholds', label: 'Όρια Λήξεων' },
+        { id: 'feature_toggles', label: 'Δυνατότητες' },
       ]
     },
     {
@@ -120,6 +126,7 @@ export const MaintenancePanel: React.FC = () => {
       items: [
         { id: 'permissions', label: 'Δικαιώματα Ρόλων' },
         { id: 'roles', label: 'Ρόλοι Χρηστών' },
+        { id: 'resource_protection', label: 'Προστασία Πόρων' },
       ]
     }
   ];
@@ -193,6 +200,7 @@ export const MaintenancePanel: React.FC = () => {
                   <>
                     <SecuritySettings activeTab={activeTab} />
                     <RolesSettings activeTab={activeTab} />
+                    <ResourceProtection activeTab={activeTab} />
                   </>
                 )}
                 

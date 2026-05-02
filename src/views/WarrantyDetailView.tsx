@@ -35,7 +35,7 @@ export const WarrantyDetailView: React.FC = () => {
   const entries = useStore(s => s.entries);
   const auditLogs = useStore(s => s.auditLogs);
   const settings = useStore(s => s.settings);
-  const setDeletingEntry = useStore(s => s.setEditingEntry); // Note: setDeletingEntry was mapped to setEditingEntry in useAppState
+  const setDeletingEntry = useStore(s => s.setDeletingEntry);
 
   // Logic from useAppState
   const { 
@@ -204,7 +204,7 @@ export const WarrantyDetailView: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
                     {entry.parts.map((p, i) => (
-                      <tr key={i} className="hover:bg-zinc-50/30 transition-colors">
+                      <tr key={p.id || `${p.code}-${i}`} className="hover:bg-zinc-50/30 transition-colors">
                         <td className="px-8 py-5 text-xs font-mono font-black text-blue-600 uppercase">{p.code || '-'}</td>
                         <td className="px-8 py-5 text-xs font-bold text-zinc-700 uppercase">{p.description}</td>
                         <td className="px-8 py-5 text-xs font-black text-zinc-900 text-right">{p.quantity}</td>
