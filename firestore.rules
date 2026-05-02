@@ -31,9 +31,8 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() && (
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN') ||
-        (request.auth.token.email == "kaparakisgrigoris@gmail.com" && request.auth.token.email_verified == true)
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN'
       );
     }
 
@@ -76,6 +75,12 @@ service cloud.firestore {
     // ===============================================================
     // Rules
     // ===============================================================
+
+    // Κανόνες για App Settings (Kill-Switch)
+    match /app_settings/{id} {
+      allow read: if true; // Επιτρέπουμε σε όλους να βλέπουν αν το Kill-Switch είναι ενεργό
+      allow write: if isAuthenticated() && isNotDisabled() && isAdmin();
+    }
 
     // Κανόνες για Προφίλ Χρηστών
     match /users/{userId} {
@@ -163,6 +168,12 @@ service cloud.firestore {
       allow write: if isAuthenticated() && isNotDisabled() && isOwner(userId) && 
                     request.resource.data.uid == request.auth.uid &&
                     request.resource.data.lastActive == request.time;
+    }
+
+    // Κανόνες για Metadata & Stats (Aggregated Dashboard Data)
+    match /metadata/{docId} {
+      allow read: if isAuthenticated() && isNotDisabled();
+      allow write: if isAuthenticated() && isNotDisabled() && (hasPermission('entry') || isAdmin());
     }
   }
 }

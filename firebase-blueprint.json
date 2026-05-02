@@ -1,0 +1,156 @@
+{
+  "entities": {
+    "Entry": {
+      "title": "Warranty Entry",
+      "description": "A warranty claim entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "warrantyId": { "type": "string" },
+        "vin": { "type": "string" },
+        "fullName": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["warrantyId", "vin", "fullName", "status", "createdAt"]
+    },
+    "AppError": {
+      "title": "Application Error",
+      "description": "Log of an application error",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "number" },
+        "message": { "type": "string" },
+        "url": { "type": "string" },
+        "userAgent": { "type": "string" }
+      },
+      "required": ["timestamp", "message", "url", "userAgent"]
+    },
+        "UsageLog": {
+      "title": "Usage Log",
+      "description": "Firestore read consumption log",
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "docCount": { "type": "number" },
+        "source": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "userId": { "type": "string" },
+        "serverTimestamp": { "type": "string" },
+        "operation": { "type": "string" }
+      }
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User profile data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "disabled": { "type": "boolean" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "AIFeedback": {
+      "title": "AI Feedback",
+      "description": "Feedback on AI extraction errors",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "userId": { "type": "string" },
+        "company": { "type": "string" },
+        "originalData": { "type": "object" },
+        "correctedData": { "type": "object" },
+        "discrepancies": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "timestamp", "userId", "company", "originalData", "correctedData"]
+    },
+    "Message": {
+      "title": "Chat Message",
+      "description": "A message in the live chat",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "timestamp": { "type": "object" },
+        "readBy": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["text", "senderId", "senderName", "timestamp", "readBy"]
+    },
+    "Presence": {
+      "title": "Chat Presence",
+      "description": "Real-time presence indicator for chat users",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "lastActive": { "type": "object" },
+        "chatOpen": { "type": "boolean" }
+      },
+      "required": ["uid", "name", "lastActive", "chatOpen"]
+    },
+    "AppSettings": {
+      "title": "Application Settings",
+      "description": "Global application configuration and controls",
+      "type": "object",
+      "properties": {
+        "killSwitchEnabled": { "type": "boolean" },
+        "maintenanceMode": { "type": "boolean" },
+        "updatedAt": { "type": "object" }
+      },
+      "required": ["killSwitchEnabled"]
+    },
+    "GlobalStats": {
+      "title": "Global Statistics",
+      "description": "Aggregated statistics for the dashboard",
+      "type": "object",
+      "properties": {
+        "total": { "type": "number" },
+        "pending": { "type": "number" },
+        "approved": { "type": "number" },
+        "rejected": { "type": "number" },
+        "paid": { "type": "number" },
+        "unpaid": { "type": "number" },
+        "lastUpdated": { "type": "object" }
+      },
+      "required": ["total", "pending", "approved", "rejected", "paid", "unpaid"]
+    }
+  },
+  "firestore": {
+    "/app_settings/{id}": {
+      "schema": "AppSettings",
+      "description": "Global settings document (usually ID 'global')"
+    },
+    "/entries/{entryId}": {
+      "schema": "Entry",
+      "description": "Collection of warranty entries"
+    },
+    "/errors/{errorId}": {
+      "schema": "AppError",
+      "description": "Collection of application error logs"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Collection of user profiles"
+    },
+    "/aiFeedback/{feedbackId}": {
+      "schema": "AIFeedback",
+      "description": "Collection of AI feedback for learning"
+    },
+    "/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Public chat messages"
+    },
+    "/presence/{userId}": {
+      "schema": "Presence",
+      "description": "Real-time presence tracking"
+    },
+    "/metadata/{docId}": {
+      "schema": "GlobalStats",
+      "description": "Collection for aggregated metadata, e.g., 'stats' doc"
+    }
+  }
+}

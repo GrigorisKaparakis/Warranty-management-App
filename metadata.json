@@ -1,5 +1,6 @@
 {
-  "name": "WarrantyH&K",
+  "name": "appwarrantyv2",
   "description": "Professional warranty management and registry system with smart analysis, PDF export, and real-time team chat.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }
