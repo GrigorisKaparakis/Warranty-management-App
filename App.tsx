@@ -19,6 +19,7 @@ import { KillSwitchOverlay } from './src/components/maintenance/KillSwitchOverla
 import { initKillSwitch } from './src/services/firebase/monitor';
 import { formatError } from './src/utils/errorUtils';
 import { toast } from './src/utils/toast';
+import { SearchOverlay } from './src/components/navigation/SearchOverlay';
 import { Upload, FileText, Loader2 } from 'lucide-react';
 
 // Lazy loaded views
@@ -72,19 +73,20 @@ const App: React.FC = () => {
   // Τοπικό state για τη διαχείριση φορμών 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   /**
    * handleLogin: Διαδικασία ταυτοποίησης με αναλυτικό feedback σφάλματος.
    */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsLoggingIn(true);
     try {
       await AuthService.login(email, password);
     } catch (err: any) {
       toast.error(formatError(err));
     } finally {
-      setIsLoading(false);
+      setIsLoggingIn(false);
     }
   };
 
@@ -102,13 +104,12 @@ const App: React.FC = () => {
   // Ενημέρωση του τίτλου της σελίδας δυναμικά
   useEffect(() => {
     document.title = companyName;
-    const unsubscribeKillSwitch = initKillSwitch();
-    return () => unsubscribeKillSwitch();
   }, [companyName]);
 
   // Κεντρικό Rendering
   return (
     <>
+      <SearchOverlay />
       <KillSwitchOverlay />
       <StateManager />
       <Toaster position="bottom-right" expand={true} richColors />
@@ -158,7 +159,7 @@ const App: React.FC = () => {
                   <form onSubmit={handleLogin} className="space-y-4">
                     <input type="email" placeholder="Email" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 font-bold" value={email} onChange={e => setEmail(e.target.value)} required />
                     <input type="password" placeholder="Password" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 font-bold" value={password} onChange={e => setPassword(e.target.value)} required />
-                    <button className="w-full py-4 bg-slate-800 text-white rounded-2xl font-black uppercase tracking-[0.15em] hover:bg-slate-700 transition-all shadow-lg active:scale-95">{isLoading ? 'ΣΥΝΔΕΣΗ...' : 'ΕΙΣΟΔΟΣ'}</button>
+                    <button className="w-full py-4 bg-slate-800 text-white rounded-2xl font-black uppercase tracking-[0.15em] hover:bg-slate-700 transition-all shadow-lg active:scale-95">{isLoggingIn ? 'ΣΥΝΔΕΣΗ...' : 'ΕΙΣΟΔΟΣ'}</button>
                   </form>
                 </div>
               </div>
@@ -177,7 +178,13 @@ const App: React.FC = () => {
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
-                  onDrop={handleDrop}
+                  onDrop={(e) => {
+                    if (useStore.getState().editingEntry) {
+                      toast.error("Δεν είναι δυνατή η σάρωση όσο επεξεργάζεστε μια εγγύηση.");
+                      return;
+                    }
+                    handleDrop(e);
+                  }}
                 >
                   {/* Drag & Drop Overlay */}
                   {dragActive && (
