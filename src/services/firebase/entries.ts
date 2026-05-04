@@ -18,7 +18,9 @@ export const EntryService = {
     if (limitCount) {
       q = query(q, limit(limitCount));
     }
-    return visibilityAwareOnSnapshot(q, (snapshot) => {
+    // Changed to monitoredOnSnapshot to keep connection alive across window changes
+    // This prevents re-fetching the entire list (e.g. 100 docs) every time the user refocuses the tab.
+    return monitoredOnSnapshot(q, (snapshot) => {
       const entries = snapshot.docs.map((snap: any) => sanitizeEntry(snap.data(), snap.id));
       callback(entries);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "entries"));

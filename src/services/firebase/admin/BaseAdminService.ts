@@ -1,5 +1,5 @@
 
-import { doc, addDoc, deleteDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, addDoc, deleteDoc, setDoc, updateDoc, query, orderBy, limit } from "firebase/firestore";
 import { monitoredOnSnapshot } from "../monitor";
 import { db, noticesCollection, auditCollection, usersCollection, deepSanitize, handleFirestoreError, OperationType } from "../core";
 import { GarageSettings, Notice, AuditEntry, UserProfile } from "../../../core/types";
@@ -51,10 +51,10 @@ export const AdminService = {
 
   // Ανακοινώσεις
   subscribeToNotices(callback: (notices: Notice[]) => void) {
-    const docRef = noticesCollection;
-    return monitoredOnSnapshot(docRef, (snapshot) => {
+    const q = query(noticesCollection, orderBy("createdAt", "desc"), limit(10));
+    return monitoredOnSnapshot(q, (snapshot) => {
       const notices = snapshot.docs.map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as Notice));
-      callback(notices.sort((a, b) => b.createdAt - a.createdAt).slice(0, 5));
+      callback(notices);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "notices"));
   },
 
@@ -77,11 +77,9 @@ export const AdminService = {
 
   // Audit Logs
   subscribeToAuditLogs(limitCount: number, callback: (logs: AuditEntry[]) => void) {
-    return monitoredOnSnapshot(auditCollection, (snapshot) => {
-      const logs = snapshot.docs
-        .map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as AuditEntry))
-        .sort((a, b) => b.timestamp - a.timestamp)
-        .slice(0, limitCount);
+    const q = query(auditCollection, orderBy("timestamp", "desc"), limit(limitCount));
+    return monitoredOnSnapshot(q, (snapshot) => {
+      const logs = snapshot.docs.map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as AuditEntry));
       callback(logs);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "audit_logs"));
   },

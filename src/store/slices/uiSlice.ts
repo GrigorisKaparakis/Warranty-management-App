@@ -20,6 +20,18 @@ export interface UISlice {
   // KillSwitch state
   isMaintenanceMode: boolean;
   setMaintenanceMode: (active: boolean) => void;
+
+  isAppIdle: boolean;
+  setAppIdle: (idle: boolean) => void;
+
+  isDebugLogsEnabled: boolean;
+  setDebugLogsEnabled: (enabled: boolean) => void;
+
+  dragCounter: number;
+  setDragCounter: (value: number | ((prev: number) => number)) => void;
+  
+  refetchKey: number;
+  triggerRefetch: () => void;
 }
 
 export const createUISlice: StateCreator<UISlice> = (set) => ({
@@ -41,4 +53,18 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
 
   isMaintenanceMode: false,
   setMaintenanceMode: (isMaintenanceMode) => set({ isMaintenanceMode }),
+
+  isAppIdle: false,
+  setAppIdle: (isAppIdle) => set({ isAppIdle }),
+
+  isDebugLogsEnabled: false,
+  setDebugLogsEnabled: (isDebugLogsEnabled) => set({ isDebugLogsEnabled }),
+
+  dragCounter: 0,
+  setDragCounter: (value) => set((state) => ({ 
+    dragCounter: typeof value === 'function' ? value(state.dragCounter) : value 
+  })),
+
+  refetchKey: 0,
+  triggerRefetch: () => set((state) => ({ refetchKey: state.refetchKey + 1 })),
 });

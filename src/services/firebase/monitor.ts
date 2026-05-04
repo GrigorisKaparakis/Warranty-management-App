@@ -25,6 +25,8 @@ import { db, auth } from "./core";
 
 let isKillSwitchActive = false;
 let killSwitchListeners: ((active: boolean) => void)[] = [];
+let activeListenersCount = 0;
+let totalReadsCount = 0;
 
 /**
  * Εγγραφή για αλλαγές στο Kill-Switch
@@ -46,11 +48,13 @@ export const initKillSwitch = () => {
     if (snapshot.exists()) {
       const data = snapshot.data();
       const isActive = !!data.killSwitchEnabled;
+      const debugEnabled = !!data.debugLogsEnabled;
       isKillSwitchActive = isActive;
 
       // Update store for UI reactivity
-      const setMaintenanceMode = useStore.getState().setMaintenanceMode;
-      if (setMaintenanceMode) setMaintenanceMode(isActive);
+      const uiState = useStore.getState();
+      if (uiState.setMaintenanceMode) uiState.setMaintenanceMode(isActive);
+      if (uiState.setDebugLogsEnabled) uiState.setDebugLogsEnabled(debugEnabled);
 
       killSwitchListeners.forEach(l => l(isActive));
     }
@@ -69,13 +73,25 @@ interface ReadLog {
 
 const logRead = (log: ReadLog) => {
   const isServer = log.source === 'SERVER';
-  const sourceLabel = isServer ? 'firebase' : 'cache';
-  const color = isServer ? 'color: #ef4444; font-weight: bold;' : 'color: #10b981; font-weight: bold;';
+  const debugEnabled = useStore.getState().isDebugLogsEnabled;
+  
+  if (isServer) {
+    totalReadsCount += log.docCount;
+  }
 
+  if (!debugEnabled) return;
+
+  const sourceLabel = isServer ? 'firebase' : 'cache';
+  const color = isServer ? 'color: #ef4444; font-weight: bold; background: #fee2e2; padding: 2px 4px; border-radius: 4px;' : 'color: #10b981; font-weight: bold; background: #dcfce7; padding: 2px 4px; border-radius: 4px;';
+  
   console.log(
     `%cfrom ${sourceLabel} ${log.docCount} docs from ${log.path}`,
     color
   );
+  
+  if (isServer) {
+    console.log(`%c[TOTAL READS: ${totalReadsCount}] [ACTIVE LISTENERS: ${activeListenersCount}]`, 'color: #6366f1; font-weight: bold;');
+  }
 };
 
 async function isCurrentUserAdmin(): Promise<boolean> {
@@ -101,6 +117,11 @@ export function monitoredOnSnapshot<T>(
 ) {
   const path = (reference as any).path || (reference as any)._query?.path?.segments?.join('/') || 'unknown/path';
 
+  activeListenersCount++;
+  if (useStore.getState().isDebugLogsEnabled) {
+    console.log(`%c[LISTENER OPENED] ${path} (Total Active: ${activeListenersCount})`, 'color: #f59e0b; font-weight: bold;');
+  }
+
   let isInitialFetch = true;
 
   const handleSnapshot = (snapshot: any) => {
@@ -121,28 +142,33 @@ export function monitoredOnSnapshot<T>(
       });
     }
 
-    const operation = isInitialFetch ? 'INITIAL_FETCH' : 'LIVE_UPDATE';
-    const docCountText = isInitialFetch
-      ? `${totalDocs} docs`
-      : `+${added} ~${modified} -${removed} (Total: ${totalDocs})`;
-
     logRead({
       path,
       docCount: isInitialFetch ? totalDocs : (added + modified + removed),
       source,
       timestamp: new Date().toLocaleTimeString(),
-      operation: `SNAPSHOT_${operation}` as any
+      operation: 'SNAPSHOT'
     });
 
     isInitialFetch = false;
     onNext(snapshot);
   };
 
+  const wrapUnsubscribe = (unsub: () => void) => {
+    return () => {
+      activeListenersCount--;
+      if (useStore.getState().isDebugLogsEnabled) {
+        console.log(`%c[LISTENER CLOSED] ${path} (Total Active: ${activeListenersCount})`, 'color: #6b7280; font-weight: bold;');
+      }
+      unsub();
+    };
+  };
+
   if (options) {
-    return firestoreOnSnapshot(reference as any, options, handleSnapshot, onError);
+    return wrapUnsubscribe(firestoreOnSnapshot(reference as any, options, handleSnapshot, onError));
   }
 
-  return firestoreOnSnapshot(reference as any, handleSnapshot, onError);
+  return wrapUnsubscribe(firestoreOnSnapshot(reference as any, handleSnapshot, onError));
 }
 
 /**

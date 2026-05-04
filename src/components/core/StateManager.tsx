@@ -16,7 +16,29 @@ const FETCH_LIMIT = UI_LIMITS.FETCH_LIMIT;
  * real-time συνδέσεις με το Firebase.
  */
 export const StateManager: React.FC = () => {
-  const store = useStore();
+  // Use individual selectors for stability
+  const user = useStore(s => s.user);
+  const profile = useStore(s => s.profile);
+  const fetchLimit = useStore(s => s.settings?.limits?.fetchLimit);
+  const auditLimit = useStore(s => s.settings?.limits?.auditLogFetchLimit);
+  const rolePermissions = useStore(s => s.settings?.rolePermissions);
+  const isAppIdle = useStore(s => s.isAppIdle);
+  
+  const setAuth = useStore(s => s.setAuth);
+  const setAccountDisabled = useStore(s => s.setAccountDisabled);
+  const setIsLoading = useStore(s => s.setIsLoading);
+  const setIsLive = useStore(s => s.setIsLive);
+  const setEntries = useStore(s => s.setEntries);
+  const setSettings = useStore(s => s.setSettings);
+  const setNotices = useStore(s => s.setNotices);
+  const setNotes = useStore(s => s.setNotes);
+  const setParts = useStore(s => s.setParts);
+  const setVehicles = useStore(s => s.setVehicles);
+  const setCustomers = useStore(s => s.setCustomers);
+  const setUsers = useStore(s => s.setUsers);
+  const setAuditLogs = useStore(s => s.setAuditLogs);
+  const setGlobalStats = useStore(s => s.setGlobalStats);
+
   const location = useLocation();
   const currentPath = location.pathname;
   const hasShownWelcome = useRef(false);
@@ -27,8 +49,10 @@ export const StateManager: React.FC = () => {
 
     const unsubscribeAuth = AuthService.subscribe(async (currentUser) => {
       if (currentUser) {
-        // Καθαρισμός προηγούμενου profile listener αν υπάρχει
         if (unsubscribeProfile) unsubscribeProfile();
+        
+        // Skip profile listener if app is idle to save resources
+        if (isAppIdle) return;
 
         unsubscribeProfile = AuthService.subscribeToProfile(currentUser.uid, async (userProfile) => {
           if (!userProfile) {
@@ -39,20 +63,20 @@ export const StateManager: React.FC = () => {
               disabled: false
             };
 
-            store.setAuth(currentUser, newProfile);
-            store.setAccountDisabled(false);
-
+            setAuth(currentUser, newProfile);
+            setAccountDisabled(false);
             await FirestoreService.updateUserProfile(currentUser.uid, newProfile);
             return;
           }
 
           if (userProfile.disabled) {
-            store.setAccountDisabled(true);
-            store.setAuth(currentUser, userProfile);
+            setAccountDisabled(true);
           } else {
-            store.setAuth(currentUser, userProfile);
-            store.setAccountDisabled(false);
+            setAccountDisabled(false);
           }
+          
+          // Important: Only update auth if data actually changed to maintain reference stability
+          setAuth(currentUser, userProfile);
         });
 
         if (!hasShownWelcome.current) {
@@ -65,34 +89,36 @@ export const StateManager: React.FC = () => {
           unsubscribeProfile();
           unsubscribeProfile = null;
         }
-        store.setAuth(null, null);
-        store.setAccountDisabled(false);
+        setAuth(null, null);
+        setAccountDisabled(false);
         hasShownWelcome.current = false;
       }
     });
 
-    const unsubscribeKillSwitch = initKillSwitch();
-
     return () => {
       unsubscribeAuth();
-      unsubscribeKillSwitch();
       if (unsubscribeProfile) unsubscribeProfile();
     };
-  }, []);
+  }, [setAuth, setAccountDisabled, isAppIdle]); // Added isAppIdle to close profile listener if idle
+
+  // --- GLOBAL MONITORING (KILL-SWITCH & DEBUG) ---
+  useEffect(() => {
+    if (isAppIdle) return;
+    const unsubscribeKillSwitch = initKillSwitch();
+    return () => unsubscribeKillSwitch();
+  }, [isAppIdle]);
 
   // --- GLOBAL FIRESTORE SUBSCRIPTIONS ---
   useEffect(() => {
-    const { user, settings, setEntries, setIsLive, setIsLoading } = store;
-    if (!user) return;
+    if (!user || isAppIdle) return;
 
     let isCancelled = false;
 
-    // Subscriptions
-    const unsubNotes = FirestoreService.subscribeToNotes((data) => store.setNotes(data));
-    const unsubSettings = FirestoreService.subscribeToSettings((data) => store.setSettings(data));
-    const unsubNotices = FirestoreService.subscribeToNotices((data) => store.setNotices(data));
+    // These subscriptions are core and should be stable
+    const unsubSettings = FirestoreService.subscribeToSettings((data) => setSettings(data));
+    const unsubNotices = FirestoreService.subscribeToNotices((data) => setNotices(data));
 
-    const limit = settings?.limits?.fetchLimit || FETCH_LIMIT;
+    const limit = fetchLimit || FETCH_LIMIT;
 
     setIsLoading(true);
     const unsubEntries = FirestoreService.subscribeToEntries(limit, (data) => {
@@ -103,61 +129,64 @@ export const StateManager: React.FC = () => {
     });
 
     FirestoreService.getGlobalStats().then(statsData => {
-      if (!isCancelled && statsData) store.setGlobalStats(statsData);
+      if (!isCancelled && statsData) setGlobalStats(statsData);
     }).catch(e => console.error("Stats Error:", e));
 
     return () => {
       isCancelled = true;
-      unsubNotes();
       unsubSettings();
       unsubNotices();
       unsubEntries();
     };
-  }, [store.user, store.settings?.limits?.fetchLimit]);
+  }, [user, isAppIdle, fetchLimit, setNotes, setSettings, setNotices, setEntries, setIsLoading, setIsLive, setGlobalStats]);
 
   // --- PERSISTENT REGISTRIES ---
   useEffect(() => {
-    if (!store.user) return;
+    if (!user || isAppIdle) return;
 
-    const unsubParts = FirestoreService.subscribeToParts((data) => store.setParts(data));
-    const unsubVehicles = FirestoreService.subscribeToVehicles((data) => store.setVehicles(data));
-    const unsubCustomers = FirestoreService.subscribeToCustomers((data) => store.setCustomers(data));
+    const unsubParts = FirestoreService.subscribeToParts((data) => setParts(data));
+    const unsubVehicles = FirestoreService.subscribeToVehicles((data) => setVehicles(data));
+    const unsubCustomers = FirestoreService.subscribeToCustomers((data) => setCustomers(data));
 
     return () => {
       unsubParts(); unsubVehicles(); unsubCustomers();
     };
-  }, [store.user]);
+  }, [user, isAppIdle, setParts, setVehicles, setCustomers]);
 
   // --- LAZY ADMIN DATA ---
   useEffect(() => {
-    if (!store.user) return;
+    if (!user || !profile || isAppIdle) return;
 
-    const currentRole = store?.profile?.role || ONBOARDING_DEFAULTS.DEFAULT_USER_ROLE;
+    const currentRole = profile.role || ONBOARDING_DEFAULTS.DEFAULT_USER_ROLE;
     const isAdmin = currentRole === 'ADMIN';
 
-    const canSeeAudit = isAdmin || (store?.settings?.rolePermissions?.['auditLog'] || []).includes(currentRole);
-    const canManageUsers = isAdmin || (store?.settings?.rolePermissions?.['users'] || []).includes(currentRole);
+    const canSeeAudit = isAdmin || (rolePermissions?.['auditLog'] || []).includes(currentRole);
+    const canManageUsers = isAdmin || (rolePermissions?.['users'] || []).includes(currentRole);
 
     let unsubUsers = () => { };
     let unsubAudit = () => { };
+    let unsubNotes = () => { };
 
     if (canManageUsers && currentPath === '/users') {
-      unsubUsers = FirestoreService.subscribeToUsers((data) => store.setUsers(data));
+      unsubUsers = FirestoreService.subscribeToUsers((data) => setUsers(data));
+    }
+
+    if (currentPath === '/notes') {
+      unsubNotes = FirestoreService.subscribeToNotes((data) => setNotes(data));
     }
 
     const isDashboard = currentPath === '/dashboard';
-    const isMaintenance = currentPath.startsWith('/maintenance');
     const isAuditLog = currentPath === '/auditLog';
 
-    if (canSeeAudit && (isMaintenance || isDashboard || isAuditLog)) {
-      const auditLimit = store.settings?.limits?.auditLogFetchLimit || UI_LIMITS.AUDIT_LOG_FETCH_LIMIT;
-      unsubAudit = FirestoreService.subscribeToAuditLogs(auditLimit, (data) => store.setAuditLogs(data));
+    if (canSeeAudit && (isDashboard || isAuditLog)) {
+      const limit = auditLimit || UI_LIMITS.AUDIT_LOG_FETCH_LIMIT;
+      unsubAudit = FirestoreService.subscribeToAuditLogs(limit, (data) => setAuditLogs(data));
     }
 
     return () => {
-      unsubUsers(); unsubAudit();
+      unsubUsers(); unsubAudit(); unsubNotes();
     };
-  }, [store.user, currentPath, store.profile?.role, store.settings?.rolePermissions, store.settings?.limits?.auditLogFetchLimit]);
+  }, [user, isAppIdle, profile, currentPath, rolePermissions, auditLimit, setUsers, setAuditLogs, setNotes]);
 
   return null;
 };

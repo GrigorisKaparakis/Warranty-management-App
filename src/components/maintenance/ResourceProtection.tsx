@@ -11,6 +11,7 @@ interface ResourceProtectionProps {
 
 export const ResourceProtection: React.FC<ResourceProtectionProps> = ({ activeTab }) => {
   const [killSwitchEnabled, setKillSwitchEnabled] = useState(false);
+  const [debugLogsEnabled, setDebugLogsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -18,12 +19,12 @@ export const ResourceProtection: React.FC<ResourceProtectionProps> = ({ activeTa
   useEffect(() => {
     if (activeTab !== 'resource_protection') return;
 
-    // Εδώ χρησιμοποιούμε απευθείας το firestoreOnSnapshot για να αποφύγουμε το monitoring global block
-    // Παρόλο που το διορθώσαμε στο monitor.ts, για ασφάλεια στο admin panel χρησιμοποιούμε basic call
     const settingsRef = doc(db, "app_settings", "global");
     const unsubscribe = onSnapshot(settingsRef, (snapshot) => {
       if (snapshot.exists()) {
-        setKillSwitchEnabled(!!snapshot.data().killSwitchEnabled);
+        const data = snapshot.data();
+        setKillSwitchEnabled(!!data.killSwitchEnabled);
+        setDebugLogsEnabled(!!data.debugLogsEnabled);
       }
       setLoading(false);
     }, (error) => {
@@ -36,6 +37,19 @@ export const ResourceProtection: React.FC<ResourceProtectionProps> = ({ activeTa
 
   const handleToggleClick = () => {
     setShowConfirm(true);
+  };
+
+  const toggleDebugLogs = async () => {
+    try {
+      const settingsRef = doc(db, "app_settings", "global");
+      await setDoc(settingsRef, {
+        debugLogsEnabled: !debugLogsEnabled,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      toast.success(debugLogsEnabled ? 'Τα Console Logs απενεργοποιήθηκαν' : 'Τα Console Logs ενεργοποιήθηκαν');
+    } catch (error) {
+      toast.error('Σφάλμα: ' + (error instanceof Error ? error.message : String(error)));
+    }
   };
 
   const toggleKillSwitch = async () => {
@@ -160,6 +174,39 @@ export const ResourceProtection: React.FC<ResourceProtectionProps> = ({ activeTa
                 ΧΡΗΣΙΜΟΠΟΙΕΙΣΤΕ ΑΥΤΗ ΤΗ ΛΕΙΤΟΥΡΓΙΑ ΜΟΝΟ ΣΕ ΠΕΡΙΠΤΩΣΗ ΕΚΤΑΚΤΗΣ ΑΝΑΓΚΗΣ (Π.Χ. ΥΠΕΡΒΟΛΙΚΗ ΧΡΕΩΣΗ Ή BUG ΠΟΥ ΠΡΟΚΑΛΕΙ INFINITE READ LOOP).
               </p>
             </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card title="CONSOLE DEBUGGING" subtitle="ΠΑΡΑΚΟΛΟΥΘΗΣΗ READS & LISTENERS ΣΤΗΝ ΚΟΝΣΟΛΑ">
+        <div className="p-6 bg-zinc-50 rounded-[2rem] border border-zinc-200">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-6">
+              <div className={`p-4 rounded-2xl ${debugLogsEnabled ? 'bg-indigo-500 text-white' : 'bg-zinc-300 text-zinc-500'}`}>
+                <Activity size={24} />
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-slate-900 uppercase tracking-tighter">
+                  DEBUG LOGS: {debugLogsEnabled ? 'ΕΝΕΡΓΑ' : 'ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΑ'}
+                </h4>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                  ΕΜΦΑΝΙΣΗ ΣΤΑΤΙΣΤΙΚΩΝ ΚΑΤΑΝΑΛΩΣΗΣ ΣΤΟ BROWSER CONSOLE (F12)
+                </p>
+              </div>
+            </div>
+            
+            <button
+              onClick={toggleDebugLogs}
+              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none ${
+                debugLogsEnabled ? 'bg-indigo-600' : 'bg-zinc-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                  debugLogsEnabled ? 'translate-x-7' : 'translate-x-1'
+                }`}
+              />
+            </button>
           </div>
         </div>
       </Card>
