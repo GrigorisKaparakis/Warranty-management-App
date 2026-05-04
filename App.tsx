@@ -14,6 +14,7 @@ import { Toaster } from 'sonner';
 import { ChangePasswordModal } from './src/components/ui/ChangePasswordModal';
 import { APP_DEFAULTS } from './src/core/config';
 import { StateManager } from './src/components/core/StateManager';
+import { UserActivityMonitor } from './src/components/core/UserActivityMonitor';
 import { ErrorBoundary } from './src/components/core/ErrorBoundary';
 import { KillSwitchOverlay } from './src/components/maintenance/KillSwitchOverlay';
 import { initKillSwitch } from './src/services/firebase/monitor';
@@ -104,6 +105,10 @@ const App: React.FC = () => {
   // Ενημέρωση του τίτλου της σελίδας δυναμικά
   useEffect(() => {
     document.title = companyName;
+    
+    // Ενεργοποιούμε το global monitoring listener (Kill-Switch & Debug Logs)
+    const unsubscribeMonitor = initKillSwitch();
+    return () => unsubscribeMonitor();
   }, [companyName]);
 
   // Κεντρικό Rendering
@@ -111,6 +116,7 @@ const App: React.FC = () => {
     <>
       <SearchOverlay />
       <KillSwitchOverlay />
+      <UserActivityMonitor />
       <StateManager />
       <Toaster position="bottom-right" expand={true} richColors />
       
