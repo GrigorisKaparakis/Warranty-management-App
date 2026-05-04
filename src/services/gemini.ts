@@ -22,14 +22,27 @@ export const extractWarrantyFromPDF = async (
   customPrompt?: string,
   companyHint?: string
 ) => {
-  // Use import.meta.env for Vite, with fallback to process.env
-  apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY;
+  // Safe retrieval of API Key with fallbacks and environment checks
+  const getApiKey = () => {
+    // 1. Try Vite-prefixed environment variables (Browser/Build-time)
+    const viteKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
+    if (viteKey) return viteKey;
+
+    // 2. Try process.env with safety check (Build-time defines or Node environments)
+    if (typeof process !== 'undefined' && process.env) {
+      return process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+    }
+
+    return '';
+  };
+
+  const activeApiKey = getApiKey();
   
-  if (!apiKey) {
+  if (!activeApiKey) {
     throw new Error("Gemini API Key is missing. Please check your environment variables or select a key.");
   }
 
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = new GoogleGenAI({ apiKey: activeApiKey });
 
   // Μετατροπή των κανόνων σε κείμενο για το Prompt
   const rulesString = rules.length > 0 
@@ -158,14 +171,24 @@ export const extractWarrantyFromPDF = async (
  * analyzeNote: Αναλύει μια σημείωση για να βρει Sentiment και Κατηγορία.
  */
 export const analyzeNote = async (content: string, categories: string[] = []) => {
-  apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY;
+  // Safe retrieval of API Key
+  const getApiKey = () => {
+    const viteKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
+    if (viteKey) return viteKey;
+    if (typeof process !== 'undefined' && process.env) {
+      return process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+    }
+    return '';
+  };
+
+  const activeApiKey = getApiKey();
   
-  if (!apiKey) {
+  if (!activeApiKey) {
     console.warn("Gemini API Key is missing for note analysis.");
     return { sentiment: 'Neutral', category: 'ΑΛΛΟ' };
   }
 
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = new GoogleGenAI({ apiKey: activeApiKey });
   
   const categoriesList = categories.length > 0 ? categories.join(', ') : 'ΕΠΙΣΚΕΥΗ, ΣΥΝΤΗΡΗΣΗ, ΕΓΓΥΗΣΗ, ΑΛΛΟ';
 
