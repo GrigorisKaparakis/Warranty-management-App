@@ -23,7 +23,7 @@ export const extractWarrantyFromPDF = async (
   companyHint?: string
 ) => {
   // Use import.meta.env for Vite, with fallback to process.env
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined) || (typeof process !== 'undefined' ? process.env.API_KEY : undefined);
+  apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY;
   
   if (!apiKey) {
     throw new Error("Gemini API Key is missing. Please check your environment variables or select a key.");
@@ -158,7 +158,7 @@ export const extractWarrantyFromPDF = async (
  * analyzeNote: Αναλύει μια σημείωση για να βρει Sentiment και Κατηγορία.
  */
 export const analyzeNote = async (content: string, categories: string[] = []) => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined) || (typeof process !== 'undefined' ? process.env.API_KEY : undefined);
+  apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY;
   
   if (!apiKey) {
     console.warn("Gemini API Key is missing for note analysis.");
