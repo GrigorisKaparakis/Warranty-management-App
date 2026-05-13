@@ -1,6 +1,10 @@
+/**
+ * AuditLogView.tsx: Η σελίδα του καθολικού ιστορικού (Audit Log).
+ * Επιτρέπει την παρακολούθηση όλων των ενεργειών των χρηστών και την επαναφορά διαγραμμένων εγγυήσεων.
+ */
 import React, { useState } from 'react';
 import { AuditEntry } from '../core/types';
-import { useAppState } from '../hooks/useAppState';
+import { useAppState } from '../hooks/core/useAppState';
 import { useStore } from '../store/useStore';
 import { toast } from '../utils/toast';
 import { FirestoreService } from '../services/firebase/db';
@@ -79,6 +83,28 @@ export const AuditLogView: React.FC = () => {
     return matchesSearch && matchesAction;
   });
 
+  const [isPruning, setIsPruning] = useState(false);
+
+  const handlePrune = async () => {
+    if (!window.confirm("ΠΡΟΣΟΧΗ: ΘΑ ΔΙΑΓΡΑΦΟΥΝ ΟΛΑ ΤΑ LOGS ΠΑΛΑΙΟΤΕΡΑ ΤΩΝ 30 ΗΜΕΡΩΝ. ΣΥΝΕΧΕΙΑ;")) return;
+    
+    setIsPruning(true);
+    try {
+      const deletedCount = await FirestoreService.pruneAuditLogs(30);
+      console.log(`%c[MAINTENANCE] Deleted ${deletedCount} old audit logs.`, 'color: #f59e0b; font-weight: bold;');
+      
+      if (deletedCount > 0) {
+        toast.success(`ΕΠΙΤΥΧΙΑ: ΔΙΑΓΡΑΦΗΚΑΝ ${deletedCount} ΠΑΛΙΕΣ ΕΓΓΡΑΦΕΣ!`);
+      } else {
+        toast.info("ΔΕΝ ΒΡΕΘΗΚΑΝ ΠΑΛΙΕΣ ΕΓΓΡΑΦΕΣ ΓΙΑ ΔΙΑΓΡΑΦΗ.");
+      }
+    } catch (e) {
+      toast.error("ΣΦΑΛΜΑ ΚΑΤΑ ΤΗΝ ΕΚΚΑΘΑΡΙΣΗ.");
+    } finally {
+      setIsPruning(false);
+    }
+  };
+
   const handleRestore = async () => {
     if (!pendingRestore) return;
     setIsRestoring(true);
@@ -98,7 +124,18 @@ export const AuditLogView: React.FC = () => {
   return (
     <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-10 pb-24">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <PageHeader title="ΙΣΤΟΡΙΚΟ ΑΛΛΑΓΩΝ" subtitle="ΠΛΗΡΗΣ ΚΑΤΑΓΡΑΦΗ ΕΝΕΡΓΕΙΩΝ & ΕΠΑΝΑΦΟΡΑ ΔΕΔΟΜΕΝΩΝ" />
+        <div className="flex items-center gap-6">
+          <PageHeader title="ΙΣΤΟΡΙΚΟ ΑΛΛΑΓΩΝ" subtitle="ΠΛΗΡΗΣ ΚΑΤΑΓΡΑΦΗ ΕΝΕΡΓΕΙΩΝ & ΕΠΑΝΑΦΟΡΑ ΔΕΔΟΜΕΝΩΝ" />
+          <Button 
+            variant="neutral" 
+            size="sm" 
+            className="rounded-xl border-dashed border-zinc-300 text-zinc-400 hover:text-red-500 hover:border-red-200 transition-all"
+            onClick={handlePrune}
+            loading={isPruning}
+          >
+            ΕΚΚΑΘΑΡΙΣΗ (+30ημ)
+          </Button>
+        </div>
         
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
           <div className="relative flex-1 sm:w-64">

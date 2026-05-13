@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { MenuItem, UserRole, StatusConfig, GarageSettings } from '../../core/types';
 import { ONBOARDING_DEFAULTS } from '../../core/config';
 import { useStore } from '../../store/useStore';
-import { useSettingsActions } from '../../hooks/useSettingsActions';
+import { useSettingsActions } from '../../hooks/settings/useSettingsActions';
 import { StatusSettings } from './settings/StatusSettings';
 import { MenuSettings } from './settings/MenuSettings';
 import { CompanySettings } from './settings/CompanySettings';

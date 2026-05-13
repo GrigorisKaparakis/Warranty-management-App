@@ -2,6 +2,13 @@
 
 Όλες οι σημαντικές αλλαγές σε αυτό το έργο θα καταγράφονται σε αυτό το αρχείο.
 
+## [1.4.0] - 2026-05-11
+### Architecture, Refactoring & Hardening
+- **Codebase Hardening & Documentation**: Προσθήκη εκτενούς τεκμηρίωσης JSDoc σε όλα τα κεντρικά Services, Views, Hooks και Components. Ενίσχυση της αυτο-περιγραφικότητας του κώδικα για μελλοντική συντήρηση και κλιμάκωση (scalability).
+- **Modularity & Code Cleanup**: Αναδιοργάνωση και διάσπαση ογκωδών αρχείων, εντοπισμός και αφαίρεση νεκρού/αχρησιμοποίητου κώδικα (dead code elimination) και αυστηρή εφαρμογή της αρχής DRY (Don't Repeat Yourself).
+- **Memory & Logic Optimization**: Διόρθωση κυκλικών εξαρτήσεων (circular dependencies) στο state store, επίλυση πιθανών διαρροών μνήμης (memory leaks) και ενίσχυση του error handling και data validation σε όλη την εφαρμογή.
+- **Registry Fixes**: Επίλυση σφαλμάτων (`deletePart`, `deleteVehicle`, `deleteCustomer`) στις ενέργειες διαγραφής εντός των καρτελών του Database Settings. Βελτιστοποίηση κλήσεων στο `FirestoreService`.
+
 ## [1.3.3] - 2026-05-04
 ### Resource Optimization & Debugging Tools
 - **Idle Timeout Strategy**: Υλοποίηση μηχανισμού αδράνειας (Idle Timeout). Μετά από 10 λεπτά χωρίς δραστηριότητα, η εφαρμογή κλείνει αυτόματα όλους τους Firebase Listeners για εξοικονόμηση Reads. Οι συνδέσεις αποκαθίστανται αμέσως μόλις ο χρήστης επιστρέψει ή αλληλεπιδράσει ξανά με το Tab.

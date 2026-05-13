@@ -1,6 +1,9 @@
-
-import { doc, addDoc, deleteDoc, setDoc, updateDoc, query, orderBy, limit } from "firebase/firestore";
-import { monitoredOnSnapshot } from "../monitor";
+/**
+ * BaseAdminService.ts: Βασικές διοικητικές λειτουργίες (Admin).
+ * Διαχειρίζεται τις ρυθμίσεις της εφαρμογής, τους χρήστες, τις ανακοινώσεις και την εκκαθάριση των logs.
+ */
+import { doc, addDoc, deleteDoc, setDoc, updateDoc, query, orderBy, limit, where, writeBatch } from "firebase/firestore";
+import { visibilityAwareOnSnapshot, monitoredGetDocs } from "../monitor";
 import { db, noticesCollection, auditCollection, usersCollection, deepSanitize, handleFirestoreError, OperationType } from "../core";
 import { GarageSettings, Notice, AuditEntry, UserProfile } from "../../../core/types";
 import { DB_CONFIG, FULL_GARAGE_DEFAULTS, EntryStatus } from "../../../core/config";
@@ -9,7 +12,7 @@ export const AdminService = {
   // Παρακολούθηση Ρυθμίσεων
   subscribeToSettings(callback: (settings: GarageSettings) => void) {
     const docRef = doc(db, DB_CONFIG.COLLECTIONS.SETTINGS, DB_CONFIG.SETTINGS_DOC_ID);
-    return monitoredOnSnapshot(docRef, (snapshot) => {
+    return visibilityAwareOnSnapshot(docRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = deepSanitize(snapshot.data()) as GarageSettings;
 
@@ -52,7 +55,7 @@ export const AdminService = {
   // Ανακοινώσεις
   subscribeToNotices(callback: (notices: Notice[]) => void) {
     const q = query(noticesCollection, orderBy("createdAt", "desc"), limit(10));
-    return monitoredOnSnapshot(q, (snapshot) => {
+    return visibilityAwareOnSnapshot(q, (snapshot) => {
       const notices = snapshot.docs.map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as Notice));
       callback(notices);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "notices"));
@@ -78,7 +81,7 @@ export const AdminService = {
   // Audit Logs
   subscribeToAuditLogs(limitCount: number, callback: (logs: AuditEntry[]) => void) {
     const q = query(auditCollection, orderBy("timestamp", "desc"), limit(limitCount));
-    return monitoredOnSnapshot(q, (snapshot) => {
+    return visibilityAwareOnSnapshot(q, (snapshot) => {
       const logs = snapshot.docs.map(snap => ({ ...deepSanitize(snap.data()), id: snap.id } as AuditEntry));
       callback(logs);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "audit_logs"));
@@ -88,14 +91,35 @@ export const AdminService = {
     try {
       await addDoc(auditCollection, deepSanitize(log));
     } catch (e) {
-      // We don't use handleFirestoreError here to avoid infinite loops if audit logging fails due to permissions
       console.error("Audit log failed:", e);
+    }
+  },
+
+  /**
+   * Διαγραφή παλαιών logs (π.χ. παλαιότερα των 30 ημερών).
+   */
+  async pruneAuditLogs(olderThanDays: number = 30): Promise<number> {
+    const cutoff = Date.now() - (olderThanDays * 24 * 60 * 60 * 1000);
+    const q = query(auditCollection, where("timestamp", "<", cutoff), limit(500));
+    
+    try {
+      const snap = await monitoredGetDocs(q);
+      if (snap.empty) return 0;
+
+      const batch = writeBatch(db);
+      snap.docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+      
+      return snap.docs.length;
+    } catch (error) {
+      console.error("Pruning audit logs failed:", error);
+      return 0;
     }
   },
 
   // Διαχείριση Χρηστών
   subscribeToUsers(callback: (users: UserProfile[]) => void) {
-    return monitoredOnSnapshot(usersCollection, (snapshot) => {
+    return visibilityAwareOnSnapshot(usersCollection, (snapshot) => {
       const users = snapshot.docs.map(snap => deepSanitize(snap.data()) as UserProfile);
       callback(users);
     }, (error) => handleFirestoreError(error, OperationType.LIST, "users"));

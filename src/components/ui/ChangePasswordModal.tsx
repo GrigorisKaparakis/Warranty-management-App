@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AuthService } from '../../services/firebase/auth';
+import { useStore } from '../../store/useStore';
 
-interface ChangePasswordModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose }) => {
+export const ChangePasswordModal: React.FC = () => {
+  const isOpen = useStore(s => s.isChangePasswordModalOpen);
+  const onClose = () => useStore.getState().setIsChangePasswordModalOpen(false);
+  
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');

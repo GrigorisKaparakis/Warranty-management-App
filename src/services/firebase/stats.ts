@@ -1,16 +1,23 @@
-
+/**
+ * stats.ts: Διαχείριση των στατιστικών της εφαρμογής (Global Stats).
+ * Παρέχει λειτουργίες για την ανάκτηση και ενημέρωση των συνόλων που εμφανίζονται στο Dashboard.
+ */
 import { doc, getDoc, setDoc, updateDoc, increment, serverTimestamp, getCountFromServer, query, where, collection } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType, entriesCollection } from "./core";
 import { EntryStatus } from "../../core/config";
 
 export interface GlobalStats {
   total: number;
-  pending: number;
-  approved: number;
-  rejected: number;
+  statusCounts: Record<string, number>;
   paid: number;
   unpaid: number;
   lastUpdated: any;
+  /** @deprecated use statusCounts */
+  pending?: number;
+  /** @deprecated use statusCounts */
+  approved?: number;
+  /** @deprecated use statusCounts */
+  rejected?: number;
 }
 
 const STATS_DOC_PATH = "metadata/stats";
@@ -21,7 +28,14 @@ export const StatsService = {
       const docRef = doc(db, STATS_DOC_PATH);
       const snap = await getDoc(docRef);
       if (snap.exists()) {
-        return snap.data() as GlobalStats;
+        const data = snap.data() as GlobalStats;
+        // Migration/Compatibility for older components that might expect pending/approved/rejected
+        if (data.statusCounts) {
+          data.pending = data.statusCounts[EntryStatus.WAITING] || 0;
+          data.approved = data.statusCounts[EntryStatus.COMPLETED] || 0;
+          data.rejected = data.statusCounts[EntryStatus.REJECTED] || 0;
+        }
+        return data;
       }
       return null;
     } catch (error) {
@@ -35,30 +49,36 @@ export const StatsService = {
    */
   async recalculateStats(): Promise<GlobalStats | null> {
     try {
+      const statuses = Object.values(EntryStatus);
+      const statusQueries = statuses.map(s => getCountFromServer(query(entriesCollection, where("status", "==", s))));
+      
       const [
         totalSnap,
-        pendingSnap,
-        approvedSnap,
-        rejectedSnap,
         paidSnap,
-        unpaidSnap
+        unpaidSnap,
+        ...statusSnaps
       ] = await Promise.all([
         getCountFromServer(entriesCollection),
-        getCountFromServer(query(entriesCollection, where("status", "==", EntryStatus.WAITING))),
-        getCountFromServer(query(entriesCollection, where("status", "==", EntryStatus.COMPLETED))),
-        getCountFromServer(query(entriesCollection, where("status", "==", EntryStatus.REJECTED))),
         getCountFromServer(query(entriesCollection, where("isPaid", "==", true))),
         getCountFromServer(query(entriesCollection, where("isPaid", "==", false))),
+        ...statusQueries
       ]);
+
+      const statusCounts: Record<string, number> = {};
+      statuses.forEach((status, index) => {
+        statusCounts[status] = statusSnaps[index].data().count;
+      });
 
       const newStats: GlobalStats = {
         total: totalSnap.data().count,
-        pending: pendingSnap.data().count,
-        approved: approvedSnap.data().count,
-        rejected: rejectedSnap.data().count,
+        statusCounts,
         paid: paidSnap.data().count,
         unpaid: unpaidSnap.data().count,
-        lastUpdated: serverTimestamp()
+        lastUpdated: serverTimestamp(),
+        // Backwards compatibility
+        pending: statusCounts[EntryStatus.WAITING] || 0,
+        approved: statusCounts[EntryStatus.COMPLETED] || 0,
+        rejected: statusCounts[EntryStatus.REJECTED] || 0
       };
 
       const docRef = doc(db, STATS_DOC_PATH);
@@ -75,11 +95,9 @@ export const StatsService = {
    */
   async updateCounters(changes: {
     total?: number;
-    pending?: number;
-    approved?: number;
-    rejected?: number;
     paid?: number;
     unpaid?: number;
+    statusDeltas?: Record<string, number>;
   }) {
     const docRef = doc(db, STATS_DOC_PATH);
     const updateData: any = {
@@ -87,25 +105,25 @@ export const StatsService = {
     };
 
     if (changes.total) updateData.total = increment(changes.total);
-    if (changes.pending) updateData.pending = increment(changes.pending);
-    if (changes.approved) updateData.approved = increment(changes.approved);
-    if (changes.rejected) updateData.rejected = increment(changes.rejected);
     if (changes.paid) updateData.paid = increment(changes.paid);
     if (changes.unpaid) updateData.unpaid = increment(changes.unpaid);
+    
+    if (changes.statusDeltas) {
+      Object.entries(changes.statusDeltas).forEach(([status, delta]) => {
+        updateData[`statusCounts.${status}`] = increment(delta);
+        
+        // Also update legacy fields for compatibility
+        if (status === EntryStatus.WAITING) updateData.pending = increment(delta);
+        if (status === EntryStatus.COMPLETED) updateData.approved = increment(delta);
+        if (status === EntryStatus.REJECTED) updateData.rejected = increment(delta);
+      });
+    }
 
     try {
       await updateDoc(docRef, updateData);
     } catch (error) {
-      // Αν το έγγραφο δεν υπάρχει, το δημιουργούμε
-      await setDoc(docRef, {
-        total: Math.max(0, changes.total || 0),
-        pending: Math.max(0, changes.pending || 0),
-        approved: Math.max(0, changes.approved || 0),
-        rejected: Math.max(0, changes.rejected || 0),
-        paid: Math.max(0, changes.paid || 0),
-        unpaid: Math.max(0, changes.unpaid || 0),
-        lastUpdated: serverTimestamp()
-      });
+      // If doc doesn't exist, we should probably run a full recalculation instead of partial sync
+      await this.recalculateStats();
     }
   }
 };

@@ -1,3 +1,7 @@
+/**
+ * core.ts: Η καρδιά του Firebase στην εφαρμογή.
+ * Αρχικοποιεί το SDK, ρυθμίζει το Persistence (Multi-tab) και εξάγει τις βασικές συλλογές (collections).
+ */
 import { initializeApp } from "firebase/app";
 import {
   initializeFirestore,
@@ -128,11 +132,11 @@ export const deepSanitize = (obj: any): any => {
 export const sanitizeEntry = (data: any, id?: string): Entry => {
   const clean = deepSanitize(data);
   if (!Array.isArray(clean.parts)) clean.parts = [];
-  clean.fullName = clean.fullName || clean.fullname || '';
-  clean.warrantyId = clean.warrantyId || clean.warrantyid || '';
-  clean.vin = clean.vin || '';
-  clean.company = clean.company || '';
-  clean.brand = clean.brand || '';
+  clean.fullName = (clean.fullName || '').trim().toUpperCase();
+  clean.warrantyId = (clean.warrantyId || '').trim().toUpperCase();
+  clean.vin = (clean.vin || '').trim().toUpperCase();
+  clean.company = (clean.company || '').trim().toUpperCase();
+  clean.brand = (clean.brand || '').trim().toUpperCase();
   clean.notes = clean.notes || '';
   if (id) clean.id = id;
   return clean as Entry;

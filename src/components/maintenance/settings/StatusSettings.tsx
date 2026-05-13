@@ -1,3 +1,7 @@
+/**
+ * StatusSettings.tsx: Διαχείριση των καταστάσεων (Statuses) των εγγυήσεων.
+ * Επιτρέπει τον ορισμό χρωμάτων, ονομάτων και δικαιωμάτων πρόσβασης ανά ρόλο.
+ */
 import React, { useState, memo } from 'react';
 import { UserRole, StatusConfig } from '../../../core/types';
 import { Card } from '../../ui/Card';

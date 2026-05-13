@@ -1,12 +1,12 @@
-
+/**
+ * aiFeedback.ts: Διαχείριση της αποθήκευσης και ανάκτησης του feedback για το AI.
+ * Επιτρέπει τη συλλογή δεδομένων για τη βελτίωση της ακρίβειας της εξαγωγής δεδομένων.
+ */
 import { collection, addDoc, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { db, auth } from "./db";
 import { AIFeedback } from "../../core/types";
 import { monitoredGetDocs } from "./monitor";
 
-/**
- * AIFeedbackService: Διαχειρίζεται την αποθήκευση και ανάκτηση του feedback για το AI.
- */
 export const AIFeedbackService = {
   /**
    * Αποθήκευση ενός νέου feedback.

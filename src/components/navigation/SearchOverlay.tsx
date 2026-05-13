@@ -21,14 +21,21 @@ export const SearchOverlay: React.FC = () => {
   // Keyboard shortcut listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      // Search shortcuts: Alt+S or Alt+F (S for Search, F for Find)
+      const isSearchShortcut = e.altKey && (e.key === 's' || e.key === 'S' || e.key === 'f' || e.key === 'F' || e.key === 'κ' || e.key === 'Κ' || e.key === 'φ' || e.key === 'Φ');
+      
+      if (isSearchShortcut) {
         e.preventDefault();
-        toggleSearch();
+        e.stopPropagation();
+        setOpen(true);
+        return;
       }
+
       if (e.key === '/') {
         // Only trigger if not in an input
         if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
           e.preventDefault();
+          e.stopPropagation();
           setOpen(true);
         }
       }
@@ -82,24 +89,32 @@ export const SearchOverlay: React.FC = () => {
   const handleResultKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
+      e.stopPropagation();
       setSelectedIndex(prev => (prev + 1) % results.length);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
+      e.stopPropagation();
       setSelectedIndex(prev => (prev - 1 + results.length) % results.length);
-    } else if (e.key === 'Enter' && results[selectedIndex]) {
-      const selected = results[selectedIndex];
-      handleNavigate(selected);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (results[selectedIndex]) {
+        handleNavigate(results[selectedIndex]);
+      }
     }
   };
 
   const handleNavigate = (item: any) => {
+    // Crucial: close first
     setOpen(false);
+    
+    // Use correct app routes from App.tsx
     if (item.type === 'ENTRY') {
-      navigate(`/dashboard/entries?id=${item.id}`);
+      navigate(`/warranty/${item.id}`);
     } else if (item.type === 'VEHICLE') {
-      navigate(`/dashboard/registries?tab=vehicles&vin=${item.vin}`);
+      navigate(`/vin-search/${item.vin}`);
     } else if (item.type === 'CUSTOMER') {
-      navigate(`/dashboard/registries?tab=customers&search=${item.fullName}`);
+      navigate(`/customer/${encodeURIComponent(item.fullName)}`);
     }
   };
 

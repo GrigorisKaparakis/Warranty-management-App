@@ -1,4 +1,7 @@
-
+/**
+ * pdf.ts: Υπηρεσία παραγωγής εγγράφων PDF.
+ * Υποστηρίζει την εξαγωγή λιστών και μεμονωμένων πιστοποιητικών με πλήρη υποστήριξη Ελληνικών (NotoSans).
+ */
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import { Entry, GarageSettings } from "../core/types";

@@ -1,4 +1,7 @@
-
+/**
+ * OnboardingView: Η σελίδα αρχικής ρύθμισης για νέους Admin.
+ * Επιτρέπει τη διαμόρφωση της ταυτότητας του συνεργείου (Logo, Όνομα) και των καταστάσεων εργασίας (Statuses).
+ */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -7,13 +10,9 @@ import { GarageSettings, StatusConfig } from '../core/types';
 import { FirestoreService } from '../services/firebase/db';
 import { DEFAULT_MENU, DEFAULT_STATUS_CONFIGS, APP_DEFAULTS, DEFAULT_PERMISSIONS, EntryStatus, ONBOARDING_DEFAULTS } from '../core/config';
 
-import { useAppState } from '../hooks/useAppState';
+import { useAppState } from '../hooks/core/useAppState';
 import { useStore } from '../store/useStore';
 
-/**
- * OnboardingView: Η σελίδα αρχικής ρύθμισης για νέους Admin,
- * επιτρέποντας τη διαμόρφωση των βασικών παραμέτρων του συστήματος.
- */
 export const OnboardingView: React.FC = () => {
   // Raw state from useStore
   const settings = useStore(s => s.settings);

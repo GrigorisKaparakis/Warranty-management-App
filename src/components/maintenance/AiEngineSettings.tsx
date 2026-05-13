@@ -3,7 +3,7 @@ import { DistributorRule } from '../../core/types';
 import { AI_CONFIG } from '../../core/config';
 import { useStore } from '../../store/useStore';
 import { toast } from '../../utils/toast';
-import { useSettingsActions } from '../../hooks/useSettingsActions';
+import { useSettingsActions } from '../../hooks/settings/useSettingsActions';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';

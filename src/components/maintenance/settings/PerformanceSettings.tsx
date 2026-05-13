@@ -1,3 +1,6 @@
+/**
+ * PerformanceSettings.tsx: Ρυθμίσεις απόδοσης και ορίων φόρτωσης δεδομένων.
+ */
 import React, { memo } from 'react';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';

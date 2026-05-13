@@ -2,7 +2,7 @@ import React from 'react';
 import { DashboardConfig } from '../../core/types';
 import { UI_LIMITS } from '../../core/config';
 import { useStore } from '../../store/useStore';
-import { useSettingsActions } from '../../hooks/useSettingsActions';
+import { useSettingsActions } from '../../hooks/settings/useSettingsActions';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { FirestoreService } from '../../services/firebase/db';

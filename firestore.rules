@@ -119,6 +119,7 @@ service cloud.firestore {
     match /audit_logs/{logId} {
       allow read: if isAuthenticated() && isNotDisabled() && hasPermission('auditLog');
       allow create: if isAuthenticated() && isNotDisabled(); 
+      allow delete: if isAuthenticated() && isNotDisabled() && isAdmin();
     }
 
     // Κανόνες για Ρυθμίσεις

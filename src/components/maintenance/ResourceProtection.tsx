@@ -1,3 +1,8 @@
+/**
+ * ResourceProtection.tsx: Διαχείριση κρίσιμων ρυθμίσεων ασφαλείας και πόρων.
+ * Επιτρέπει στον Admin να ενεργοποιήσει το Global Kill-Switch (απενεργοποίηση reads)
+ * και να διαχειριστεί τα Debug Logs για την παρακολούθηση της κατανάλωσης.
+ */
 import React, { useEffect, useState } from 'react';
 import { db } from '../../services/firebase/core';
 import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';

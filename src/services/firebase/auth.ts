@@ -1,5 +1,7 @@
-
-// Ενοποίηση όλων των απαραίτητων μεθόδων από το firebase/auth
+/**
+ * auth.ts: Διαχείριση της πιστοποίησης χρηστών (Authentication).
+ * Περιλαμβάνει λειτουργίες login, logout, διαχείριση προφίλ και αλλαγή κωδικών.
+ */
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 

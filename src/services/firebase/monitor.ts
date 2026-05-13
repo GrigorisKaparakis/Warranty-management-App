@@ -18,13 +18,16 @@ import { visibilityManager } from "../../utils/visibilityManager";
 import { db, auth } from "./core";
 
 /**
- * Firestore Monitor Tool (v1.2.0)
- * Καταγράφει κάθε ανάγνωση (Read) από το Firestore για έλεγχο κόστους και απόδοσης.
- * Υποστηρίζει Visibility-Aware Subscriptions και Global Kill-Switch.
+ * monitor.ts: Εργαλείο παρακολούθησης και ελέγχου των Firestore Reads (v1.2.5).
+ * 
+ * Λειτουργίες:
+ * 1. Καταγραφή κάθε Read (GET/SNAPSHOT) στην κονσόλα για έλεγχο κόστους.
+ * 2. Global Kill-Switch: Δυνατότητα άμεσης απενεργοποίησης της εφαρμογής από τη βάση.
+ * 3. Visibility-Aware Subscriptions: Αυτόματη παύση των listeners όταν το tab δεν είναι ορατό.
  */
 
 let isKillSwitchActive = false;
-let killSwitchListeners: ((active: boolean) => void)[] = [];
+const killSwitchListeners = new Set<(active: boolean) => void>();
 let activeListenersCount = 0;
 let totalReadsCount = 0;
 
@@ -32,10 +35,10 @@ let totalReadsCount = 0;
  * Εγγραφή για αλλαγές στο Kill-Switch
  */
 export const onKillSwitchChange = (callback: (active: boolean) => void) => {
-  killSwitchListeners.push(callback);
+  killSwitchListeners.add(callback);
   callback(isKillSwitchActive);
   return () => {
-    killSwitchListeners = killSwitchListeners.filter(l => l !== callback);
+    killSwitchListeners.delete(callback);
   };
 };
 
@@ -94,17 +97,6 @@ const logRead = (log: ReadLog) => {
   }
 };
 
-async function isCurrentUserAdmin(): Promise<boolean> {
-  const user = auth.currentUser;
-  if (!user) return false;
-
-  try {
-    const userDoc = await firestoreGetDoc(doc(db, "users", user.uid));
-    return userDoc.exists() && userDoc.data()?.role === 'ADMIN';
-  } catch (e) {
-    return false;
-  }
-}
 
 /**
  * Monitored version of onSnapshot
@@ -183,17 +175,15 @@ export function visibilityAwareOnSnapshot<T>(
   let unsubscribe: (() => void) | null = null;
   let isStoppedManually = false;
 
-  const start = async () => {
+  const start = () => {
     if (isStoppedManually) return;
     if (unsubscribe) return;
 
     if (isKillSwitchActive) {
       const path = (reference as any).path || (reference as any)._query?.path?.segments?.join('/') || 'unknown';
       if (!path.includes('app_settings/global')) {
-        const isAdmin = await isCurrentUserAdmin();
-        if (isStoppedManually || unsubscribe) return;
-
-        if (!isAdmin) {
+        const role = useStore.getState().profile?.role;
+        if (role !== 'ADMIN') {
           console.warn("Kill-Switch active: Subscription blocked for non-admin");
           return;
         }
@@ -232,8 +222,8 @@ export async function monitoredGetDocs<T>(query: Query<T>): Promise<QuerySnapsho
   const path = (query as any).path || (query as any)._query?.path?.segments?.join('/') || 'unknown/path';
 
   if (isKillSwitchActive && !path.includes('app_settings/global')) {
-    const isAdmin = await isCurrentUserAdmin();
-    if (!isAdmin) {
+    const role = useStore.getState().profile?.role;
+    if (role !== 'ADMIN') {
       throw new Error("Application is temporarily disabled (Kill-Switch Active)");
     }
   }
@@ -258,8 +248,8 @@ export async function monitoredGetDoc<T>(reference: DocumentReference<T>): Promi
   const path = (reference as any).path || 'unknown/path';
 
   if (isKillSwitchActive && !path.includes('app_settings/global')) {
-    const isAdmin = await isCurrentUserAdmin();
-    if (!isAdmin) {
+    const role = useStore.getState().profile?.role;
+    if (role !== 'ADMIN') {
       throw new Error("Application is temporarily disabled (Kill-Switch Active)");
     }
   }

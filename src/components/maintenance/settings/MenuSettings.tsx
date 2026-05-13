@@ -1,3 +1,7 @@
+/**
+ * MenuSettings.tsx: Διαμόρφωση του κεντρικού μενού πλοήγησης της εφαρμογής.
+ * Επιτρέπει την προσθήκη νέων σελίδων, την αλλαγή σειράς και τη διαχείριση κατηγοριών.
+ */
 import React, { useState, memo } from 'react';
 import { MenuItem } from '../../../core/types';
 import { ICONS, DEFAULT_MENU } from '../../../core/config';

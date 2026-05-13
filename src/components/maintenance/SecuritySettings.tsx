@@ -2,8 +2,8 @@ import React from 'react';
 import { UserRole } from '../../core/types';
 import { ONBOARDING_DEFAULTS } from '../../core/config';
 import { useStore } from '../../store/useStore';
-import { useAppState } from '../../hooks/useAppState';
-import { useSettingsActions } from '../../hooks/useSettingsActions';
+import { useAppState } from '../../hooks/core/useAppState';
+import { useSettingsActions } from '../../hooks/settings/useSettingsActions';
 import { Card } from '../ui/Card';
 import { Check, X, Info } from 'lucide-react';
 
@@ -67,20 +67,26 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ activeTab })
                         <div className="text-[12px] font-bold text-blue-600 uppercase">{feature.label}</div>
                         <div className="text-[9px] font-bold text-zinc-400 uppercase">ACTION_ID: {feature.id}</div>
                       </td>
-                      {availableRoles.map(role => (
-                        <td key={role} className="px-8 py-6 text-center">
-                          <button 
-                            onClick={() => handleUpdatePermission(feature.id, role)}
-                            className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center mx-auto border ${
-                              allowedRoles.includes(role) 
-                                ? 'bg-blue-50 text-blue-600 border-blue-100 shadow-sm' 
-                                : 'bg-zinc-50 text-zinc-300 border-zinc-100'
-                            }`}
-                          >
-                            {allowedRoles.includes(role) ? <Check size={18} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
-                          </button>
-                        </td>
-                      ))}
+                      {availableRoles.map(role => {
+                        const isAdminRole = role === 'ADMIN';
+                        const isAllowed = isAdminRole || allowedRoles.includes(role);
+                        
+                        return (
+                          <td key={role} className="px-8 py-6 text-center">
+                            <button 
+                              onClick={() => !isAdminRole && handleUpdatePermission(feature.id, role)}
+                              disabled={isAdminRole}
+                              className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center mx-auto border ${
+                                isAllowed 
+                                  ? 'bg-blue-50 text-blue-600 border-blue-100 shadow-sm' 
+                                  : 'bg-zinc-50 text-zinc-300 border-zinc-100'
+                              } ${isAdminRole ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                              {isAllowed ? <Check size={18} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
+                            </button>
+                          </td>
+                        );
+                      })}
                     </tr>
                   );
                 })}
@@ -99,19 +105,22 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ activeTab })
                         <div className="text-[9px] font-bold text-zinc-400 uppercase">{item.id}</div>
                       </td>
                       {availableRoles.map(role => {
-                        const isLockedAdmin = (role === 'ADMIN' && item.id === 'maintenance') || item.id === 'users';
+                        const isAdminRole = role === 'ADMIN';
+                        const isLockedAdmin = isAdminRole; // Όλα τα δικαιώματα κλειδωμένα για Admin
+                        const isAllowed = isAdminRole || allowedRoles.includes(role);
+
                         return (
                           <td key={role} className="px-8 py-6 text-center">
                             <button 
                               onClick={() => !isLockedAdmin && handleUpdatePermission(item.id, role)}
                               disabled={isLockedAdmin}
                               className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center mx-auto border ${
-                                allowedRoles.includes(role) 
+                                isAllowed 
                                   ? 'bg-emerald-50 text-emerald-600 border-emerald-100 shadow-sm' 
                                   : 'bg-zinc-50 text-zinc-300 border-zinc-100'
                               } ${isLockedAdmin ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                              {allowedRoles.includes(role) ? <Check size={18} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
+                              {isAllowed ? <Check size={18} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
                             </button>
                           </td>
                         );

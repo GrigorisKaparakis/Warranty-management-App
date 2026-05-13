@@ -6,7 +6,7 @@ import { AuthService } from '../../services/firebase/auth';
 import { APP_DEFAULTS } from '../../core/config';
 import { APP_VERSION } from '../../version';
 
-import { useAppState } from '../../hooks/useAppState';
+import { useAppState } from '../../hooks/core/useAppState';
 import { useStore } from '../../store/useStore';
 
 /**

@@ -1,3 +1,6 @@
+/**
+ * ThresholdSettings.tsx: Διαχείριση χρονικών ορίων (SLA) για την ειδοποίηση καθυστερήσεων.
+ */
 import React, { memo } from 'react';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';

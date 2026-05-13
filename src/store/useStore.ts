@@ -1,3 +1,13 @@
+/**
+ * useStore.ts
+ * Κεντρικό state management με Zustand.
+ * 
+ * Διαχειρίζεται:
+ * - Auth (User, Profile, Permissions).
+ * - Data (Entries, Registries).
+ * - UI (Loading, Modals, Filters).
+ * - Settings (Garage Configuration).
+ */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { AuthSlice, createAuthSlice } from './slices/authSlice';

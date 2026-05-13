@@ -1,4 +1,7 @@
-
+/**
+ * AiAssistantView: Παρέχει μια διεπαφή συνομιλίας με το Gemini AI.
+ * Επιτρέπει στους χρήστες να κάνουν ερωτήσεις για τις εγγυήσεις και τα στατιστικά δεδομένα του συνεργείου.
+ */
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { GoogleGenAI } from '@google/genai';
@@ -20,10 +23,6 @@ import Markdown from 'react-markdown';
 import { UI_LIMITS, AI_CONFIG } from '../core/config';
 import { Message } from '../store/slices/aiSlice';
 
-/**
- * AiAssistantView: Παρέχει μια διεπαφή συνομιλίας με το Gemini AI
- * για ερωτήσεις σχετικά με τις εγγυήσεις και τα δεδομένα του συνεργείου.
- */
 export const AiAssistantView: React.FC = () => {
   // Raw state from useStore
   const entries = useStore(s => s.entries);
@@ -94,13 +93,23 @@ export const AiAssistantView: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined) || (typeof process !== 'undefined' ? process.env.API_KEY : undefined);
+      // Safe retrieval of API Key
+      const getApiKey = () => {
+        const viteKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
+        if (viteKey) return viteKey;
+        if (typeof process !== 'undefined' && process.env) {
+          return process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+        }
+        return '';
+      };
+
+      const activeApiKey = getApiKey();
       
-      if (!apiKey) {
+      if (!activeApiKey) {
         throw new Error('Gemini API Key is missing. Please check your environment variables.');
       }
 
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({ apiKey: activeApiKey });
       
       const customInstructions = (settings.aiPrompts?.botInstructions || AI_CONFIG.BASE_PROMPTS.ASSISTANT)
         .replaceAll('{{garage_name}}', settings.branding?.appName || 'Warranty H&K');

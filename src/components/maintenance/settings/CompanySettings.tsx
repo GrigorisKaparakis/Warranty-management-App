@@ -1,3 +1,6 @@
+/**
+ * CompanySettings.tsx: Διαχείριση Εταιρειών, Μαρκών και Κανόνων Λήξης.
+ */
 import React, { useState, memo } from 'react';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';

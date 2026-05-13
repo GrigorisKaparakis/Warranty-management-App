@@ -3,7 +3,7 @@ import React from 'react';
 import { Notice } from '../../core/types';
 import { FirestoreService } from '../../services/firebase/db';
 
-import { useAppState } from '../../hooks/useAppState';
+import { useAppState } from '../../hooks/core/useAppState';
 import { useStore } from '../../store/useStore';
 
 /**

@@ -227,13 +227,14 @@ export interface ChatMessage {
 }
 
 /**
- * Παρουσία χρήστη στο Chat.
+ * Παρουσία χρήστη στην εφαρμογή (Presence).
  */
 export interface ChatPresence {
   uid: string;
   name: string;
   lastActive: any; // Firestore Timestamp
-  chatOpen: boolean;
+  isAppFocused: boolean; // Αν η εφαρμογή είναι στο προσκήνιο (tab visible)
+  isAppIdle: boolean;    // Αν ο χρήστης είναι ανενεργός (idle)
 }
 
 /**
@@ -241,10 +242,14 @@ export interface ChatPresence {
  */
 export interface GlobalStats {
   total: number;
-  pending: number;
-  approved: number;
-  rejected: number;
+  statusCounts?: Record<string, number>;
   paid: number;
   unpaid: number;
-  lastUpdated?: number;
+  lastUpdated?: any;
+  /** @deprecated use statusCounts */
+  pending?: number;
+  /** @deprecated use statusCounts */
+  approved?: number;
+  /** @deprecated use statusCounts */
+  rejected?: number;
 }

@@ -2,7 +2,6 @@
  * notes.ts: Διαχείριση των σημειώσεων (Note Board) στο Firestore.
  * Επιτρέπει την προσθήκη, διαγραφή και παρακολούθηση σημειώσεων σε πραγματικό χρόνο.
  */
-
 import { query, orderBy, addDoc, deleteDoc, doc, limit } from "firebase/firestore";
 import { monitoredOnSnapshot } from "./monitor";
 import { db, notesCollection, deepSanitize, handleFirestoreError, OperationType } from "./core";

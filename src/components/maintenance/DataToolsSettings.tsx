@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FirestoreService } from '../../services/firebase/db';
 import { useStore } from '../../store/useStore';
 import { toast } from '../../utils/toast';
-import { useSettingsActions } from '../../hooks/useSettingsActions';
+import { useSettingsActions } from '../../hooks/settings/useSettingsActions';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { RefreshCw, Database, FileText, Info } from 'lucide-react';

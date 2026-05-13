@@ -1,9 +1,7 @@
-
 /**
- * db.ts: Ο κεντρικός διαχειριστής της βάσης δεδομένων.
- * Πλέον λειτουργεί ως "Facade" που συγκεντρώνει τις λειτουργίες από εξειδικευμένα modules.
+ * db.ts: Ο κεντρικός διαχειριστής της βάσης δεδομένων (Facade).
+ * Συγκεντρώνει και εξάγει όλες τις επιμέρους υπηρεσίες (Admin, Entries, Registry, κλπ) για εύκολη πρόσβαση.
  */
-
 import { db, auth } from "./core";
 import { AdminService, MaintenanceService } from "./admin";
 import { EntryService } from "./entries";

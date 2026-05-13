@@ -3,7 +3,6 @@
  * Περιλαμβάνει λειτουργίες για τη δημιουργία μητρώων από υπάρχουσες εγγυήσεις
  * και τη μαζική ενημέρωση ημερομηνιών λήξης ή σημειώσεων.
  */
-
 import { doc, updateDoc, query, limit, startAfter, writeBatch, orderBy, QueryDocumentSnapshot } from "firebase/firestore";
 import { monitoredGetDocs } from "../monitor";
 import { db, entriesCollection, sanitizeEntry, handleFirestoreError, OperationType } from "../core";

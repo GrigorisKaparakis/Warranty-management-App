@@ -67,3 +67,23 @@ export const calculateExpiryDate = (rule: string | undefined): number | undefine
 
   return undefined;
 };
+
+/**
+ * Μορφοποιεί μια ημερομηνία (ή Firestore Timestamp) σε μορφή DD/MM/YYYY.
+ */
+export const formatDate = (dateValue: any): string => {
+  try {
+    if (!dateValue) return '—';
+    let date: Date;
+    
+    if (dateValue && typeof dateValue.toMillis === 'function') {
+      date = new Date(dateValue.toMillis());
+    } else {
+      date = new Date(dateValue);
+    }
+    
+    return isNaN(date.getTime()) ? '—' : date.toLocaleDateString('el-GR');
+  } catch (e) {
+    return '—';
+  }
+};

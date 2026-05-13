@@ -1,14 +1,14 @@
+/**
+ * ExpiryTrackerView: Παρακολουθεί τις εγγυήσεις που πλησιάζουν στη λήξη τους.
+ * Επιτρέπει την οργάνωση των επόμενων ενεργειών για τις ληγμένες ή λήγουσες εγγυήσεις.
+ */
 import React from 'react';
 import { Entry, GarageSettings, ViewType, UserRole } from '../core/types';
 import { WarrantyCard } from '../components/warranty/WarrantyCard';
 import { Clock } from 'lucide-react';
 
-import { useAppState } from '../hooks/useAppState';
+import { useAppState } from '../hooks/core/useAppState';
 
-/**
- * ExpiryTrackerView: Παρακολουθεί τις εγγυήσεις που πλησιάζουν στη λήξη τους
- * και επιτρέπει την οργάνωση των επόμενων ενεργειών.
- */
 export const ExpiryTrackerView: React.FC = () => {
   const { expiringEntries } = useAppState();
   return (

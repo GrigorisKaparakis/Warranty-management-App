@@ -1,4 +1,7 @@
-
+/**
+ * chat.ts: Υπηρεσία για τη λειτουργία της ομαδικής συνομιλίας (Live Chat).
+ * Διαχειρίζεται την αποστολή μηνυμάτων, το real-time συγχρονισμό και την κατάσταση παρουσίας (Presence).
+ */
 import { 
   collection, 
   addDoc, 
@@ -11,7 +14,8 @@ import {
   doc, 
   arrayUnion,
   setDoc,
-  writeBatch
+  writeBatch,
+  where
 } from "firebase/firestore";
 import { db } from "./core";
 import { ChatMessage, ChatPresence } from "../../core/types";
@@ -21,9 +25,7 @@ import { visibilityAwareOnSnapshot } from "./monitor";
  * ChatService: Διαχειρίζεται την επικοινωνία σε πραγματικό χρόνο (public chat).
  */
 export const ChatService = {
-  /**
-   * Αποστολή νέου μηνύματος.
-   */
+  // ... (rest of sendMessage remains same)
   sendMessage: async (text: string, userId: string, userName: string) => {
     try {
       const messagesRef = collection(db, "messages");
@@ -32,7 +34,7 @@ export const ChatService = {
         senderId: userId,
         senderName: userName,
         timestamp: serverTimestamp(),
-        readBy: [userId] // Ο αποστολέας το έχει ήδη διαβάσει
+        readBy: [userId]
       });
     } catch (error) {
       console.error("Error sending message:", error);
@@ -57,7 +59,7 @@ export const ChatService = {
   },
 
   /**
-   * Σήμανση μηνύματος ως διαβασμένο από τον τρέχοντα χρήστη.
+   * Σήμανση μηνύματος ως διαβασμένο.
    */
   markAsRead: async (messageId: string, userId: string) => {
     try {
@@ -90,28 +92,32 @@ export const ChatService = {
   },
 
   /**
-   * Ενημέρωση παρουσίας χρήστη.
+   * Ενημέρωση παρουσίας χρήστη (Presence).
    */
-  updatePresence: async (userId: string, name: string, chatOpen: boolean) => {
+  updatePresence: async (userId: string, name: string, isAppFocused: boolean, isAppIdle: boolean) => {
     try {
       const presenceRef = doc(db, "presence", userId);
       await setDoc(presenceRef, {
         uid: userId,
         name,
         lastActive: serverTimestamp(),
-        chatOpen
+        isAppFocused,
+        isAppIdle
       }, { merge: true });
     } catch (error) {
-      // Ignored for presence to avoid noise
+      // Ignored
     }
   },
 
   /**
-   * Παρακολούθηση ενεργών χρηστών (presence).
+   * Παρακολούθηση ενεργών χρηστών (presence) με φιλτράρισμα στη βάση για οικονομία.
    */
   subscribeToPresence: (callback: (presence: ChatPresence[]) => void) => {
     const presenceRef = collection(db, "presence");
-    return visibilityAwareOnSnapshot(presenceRef, (snapshot) => {
+    // Φιλτράρουμε μόνο όσους έχουν το app focused για να μειώσουμε τα reads
+    const q = query(presenceRef, where("isAppFocused", "==", true));
+    
+    return visibilityAwareOnSnapshot(q, (snapshot) => {
       const presence: ChatPresence[] = [];
       snapshot.forEach((docSnap) => {
         presence.push({ ...docSnap.data() } as ChatPresence);

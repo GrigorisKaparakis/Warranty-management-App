@@ -8,7 +8,7 @@ import { Note } from '../../core/types';
 import { FirestoreService } from '../../services/firebase/db';
 import { UI_MESSAGES } from '../../core/config';
 
-import { useAppState } from '../../hooks/useAppState';
+import { useAppState } from '../../hooks/core/useAppState';
 import { useStore } from '../../store/useStore';
 
 /**

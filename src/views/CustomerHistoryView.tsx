@@ -1,4 +1,7 @@
-
+/**
+ * CustomerHistoryView: Εμφανίζει το πλήρες ιστορικό εγγυήσεων και τα οχήματα ενός συγκεκριμένου πελάτη.
+ * Παρέχει μια ενοποιημένη εικόνα του πελάτη, συμπεριλαμβανομένων των στοιχείων επικοινωνίας και των στατιστικών του.
+ */
 import React, { useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
@@ -19,10 +22,6 @@ import {
   Clock
 } from 'lucide-react';
 
-/**
- * CustomerHistoryView: Εμφανίζει το πλήρες ιστορικό εγγυήσεων και τα οχήματα
- * ενός συγκεκριμένου πελάτη.
- */
 export const CustomerHistoryView: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const navigate = useNavigate();

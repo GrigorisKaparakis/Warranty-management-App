@@ -1,3 +1,6 @@
+/**
+ * FeatureSettings.tsx: Διαχείριση δυνατοτήτων και πειραματικών λειτουργιών της εφαρμογής.
+ */
 import React, { memo } from 'react';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';

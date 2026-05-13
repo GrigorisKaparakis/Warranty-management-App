@@ -1,3 +1,6 @@
+/**
+ * BrandingSettings.tsx: Ρυθμίσεις εμφάνισης και ταυτότητας (Logo, Τίτλοι).
+ */
 import React, { memo } from 'react';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
